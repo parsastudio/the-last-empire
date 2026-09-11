@@ -1,10 +1,11 @@
 import { useMemo } from "react";
+import { useLocale } from "next-intl";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, AppLocale } from "@geopolitics/domain";
 
 export interface LiveNationItem {
   id: string;
@@ -34,6 +35,9 @@ export function useLiveNations({
   excludeNationId,
   searchQuery = "",
 }: UseLiveNationsProps) {
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+
   const allLiveNations = useMemo<LiveNationItem[]>(() => {
     if (!nationsMap) return [];
 
@@ -62,6 +66,11 @@ export function useLiveNations({
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
         const code = profile ? profile.code : canonical;
 
+        const name =
+          locale === "en"
+            ? profile?.nameEn || n.name
+            : n.name || profile?.nameFa || canonical;
+
         const isReachable = sourceNation
           ? GeopoliticalReachResolver.canInitiateDiplomacy(
               sourceNation,
@@ -79,7 +88,7 @@ export function useLiveNations({
 
         return {
           id: canonical,
-          name: n.name,
+          name,
           code,
           flagCode,
           rank,
@@ -92,7 +101,7 @@ export function useLiveNations({
           rawNation: n,
         };
       });
-  }, [nationsMap, provincesMap, excludeNationId]);
+  }, [nationsMap, provincesMap, excludeNationId, locale]);
 
   const filteredNations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

@@ -20,4 +20,16 @@ export class PersianNumberFormatter {
   public static formatSignedIncome(value: number, compact = true): string {
     return LocaleNumberFormatter.formatSignedIncome(value, compact, "fa");
   }
+
+  public static formatPercent(value: number, decimals = 0): string {
+    return LocaleNumberFormatter.formatPercent(value, decimals, "fa");
+  }
+
+  public static formatLevel(level: number, decimals = 1): string {
+    return LocaleNumberFormatter.formatLevel(level, "fa", decimals);
+  }
+
+  public static formatPopulation(population: number): string {
+    return LocaleNumberFormatter.formatPopulation(population, "fa");
+  }
 }

@@ -7,11 +7,11 @@ import {
   CountryDefaultsUtility,
   getNationGdp,
   NationGettersUtility,
-  PersianNumberFormatter,
+  LocaleNumberFormatter,
+  AppLocale,
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import {
   getPostureLabel,
   getPostureBadgeClass,
@@ -47,6 +47,7 @@ export function resolveProfileRelation(
   humanNation?: Nation | null,
   allNations?: Record<string, Nation>,
   provincesMap?: Record<string, Province>,
+  locale: AppLocale = "fa",
 ): DiplomaticRelation {
   const profile = CountryRegistry.getCountry(code);
   const fallback = CountryDefaultsUtility.getFallbackProfile(code, profile);
@@ -57,20 +58,28 @@ export function resolveProfileRelation(
   const realPopNum = liveNation
     ? NationGettersUtility.getPopulation(liveNation.id, provincesMap)
     : fallback.population;
-  const name = liveNation ? liveNation.name : fallback.nameFa;
+
+  const name =
+    locale === "en"
+      ? profile?.nameEn || liveNation?.name || fallback.nameEn
+      : liveNation?.name || profile?.nameFa || fallback.nameFa;
+
   const displayCode = profile
     ? profile.code
     : liveNation
       ? liveNation.id
       : fallback.code;
+
   const flagCode = profile
     ? profile.flagCode
     : liveNation
       ? liveNation.flagCode
       : fallback.flagCode;
+
   const techLevel = liveNation
     ? liveNation.military.techLevel
     : fallback.startingTechLevel;
+
   const industrialLevel = liveNation
     ? liveNation.industrialLevel
     : fallback.industrialLevel;
@@ -137,6 +146,16 @@ export function resolveProfileRelation(
           ] || null
         : null;
 
+  const guarantorProfile = guarantorNation
+    ? CountryRegistry.getCountry(guarantorNation.id)
+    : null;
+
+  const guarantorName = guarantorNation
+    ? locale === "en"
+      ? guarantorProfile?.nameEn || guarantorNation.name
+      : guarantorNation.name
+    : undefined;
+
   const humanTech = humanNation?.military.techLevel ?? 1.0;
   const isArmsEligible =
     tension < 50 && stance !== "WAR" && techLevel > humanTech;
@@ -150,12 +169,12 @@ export function resolveProfileRelation(
     alignment,
     tension,
     posture,
-    postureLabel: getPostureLabel(posture),
+    postureLabel: getPostureLabel(posture, locale),
     hasSecurityGuarantee,
     isEmergencyProtectorate,
     profileData: {
-      gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
-      population: NationPresentationMapper.formatPopulation(realPopNum),
+      gdp: LocaleNumberFormatter.formatCurrency(realGdpNum, true, locale),
+      population: LocaleNumberFormatter.formatPopulation(realPopNum, locale),
       techLevel,
       industrialLevel,
       governmentType: liveNation
@@ -163,7 +182,7 @@ export function resolveProfileRelation(
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
       tension,
-      guarantorName: guarantorNation?.name,
+      guarantorName,
       isEmergencyProtectorate: Boolean(liveNation?.isEmergencyProtectorate),
       isArmsEligible,
     },

@@ -4,7 +4,8 @@ import {
   CountryRegistry,
   NationGettersUtility,
   getNationGdp,
-  PersianNumberFormatter,
+  LocaleNumberFormatter,
+  AppLocale,
 } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -29,29 +30,45 @@ export class DiplomacyAlliesResolver {
     canonicalHuman: string,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    locale: AppLocale = "fa",
   ): NationAllyDetail {
     const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+    const profile = CountryRegistry.getCountry(canonicalId);
     const rank = NationGettersUtility.getRank(
       nation.id,
       nationsMap,
       provincesMap,
     );
     const gdp = getNationGdp(nation, provincesMap);
-    const gdpFormatted = PersianNumberFormatter.formatCurrency(gdp, true);
+    const gdpFormatted = LocaleNumberFormatter.formatCurrency(
+      gdp,
+      true,
+      locale,
+    );
     const flagCode = nation.flagCode || canonicalId;
     const flagEmoji = getFlagEmoji(flagCode);
+
+    const name =
+      locale === "en"
+        ? profile?.nameEn || nation.name
+        : nation.name || profile?.nameFa || canonicalId;
+
+    const allianceTypeLabel =
+      locale === "en"
+        ? "Committed Defense Guarantor (Direct War Intervention)"
+        : "حامی دفاعی متعهد (ورود قطعی به جنگ)";
 
     return {
       id: canonicalId,
       code: canonicalId,
-      name: nation.name,
+      name,
       flagCode,
       flagEmoji,
       rank,
       gdpFormatted,
       militaryTech: Number(nation.military.techLevel.toFixed(1)),
       industrialTech: Number(nation.industrialLevel.toFixed(1)),
-      allianceTypeLabel: "حامی دفاعی متعهد (ورود قطعی به جنگ)",
+      allianceTypeLabel,
       isHuman: canonicalId === canonicalHuman,
       role: "GUARANTOR",
     };
@@ -62,6 +79,7 @@ export class DiplomacyAlliesResolver {
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     humanNationId?: string,
+    locale: AppLocale = "fa",
   ): NationAllyDetail[] {
     if (!targetNation || !nationsMap) {
       return [];
@@ -89,6 +107,7 @@ export class DiplomacyAlliesResolver {
               canonicalHuman,
               nationsMap,
               provincesMap,
+              locale,
             ),
           );
         }

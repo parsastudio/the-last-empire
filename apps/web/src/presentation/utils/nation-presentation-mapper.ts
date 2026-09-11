@@ -1,6 +1,7 @@
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { LocaleNumberFormatter, AppLocale } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface FormattedNationSummary {
   id: string;
@@ -21,15 +22,25 @@ export class NationPresentationMapper {
     return getFlagEmoji(String(code));
   }
 
-  public static getPowerLabel(gdp: number): string {
+  public static getPowerLabel(gdp: number, locale: AppLocale = "fa"): string {
+    if (locale === "en") {
+      if (gdp >= 10e12) return "Global Superpower";
+      if (gdp >= 1e12) return "Leading Industrial Hegemon";
+      if (gdp >= 200e9) return "Trans-Regional Power";
+      return "Regional Power";
+    }
+
     if (gdp >= 10e12) return "ابرقدرت جهانی";
     if (gdp >= 1e12) return "قدرت برتر صنعتی";
     if (gdp >= 200e9) return "قدرت فرامنطقه‌ای";
     return "قدرت منطقه‌ای";
   }
 
-  public static formatPopulation(population: number): string {
-    return PersianNumberFormatter.formatCompactNumber(population) + " نفر";
+  public static formatPopulation(
+    population: number,
+    locale: AppLocale = "fa",
+  ): string {
+    return LocaleNumberFormatter.formatPopulation(population, locale);
   }
 
   public static formatNationSummary(
@@ -42,22 +53,33 @@ export class NationPresentationMapper {
     population: number,
     governmentType: string,
     treasury?: number,
+    locale: AppLocale = "fa",
   ): FormattedNationSummary {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
     const cleanCode = code.toUpperCase();
+    const profile = CountryRegistry.getCountry(cleanCode);
+
+    const displayName =
+      locale === "en"
+        ? profile?.nameEn || cleanCode
+        : nameFa || profile?.nameFa || cleanCode;
 
     return {
       id: cleanCode,
-      name: nameFa,
+      name: displayName,
       code: cleanCode,
       flagCode: (flagCode || cleanCode).toUpperCase(),
       flagEmoji: this.getFlagEmoji(flagCode || cleanCode),
       rank,
-      powerLabel: this.getPowerLabel(gdp),
-      gdpText: PersianNumberFormatter.formatCurrency(gdp, true),
-      populationText: this.formatPopulation(population),
-      treasuryText: PersianNumberFormatter.formatCurrency(computedTreasury),
-      governmentLabel: getGovernmentTypeLabel(governmentType),
+      powerLabel: this.getPowerLabel(gdp, locale),
+      gdpText: LocaleNumberFormatter.formatCurrency(gdp, true, locale),
+      populationText: this.formatPopulation(population, locale),
+      treasuryText: LocaleNumberFormatter.formatCurrency(
+        computedTreasury,
+        true,
+        locale,
+      ),
+      governmentLabel: getGovernmentTypeLabel(governmentType, locale),
     };
   }
 }

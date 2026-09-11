@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useToast } from "@/presentation/context/toast-context";
 import {
@@ -14,12 +15,14 @@ import {
   ClientMapPathResolver,
   GameDifficulty,
   MapTopologyRegistry,
+  AppLocale,
 } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
+  locale: AppLocale = "fa",
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -44,7 +47,13 @@ function mapManifestToNationDetails(
         pop,
         gov,
         treasury,
+        locale,
       );
+
+      const desc =
+        locale === "en"
+          ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
+          : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
 
       return {
         id: p.code,
@@ -55,7 +64,7 @@ function mapManifestToNationDetails(
         gdp: summary.gdpText,
         population: summary.populationText,
         treasury: summary.treasuryText,
-        desc: `شناسنامه استراتژیک رسمی ${p.nameFa} با رتبه جهانی #${rank}.`,
+        desc,
         defaultGovernment: gov,
       };
     });
@@ -90,7 +99,13 @@ function mapManifestToNationDetails(
       population,
       gov,
       treasury,
+      locale,
     );
+
+    const desc =
+      locale === "en"
+        ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
+        : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
 
     return {
       id: canonicalId,
@@ -101,7 +116,7 @@ function mapManifestToNationDetails(
       gdp: summary.gdpText,
       population: summary.populationText,
       treasury: summary.treasuryText,
-      desc: `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`,
+      desc,
       defaultGovernment: gov,
     };
   });
@@ -109,6 +124,8 @@ function mapManifestToNationDetails(
 
 export function useSelectNationForm() {
   const router = useRouter();
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
   const { showToast } = useToast();
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
@@ -156,8 +173,8 @@ export function useSelectNationForm() {
   }, []);
 
   const allNations = useMemo(
-    () => mapManifestToNationDetails(manifest),
-    [manifest],
+    () => mapManifestToNationDetails(manifest, locale),
+    [manifest, locale],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {
@@ -212,15 +229,19 @@ export function useSelectNationForm() {
         router.push(`/play/${gameId}`);
       } else {
         showToast(
-          "خطا در ایجاد کمپین",
-          "خطا در راه‌اندازی کمپین جدید بازی",
+          locale === "en" ? "Campaign Error" : "خطا در ایجاد کمپین",
+          locale === "en"
+            ? "Failed to initialize new game campaign"
+            : "خطا در راه‌اندازی کمپین جدید بازی",
           "error",
         );
       }
     } catch {
       showToast(
-        "خطا در ایجاد کمپین",
-        "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",
+        locale === "en" ? "Campaign Error" : "خطا در ایجاد کمپین",
+        locale === "en"
+          ? "Unable to save new campaign record in local storage"
+          : "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",
         "error",
       );
     }
@@ -232,6 +253,7 @@ export function useSelectNationForm() {
     manifest,
     router,
     showToast,
+    locale,
   ]);
 
   return {

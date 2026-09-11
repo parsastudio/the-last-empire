@@ -142,4 +142,36 @@ export class LocaleNumberFormatter {
       ? `${sign}${formatted} دلار`
       : `${sign}$${formatted}`;
   }
+
+  public static formatPercent(
+    value: number,
+    decimals = 0,
+    locale: AppLocale = "fa",
+  ): string {
+    if (isNaN(value) || value === null) {
+      return locale === "fa" ? "۰٪" : "0%";
+    }
+    const formattedNum =
+      decimals > 0 ? value.toFixed(decimals) : Math.round(value);
+    const digitString = this.toDigits(formattedNum, locale);
+    return locale === "fa" ? `${digitString}٪` : `${digitString}%`;
+  }
+
+  public static formatLevel(
+    level: number,
+    locale: AppLocale = "fa",
+    decimals = 1,
+  ): string {
+    const safeLevel = Math.max(1, level);
+    const digitString = this.toDigits(safeLevel.toFixed(decimals), locale);
+    return locale === "fa" ? `سطح ${digitString}` : `Level ${digitString}`;
+  }
+
+  public static formatPopulation(
+    population: number,
+    locale: AppLocale = "fa",
+  ): string {
+    const compactText = this.formatCompactNumber(population, locale);
+    return locale === "fa" ? `${compactText} نفر` : `${compactText} citizens`;
+  }
 }

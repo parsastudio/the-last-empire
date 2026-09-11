@@ -1,4 +1,4 @@
-import { CountryRegistry, Nation } from "@geopolitics/domain";
+import { CountryRegistry, Nation, AppLocale } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 export interface ResolvedNationEntity {
@@ -13,12 +13,13 @@ export class NationResolverUtility {
   public static resolve(
     rawId?: string | null,
     nationsMap?: Record<string, Nation>,
+    locale: AppLocale = "fa",
   ): ResolvedNationEntity {
     if (!rawId) {
       return {
         canonicalId: "",
         nation: null,
-        name: "نامشخص",
+        name: locale === "en" ? "Unknown" : "نامشخص",
         flagCode: "IR",
         flagEmoji: "🌐",
       };
@@ -28,8 +29,14 @@ export class NationResolverUtility {
     const nation = nationsMap
       ? nationsMap[canonicalId] || nationsMap[rawId] || null
       : null;
-    const name = nation ? nation.name : rawId;
-    const flagCode = nation?.flagCode || canonicalId;
+    const profile = CountryRegistry.getCountry(canonicalId);
+
+    const name =
+      locale === "en"
+        ? profile?.nameEn || nation?.name || canonicalId
+        : nation?.name || profile?.nameFa || canonicalId;
+
+    const flagCode = nation?.flagCode || profile?.flagCode || canonicalId;
     const flagEmoji = getFlagEmoji(flagCode);
 
     return {
