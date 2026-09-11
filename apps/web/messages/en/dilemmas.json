@@ -1,0 +1,452 @@
+{
+  "categories": {
+    "GEOPOLITICAL": "Geopolitical & Diplomatic Crisis",
+    "ECONOMIC": "Macroeconomic & Industrial Event",
+    "ESPIONAGE": "Special Intelligence & Security Operation",
+    "DOMESTIC": "Political Stability & Statecraft",
+    "MILITARY": "Armed Forces Command & Readiness"
+  },
+  "urgency": {
+    "CRITICAL": "Emergency Crisis",
+    "HIGH": "High Priority",
+    "MEDIUM": "Routine Event",
+    "LOW": "Periodic Report"
+  },
+  "modal": {
+    "submitting": "Ratifying and issuing sovereign decree...",
+    "actionConfirm": "Enact Sovereign Decree ({label})",
+    "actionSelectPrompt": "Select one of the decisions above first",
+    "units": {
+      "stability": "Stability",
+      "prestige": "Prestige",
+      "milTech": "Military Tech",
+      "indTech": "Industrial Tech",
+      "infantry": "Infantry",
+      "armor": "Armor",
+      "airDefense": "Air Defense",
+      "droneMissile": "Missiles"
+    }
+  },
+  "events": {
+    "energy_reserves_boom": {
+      "title": "Discovery of Major Energy Reserves",
+      "description": "Fresh geological surveys reveal massive untapped hydrocarbon deposits. A strategic concession decision is required.",
+      "choices": {
+        "sell_concession": {
+          "label": "International Extraction Auction",
+          "description": "Inject immediate capital into the national treasury at the cost of minor sovereign prestige."
+        },
+        "strategic_reserve": {
+          "label": "Domestic Processing & Refining",
+          "description": "Expand indigenous refineries, boosting nationwide industrial technology levels."
+        }
+      }
+    },
+    "supply_chain_bottleneck": {
+      "title": "Raw Material Supply Bottleneck",
+      "description": "Disrupted international transit lines are constricting the flow of specialized steel to heavy industrial plants.",
+      "choices": {
+        "subsidize_freight": {
+          "label": "Subsidize Strategic Air Freight",
+          "description": "Maintain uninterrupted manufacturing output without penalizing factory productivity."
+        },
+        "ration_materials": {
+          "label": "Ration Strategic Industrial Feedstock",
+          "description": "Preserve treasury reserves at the expense of temporary domestic dissatisfaction."
+        }
+      }
+    },
+    "hyperinflation_threat": {
+      "title": "Liquidity Surge & Inflationary Threat",
+      "description": "Unchecked liquidity growth is eroding purchasing power, prompting an emergency monetary directive.",
+      "choices": {
+        "tighten_monetary": {
+          "label": "Monetary Tightening & Fiscal Austerity",
+          "description": "Quell inflation and elevate domestic stability at the cost of transient revenue contraction."
+        },
+        "price_controls": {
+          "label": "Mandate Strict Price Controls",
+          "description": "Preserve state funds while drawing commercial sector discontent and lowering stability."
+        }
+      }
+    },
+    "debt_relief_opportunity": {
+      "title": "International Debt Relief Offer",
+      "description": "Creditor syndicates propose discounted principal settlement if an immediate lump sum is cleared.",
+      "choices": {
+        "repay_bulk": {
+          "label": "Settle Debt Tranche at Discount",
+          "description": "Diminish national debt burdens and elevate the sovereign international credit standing."
+        },
+        "decline_offer": {
+          "label": "Retain Full Liquid Treasury",
+          "description": "Conserve cash reserves for national modernization and armed forces procurement."
+        }
+      }
+    },
+    "industrial_patent_auction": {
+      "title": "Auction of Industrial Automation Patents",
+      "description": "Breakthrough industrial robotics patents are being auctioned on the international open market.",
+      "choices": {
+        "buy_patents": {
+          "label": "Acquire Exclusive Industrial Patents",
+          "description": "Instantly advance sovereign industrial technology level through targeted capital outlay."
+        },
+        "ignore_patents": {
+          "label": "Rely on Domestic R&D Centers",
+          "description": "Forego capital expenditure and sustain the natural tempo of scientific research."
+        }
+      }
+    },
+    "foreign_trade_embargo_risk": {
+      "title": "Punitive Tariffs by Rival Trade Bloc",
+      "description": "A hostile economic alliance has slapped punitive tariffs onto our sovereign export commodities.",
+      "choices": {
+        "retaliate_tariffs": {
+          "label": "Retaliatory Counter-Tariffs",
+          "description": "Demonstrate national resolve and unify society despite heightened international friction."
+        },
+        "concede_lobby": {
+          "label": "Negotiate Targeted Trade Subsidies",
+          "description": "Disburse export subsidies to maintain critical market access and soothe tensions."
+        }
+      }
+    },
+    "covert_arms_offer": {
+      "title": "Foreign Purchase Offer for Armored Reserves",
+      "description": "An allied government urgently requests the immediate acquisition of surplus armored tank divisions.",
+      "choices": {
+        "sell_tanks_batch": {
+          "label": "Transfer Tanks & Receive Hard Currency",
+          "description": "Substantially replenish treasury liquidity in exchange for a modest reduction in tank strength."
+        },
+        "keep_readiness": {
+          "label": "Maintain Full Fleet Readiness",
+          "description": "Uphold military deterrence without compromising frontline armored divisions."
+        }
+      }
+    },
+    "strait_security_incident": {
+      "title": "Maritime Piracy in Chokepoint Strait",
+      "description": "Hostile raiders are harassing commercial shipping corridors adjacent to national territorial waters.",
+      "choices": {
+        "dispatch_naval_taskforce": {
+          "label": "Deploy Naval Escort Taskforce",
+          "description": "Assert maritime sovereignty and gain global prestige at the expense of fuel expenditures."
+        },
+        "pass_incident": {
+          "label": "Refrain from Direct Intervention",
+          "description": "Conserve operational logistics while enduring a blow to international standing."
+        }
+      }
+    },
+    "national_conscription_surge": {
+      "title": "Surge of Patriotic Enlistment Volunteers",
+      "description": "National mobilization enthusiasm has generated overflowing queues across recruitment stations.",
+      "choices": {
+        "expand_divisions": {
+          "label": "Muster & Outfit Additional Divisions",
+          "description": "Substantially expand infantry regiments at the cost of equipping military depots."
+        },
+        "selective_intake": {
+          "label": "Selective Elite Enlistment",
+          "description": "Maintain fiscal balance and disciplined garrisons without additional strain on the treasury."
+        }
+      }
+    },
+    "ammunition_plant_modernization": {
+      "title": "Munitions & Ballistics Expansion Directive",
+      "description": "The General Staff submits blueprints to double missile and precision drone manufacturing throughput.",
+      "choices": {
+        "fund_missile_expansion": {
+          "label": "Fund Ballistic Manufacturing Expansion",
+          "description": "Mass-produce precision strike drones and missiles to dominate upcoming combat phases."
+        },
+        "maintain_current_pace": {
+          "label": "Sustain Existing Production Quotas",
+          "description": "Avoid fiscal burdens on the state treasury and preserve financial reserves."
+        }
+      }
+    },
+    "veterans_welfare_bill": {
+      "title": "Veterans Pension & Healthcare Accord",
+      "description": "Armed forces representatives petition for expanded medical coverage and veteran stipends.",
+      "choices": {
+        "approve_pension": {
+          "label": "Ratify Welfare & Disburse Stipends",
+          "description": "Substantially reinforce morale and military fidelity across the armed forces."
+        },
+        "defer_welfare": {
+          "label": "Defer Legislation Pending Fiscal Recovery",
+          "description": "Preserve liquid reserves despite simmering discontent among military ranks."
+        }
+      }
+    },
+    "air_defense_readiness_drill": {
+      "title": "Live-Fire Integrated Air Defense Drill",
+      "description": "Air Defense Command requests permission for comprehensive live-fire radar calibration drills.",
+      "choices": {
+        "conduct_drill": {
+          "label": "Authorize Full Live-Fire Calibration",
+          "description": "Calibrate batteries and heighten operational readiness while consuming munitions."
+        },
+        "simulator_only": {
+          "label": "Limit to Computerized Simulations",
+          "description": "Conserve state funds without commissioning additional live air defense units."
+        }
+      }
+    },
+    "superpower_ultimatum": {
+      "title": "Superpower Hegemon Ultimatum",
+      "description": "A leading superpower delivers a diplomatic ultimatum demanding concessions on sovereign trade transit routes.",
+      "choices": {
+        "pay_diplomatic_settlement": {
+          "label": "Concede Settlement & Preserve Neutrality",
+          "description": "Avert international containment sanctions through compensatory cash settlement."
+        },
+        "defy_superpower": {
+          "label": "Defy Ultimatum on Sovereign Grounds",
+          "description": "Surge patriotic solidarity and domestic stability at the cost of global reputation."
+        }
+      }
+    },
+    "international_peace_accord": {
+      "title": "Regional Peace Mediation Invitation",
+      "description": "International bodies invite our government to arbitrate and guarantee a ceasefire in a border conflict.",
+      "choices": {
+        "host_summit": {
+          "label": "Host Peace Summit & Cover Expenses",
+          "description": "Acquire immense international prestige at the expense of diplomatic hospitality outlays."
+        },
+        "stay_neutral": {
+          "label": "Declare Neutrality & Avoid Entanglements",
+          "description": "Focus strictly on domestic priorities without undertaking foreign guarantees."
+        }
+      }
+    },
+    "refugee_corridor_crisis": {
+      "title": "Cross-Border Refugee Humanitarian Crisis",
+      "description": "Escalating hostilities in an adjacent state have driven thousands of refugees to our sovereign checkpoints.",
+      "choices": {
+        "open_humanitarian_camps": {
+          "label": "Admit Refugees with Global Support",
+          "description": "Elevate humanitarian standing despite absorbing financial strains on municipal budgets."
+        },
+        "seal_borders": {
+          "label": "Seal Borders with Military Units",
+          "description": "Safeguard internal order while drawing severe condemnation from foreign capitals."
+        }
+      }
+    },
+    "allied_loan_guarantee_request": {
+      "title": "Allied Sovereign Debt Guarantee Request",
+      "description": "A treaty partner facing acute liquidity insolvency requests our treasury to backstop its obligations.",
+      "choices": {
+        "back_ally_loan": {
+          "label": "Underwrite Debt & Cement Alliance",
+          "description": "Deepen bilateral geopolitical alignment while bearing sovereign fiscal risk."
+        },
+        "refuse_guarantee": {
+          "label": "Decline on Grounds of Fiscal Prudence",
+          "description": "Shield national treasury reserves at the expense of alienating our partner."
+        }
+      }
+    },
+    "international_strait_claims": {
+      "title": "Foreign Encroachment on Territorial Waters",
+      "description": "A neighboring state publishes maritime charts claiming exclusive jurisdiction over adjacent navigation channels.",
+      "choices": {
+        "show_of_force": {
+          "label": "Deploy Fleet in Sovereignty Patrol",
+          "description": "Reassert territorial integrity and national pride at the cost of fuel and readiness."
+        },
+        "arbitration_court": {
+          "label": "File International Arbitration Motion",
+          "description": "Signal commitment to international law and boost diplomatic reputation."
+        }
+      }
+    },
+    "foreign_investment_wave": {
+      "title": "Multinational Infrastructure Investment Offer",
+      "description": "A transnational consortium proposes injecting billions into our deep-sea harbors and transportation arteries.",
+      "choices": {
+        "accept_investment": {
+          "label": "Ratify Deal & Ingest Direct Capital",
+          "description": "Inject liquidity and global ties while accepting foreign operational oversight."
+        },
+        "reject_for_sovereignty": {
+          "label": "Reject to Protect Sovereign Independence",
+          "description": "Preserve uncompromised domestic jurisdiction over vital infrastructure."
+        }
+      }
+    },
+    "defector_scientist_asylum": {
+      "title": "Defection of High-Ranking Ballistic Scientist",
+      "description": "A senior engineer from a rival defense ministry seeks political asylum carrying sensitive blueprints.",
+      "choices": {
+        "grant_full_asylum": {
+          "label": "Grant Asylum & Extract Technical Data",
+          "description": "Accelerate defense technology development despite triggering foreign diplomatic rage."
+        },
+        "extradite_secretly": {
+          "label": "Extradite in Exchange for Concessions",
+          "description": "Secure trade privileges and demonstrate compliance with international standards."
+        }
+      }
+    },
+    "cyber_grid_intrusion": {
+      "title": "Cyber Intrusion into Air Defense Grid",
+      "description": "Defensive cybersecurity teams uncover complex malware infiltrating radar command installations.",
+      "choices": {
+        "total_system_overhaul": {
+          "label": "Isolate Subnets & Upgrade Firewalls",
+          "description": "Bolster technical expertise and secure networks through dedicated capital allocation."
+        },
+        "quick_patch": {
+          "label": "Deploy Rapid Patch Accepting Risk",
+          "description": "Conserve funds while enduring localized disruption across air defense batteries."
+        }
+      }
+    },
+    "mole_in_general_staff": {
+      "title": "High-Level Espionage Mole in War Room",
+      "description": "Counter-intelligence uncovers conclusive evidence of troop movement leaks to an adversary embassy.",
+      "choices": {
+        "public_military_tribunal": {
+          "label": "Public Tribunal & Comprehensive Purge",
+          "description": "Purge command vulnerabilities and restore public trust despite short-term morale dips."
+        },
+        "double_agent_trap": {
+          "label": "Turn into Double Agent with Deception",
+          "description": "Mislead adversary intelligence and capture tactical advantage through covert operations."
+        }
+      }
+    },
+    "foreign_satellite_blackout": {
+      "title": "Adversary Electronic Warfare in Space",
+      "description": "Orbital navigation satellites are facing intense electronic blinding from foreign ground stations.",
+      "choices": {
+        "deploy_anti_jamming": {
+          "label": "Deploy Agile Anti-Jamming Transponders",
+          "description": "Fortify drone navigation arrays through capital investments in electronic warfare."
+        },
+        "switch_inertial_guidance": {
+          "label": "Fall Back onto Inertial Guidance",
+          "description": "Conserve liquid capital while accepting degraded accuracy in aerial operations."
+        }
+      }
+    },
+    "dissident_propaganda_campaign": {
+      "title": "Adversary Disinformation & Panic Campaign",
+      "description": "Foreign cyber bots are propagating coordinated rumors forecasting domestic banking collapse.",
+      "choices": {
+        "counter_info_center": {
+          "label": "Establish Public Transparency Hub",
+          "description": "Restore market confidence and domestic stability through decisive communication."
+        },
+        "ignore_rumors": {
+          "label": "Official Denial Without Capital Outlay",
+          "description": "Avoid informational expenses while enduring lingering civilian unease."
+        }
+      }
+    },
+    "industrial_espionage_syndicate": {
+      "title": "Attempted Thefts of Composite Armor Files",
+      "description": "Border security intercepts an espionage cell attempting to smuggle classified tank armor schematics.",
+      "choices": {
+        "secure_rd_facilities": {
+          "label": "Harden Engineering & R&D Facilities",
+          "description": "Raise industrial security standards and bolster sovereign industrial knowledge."
+        },
+        "swift_interrogation": {
+          "label": "Interrogate Ring & Confiscate Assets",
+          "description": "Seize contraband finances into the treasury without altering facility security."
+        }
+      }
+    },
+    "industrial_labor_union_unrest": {
+      "title": "Nationwide General Strike in Industrial Parks",
+      "description": "Heavy industrial labor unions have halted manufacturing lines demanding immediate cost-of-living adjustments.",
+      "choices": {
+        "approve_wage_subsidies": {
+          "label": "Authorize Subsidies & Settle with Unions",
+          "description": "Restore factory output immediately and surge domestic stability."
+        },
+        "enforce_labor_laws": {
+          "label": "Enforce Strict Labor Injunctions",
+          "description": "Preserve treasury liquidity at the risk of escalating civil unrest."
+        }
+      }
+    },
+    "bureaucratic_purge_demand": {
+      "title": "High-Level Embezzlement in State Bureaus",
+      "description": "Investigative dossiers reveal substantial misappropriation of provincial development budgets.",
+      "choices": {
+        "root_out_corruption": {
+          "label": "Rigorous Prosecution & Asset Recovery",
+          "description": "Restore public confidence, recover state funds, and elevate international standing."
+        },
+        "silent_administrative_reform": {
+          "label": "Quiet Reorganization to Avoid Strife",
+          "description": "Preserve bureaucratic stability while weathering public discontent."
+        }
+      }
+    },
+    "natural_disaster_rebuilding": {
+      "title": "Devastating Earthquake in Central Provinces",
+      "description": "A violent earthquake has damaged transit lines and infrastructure, leaving thousands displaced.",
+      "choices": {
+        "fund_reconstruction": {
+          "label": "Emergency National Reconstruction Fund",
+          "description": "Provide disaster relief and cement sovereign unity between citizenry and state."
+        },
+        "lean_relief": {
+          "label": "Rely on Existing Civil Contingencies",
+          "description": "Preserve state treasury reserves despite widespread protests in stricken areas."
+        }
+      }
+    },
+    "university_student_movements": {
+      "title": "Student & Academic Intellectual Rallies",
+      "description": "University faculties rally in the capital demanding research endowments and academic independence.",
+      "choices": {
+        "grant_campus_autonomy": {
+          "label": "Expand Research Grants & Open Dialogue",
+          "description": "Avert brain drain, advancing national scientific level and political stability."
+        },
+        "disperse_movements": {
+          "label": "Enforce Public Order & Disperse Rallies",
+          "description": "Restore street order quickly at the cost of alienating academic institutions."
+        }
+      }
+    },
+    "national_anthem_and_emblem_revamp": {
+      "title": "National Heritage & Cultural Gala Initiative",
+      "description": "The Ministry of Culture proposes nationwide cultural spectacles to rekindle historical solidarity.",
+      "choices": {
+        "fund_cultural_gala": {
+          "label": "Finance Heritage Festivals",
+          "description": "Substantially elevate societal cohesion and domestic political stability."
+        },
+        "austerity_culture": {
+          "label": "Prioritize Funds for Industrial Expansion",
+          "description": "Forego symbolic expenditure and retain focus entirely on industrial output."
+        }
+      }
+    },
+    "provincial_autonomy_referendum_push": {
+      "title": "Fiscal Autonomy Demands in Border Provinces",
+      "description": "Border provincial councils petition for direct municipal control over regional customs transit receipts.",
+      "choices": {
+        "decentralize_funds": {
+          "label": "Decentralize Infrastructure Revenue",
+          "description": "Cement borderland security and fortify provincial fidelity to the state."
+        },
+        "centralize_treasury": {
+          "label": "Reaffirm Centralized Treasury Primacy",
+          "description": "Maintain unified fiscal command despite localized peripheral discontent."
+        }
+      }
+    }
+  }
+}

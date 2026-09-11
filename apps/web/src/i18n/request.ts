@@ -18,6 +18,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     .default;
   const military = (await import(`../../messages/${locale}/military.json`))
     .default;
+  const dilemmas = (await import(`../../messages/${locale}/dilemmas.json`))
+    .default;
 
   return {
     locale,
@@ -27,6 +29,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       governments,
       politics,
       military,
+      dilemmas,
     },
   };
 });

@@ -31,16 +31,11 @@ export const DilemmaEffectSchema = z.object({
 
 export const DilemmaChoiceSchema = z.object({
   id: z.string(),
-  labelFa: z.string().min(1),
-  descriptionFa: z.string().min(1),
   effect: DilemmaEffectSchema,
 });
 
 export const DilemmaEventSchema = z.object({
   id: z.string(),
-  titleFa: z.string().min(1),
-  headlineFa: z.string().min(1),
-  descriptionFa: z.string().min(1),
   category: DilemmaCategorySchema,
   urgency: DilemmaUrgencySchema,
   choices: z.array(DilemmaChoiceSchema).min(2),

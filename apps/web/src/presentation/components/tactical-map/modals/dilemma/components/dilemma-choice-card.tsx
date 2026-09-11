@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Coins,
   Landmark,
@@ -14,6 +15,7 @@ import {
 import { DilemmaChoice, PersianNumberFormatter } from "@geopolitics/domain";
 
 interface DilemmaChoiceCardProps {
+  eventId: string;
   choice: DilemmaChoice;
   choiceIndex: number;
   isSelected: boolean;
@@ -22,13 +24,20 @@ interface DilemmaChoiceCardProps {
 }
 
 export function DilemmaChoiceCard({
+  eventId,
   choice,
   choiceIndex,
   isSelected,
   nationGdp,
   onSelect,
 }: DilemmaChoiceCardProps) {
+  const t = useTranslations("dilemmas");
   const effect = choice.effect;
+
+  const choiceLabel = t(`events.${eventId}.choices.${choice.id}.label`);
+  const choiceDescription = t(
+    `events.${eventId}.choices.${choice.id}.description`,
+  );
 
   let moneyVal = effect.treasuryDelta || 0;
   if (
@@ -55,7 +64,7 @@ export function DilemmaChoiceCard({
               {PersianNumberFormatter.toPersianDigits(choiceIndex + 1)}
             </span>
             <h4 className="text-sm font-black text-foreground group-hover:text-primary transition-colors">
-              {choice.labelFa}
+              {choiceLabel}
             </h4>
           </div>
 
@@ -71,7 +80,7 @@ export function DilemmaChoiceCard({
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed font-sans pr-8">
-          {choice.descriptionFa}
+          {choiceDescription}
         </p>
       </div>
 
@@ -103,8 +112,9 @@ export function DilemmaChoiceCard({
             <Landmark size={11} />
             <span>
               {effect.stabilityDelta > 0 ? "+" : ""}
-              {PersianNumberFormatter.toPersianDigits(effect.stabilityDelta)}٪
-              ثبات
+              {PersianNumberFormatter.toPersianDigits(
+                effect.stabilityDelta,
+              )}٪ {t("modal.units.stability")}
             </span>
           </span>
         )}
@@ -124,7 +134,7 @@ export function DilemmaChoiceCard({
                 {PersianNumberFormatter.toPersianDigits(
                   effect.globalReputationDelta,
                 )}{" "}
-                پرستیژ
+                {t("modal.units.prestige")}
               </span>
             </span>
           )}
@@ -138,7 +148,7 @@ export function DilemmaChoiceCard({
                 {PersianNumberFormatter.toPersianDigits(
                   effect.militaryTechDelta,
                 )}{" "}
-                فناوری نظامی
+                {t("modal.units.milTech")}
               </span>
             </span>
           )}
@@ -152,7 +162,7 @@ export function DilemmaChoiceCard({
                 {PersianNumberFormatter.toPersianDigits(
                   effect.industrialLevelDelta,
                 )}{" "}
-                فناوری صنعت
+                {t("modal.units.indTech")}
               </span>
             </span>
           )}
@@ -171,7 +181,7 @@ export function DilemmaChoiceCard({
               {PersianNumberFormatter.formatNumberWithCommas(
                 effect.infantryDelta,
               )}{" "}
-              پیاده
+              {t("modal.units.infantry")}
             </span>
           </span>
         )}
@@ -190,7 +200,7 @@ export function DilemmaChoiceCard({
               {PersianNumberFormatter.formatNumberWithCommas(
                 effect.armorDelta,
               )}{" "}
-              تانک
+              {t("modal.units.armor")}
             </span>
           </span>
         )}
@@ -210,7 +220,7 @@ export function DilemmaChoiceCard({
                 {PersianNumberFormatter.formatNumberWithCommas(
                   effect.airDefenseDelta,
                 )}{" "}
-                پدافند
+                {t("modal.units.airDefense")}
               </span>
             </span>
           )}
@@ -230,7 +240,7 @@ export function DilemmaChoiceCard({
                 {PersianNumberFormatter.formatNumberWithCommas(
                   effect.droneMissileDelta,
                 )}{" "}
-                موشک
+                {t("modal.units.droneMissile")}
               </span>
             </span>
           )}
