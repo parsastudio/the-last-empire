@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, Globe2, Clock, Search } from "lucide-react";
 import { TurnLogScope } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -22,6 +23,8 @@ export function ReportFilters({
   onTurnChange,
   onSearchChange,
 }: ReportFiltersProps) {
+  const t = useTranslations("reports.filters");
+
   return (
     <div className="space-y-3 font-sans dir-rtl text-right">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -45,10 +48,10 @@ export function ReportFilters({
             </div>
             <div>
               <span className="text-xs font-black block text-foreground">
-                گزارش‌های حاکمیتی و داخلی کشور
+                {t("national")}
               </span>
               <span className="text-[10px] text-muted-foreground">
-                وقایع نظامی، امنیتی، دیپلماتیک و مالی کشور شما
+                {t("nationalDesc")}
               </span>
             </div>
           </div>
@@ -77,10 +80,10 @@ export function ReportFilters({
             </div>
             <div>
               <span className="text-xs font-black block text-foreground">
-                دیده‌بان اخبار بین‌الملل و جهان
+                {t("global")}
               </span>
               <span className="text-[10px] text-muted-foreground">
-                پوشش عمومی جنگ‌ها، معاهدات و سقوط دولت‌ها
+                {t("globalDesc")}
               </span>
             </div>
           </div>
@@ -94,7 +97,7 @@ export function ReportFilters({
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold shrink-0 ml-1">
             <Clock size={13} className="text-primary" />
-            <span>نوبت:</span>
+            <span>{t("turnLabel")}</span>
           </div>
 
           <button
@@ -105,8 +108,11 @@ export function ReportFilters({
                 : "bg-secondary/50 text-muted-foreground border-border/60 hover:bg-secondary"
             }`}
           >
-            دست جاری (نوبت{" "}
-            {PersianNumberFormatter.toPersianDigits(availableTurns[0] ?? 1)})
+            {t("currentTurn", {
+              turn: PersianNumberFormatter.toPersianDigits(
+                availableTurns[0] ?? 1,
+              ),
+            })}
           </button>
 
           {availableTurns.slice(1, 6).map((turn) => (
@@ -119,7 +125,9 @@ export function ReportFilters({
                   : "bg-secondary/30 text-muted-foreground border-border/40 hover:bg-secondary/60"
               }`}
             >
-              نوبت {PersianNumberFormatter.toPersianDigits(turn)}
+              {t("turnNumber", {
+                turn: PersianNumberFormatter.toPersianDigits(turn),
+              })}
             </button>
           ))}
 
@@ -131,7 +139,7 @@ export function ReportFilters({
                 : "bg-secondary/20 text-muted-foreground border-border/40 hover:bg-secondary/50"
             }`}
           >
-            همه نوبت‌ها
+            {t("allTurns")}
           </button>
         </div>
 
@@ -142,7 +150,7 @@ export function ReportFilters({
           />
           <input
             type="text"
-            placeholder="جستجو در متن وقایع..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Compass, Eye, RefreshCw, Home } from "lucide-react";
 
 interface GameOverActionButtonsProps {
@@ -14,6 +15,8 @@ export function GameOverActionButtons({
   onRestart,
   onHome,
 }: GameOverActionButtonsProps) {
+  const t = useTranslations("gameOver.actions");
+
   return (
     <div className="space-y-2.5 pt-2">
       <button
@@ -25,11 +28,7 @@ export function GameOverActionButtons({
         }`}
       >
         {isVictory ? <Compass size={16} /> : <Eye size={16} />}
-        <span>
-          {isVictory
-            ? "ادامه فتوحات و جهان‌گشایی نامحدود (حالت آزاد)"
-            : "تماشای نقشه جهان و سرنوشت جنگ‌ها (حالت ناظر)"}
-        </span>
+        <span>{isVictory ? t("sandbox") : t("spectator")}</span>
       </button>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -38,7 +37,7 @@ export function GameOverActionButtons({
           className="py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md shadow-primary/20"
         >
           <RefreshCw size={14} />
-          <span>شروع کمپین جدید</span>
+          <span>{t("restart")}</span>
         </button>
 
         <button
@@ -46,7 +45,7 @@ export function GameOverActionButtons({
           className="py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
         >
           <Home size={14} />
-          <span>بازگشت به منوی اصلی</span>
+          <span>{t("home")}</span>
         </button>
       </div>
     </div>

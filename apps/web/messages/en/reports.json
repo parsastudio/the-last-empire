@@ -134,5 +134,74 @@
     "provinces": {
       "title": "Conquered Provinces:"
     }
+  },
+  "filters": {
+    "national": "National Sovereign & Domestic Intel",
+    "nationalDesc": "Military, security, diplomatic, and fiscal state events",
+    "global": "International News & Geopolitical Watch",
+    "globalDesc": "Public global coverage of wars, treaties, and fallen regimes",
+    "turnLabel": "Turn:",
+    "currentTurn": "Current Hand (Turn {turn})",
+    "turnNumber": "Turn {turn}",
+    "allTurns": "All Turns",
+    "searchPlaceholder": "Search event logs..."
+  },
+  "stats": {
+    "combat": "Battles ({turn})",
+    "diplomacy": "Diplomacy ({turn})",
+    "espionage": "Covert Ops ({turn})",
+    "critical": "Crisis & Collapse ({turn})"
+  },
+  "views": {
+    "loading": "Retrieving records from secure intelligence database...",
+    "empty": "No events recorded for this sector in {turn}.",
+    "emptySubtitle": "Select another turn to inspect historical occurrences.",
+    "allTurns": "All Turns",
+    "turnPrefix": "Turn {turn}"
+  },
+  "card": {
+    "hegemonyBadge": "World Hegemony Glory",
+    "crisisBadge": "National Survival Crisis",
+    "machineryExportBadge": "Industrial Assembly Export",
+    "armsExportBadge": "Arms Export Revenue",
+    "industrialExport": "Industrial Export",
+    "pendingDecision": "Awaiting Sovereign Decision",
+    "viewBuyers": "Inspect Details & Buyer Ledger",
+    "viewVictory": "View Ledger & Victory Celebration",
+    "viewCoalition": "Inspect Containment Coalition Accord",
+    "viewBattle": "Inspect 3 Combat Phases & Ledger"
+  },
+  "proposals": {
+    "viewAndSignPeace": "Review & Ratify Peace Terms",
+    "reject": "Reject",
+    "accept": "Accept"
+  },
+  "coalition": {
+    "containmentHeader": "DEFENSIVE PACT OF CONTAINMENT",
+    "warDeclaredTitle": "Global Coalition War Declaration!",
+    "turn": "Turn {turn}",
+    "alarmTitleHuman": "Global Terror of Your Might & Unified War Coalition",
+    "alarmTitleOther": "Allied Superpowers War Against {name}",
+    "alarmDescHuman": "Your lightning conquests have sounded alarms across world capitals! 3 superpowers have formed a containment pact and declared war on your empire. Peace is rejected: conquer or collapse!",
+    "alarmDescOther": "Rival powers have formed a united front against {name}, initiating joint containment operations.",
+    "coalitionPowers": "Coalition Member Powers",
+    "hostileStatus": "Status: Total Hostility",
+    "militaryTech": "Military Tech:",
+    "techLevel": "Level {level}",
+    "diplomaticStatus": "Diplomatic Standing:",
+    "embargoStatus": "Total Trade Embargo • Peace Treaties Rejected",
+    "mobilizeBtn": "Issue Nationwide Combat Alert to Armed Forces"
+  },
+  "exportSales": {
+    "modalTitle": "Arms Export Revenue Breakdown",
+    "modalSubtitle": "Foreign buyer transactions ledger in Turn {turn}",
+    "totalRevenueHeader": "TOTAL EXPORT REVENUE",
+    "totalProfitTitle": "Total Profit Credited to Treasury",
+    "fromCountries": "from {count} Nations",
+    "buyersList": "Buyer Nations Ledger (Sorted by Highest Payment)",
+    "descendingSort": "Sorted Descending",
+    "worldRank": "World Rank #{rank}",
+    "tradeCredibility": "Trade Credit Standing:",
+    "sustainableExport": "Sustainable Exports • Reinforced Fiscal Balance"
   }
 }
