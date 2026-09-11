@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   Coins,
   Receipt,
@@ -25,6 +26,8 @@ export function MilitaryValuationCard({
   nation,
   provincesMap,
 }: MilitaryValuationCardProps) {
+  const t = useTranslations("overview.militaryValuation");
+
   const metrics = useMemo(
     () =>
       selectMilitaryValuationViewModel(
@@ -41,13 +44,16 @@ export function MilitaryValuationCard({
       <div className="flex items-center justify-between pb-1 border-b border-border/40">
         <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
           <Receipt size={15} className="text-treasury" />
-          <span>ارزش دارایی‌ها و بودجه نگهداری ارتش</span>
+          <span>{t("title")}</span>
         </div>
         <span className="text-[10px] font-mono bg-secondary/80 px-2 py-0.5 rounded-lg text-muted-foreground border border-border/50 flex items-center gap-1">
           <Layers size={11} />
           <span>
-            {PersianNumberFormatter.formatNumberWithCommas(metrics.totalUnits)}{" "}
-            یگان فعال
+            {t("activeUnits", {
+              count: PersianNumberFormatter.formatNumberWithCommas(
+                metrics.totalUnits,
+              ),
+            })}
           </span>
         </span>
       </div>
@@ -56,7 +62,7 @@ export function MilitaryValuationCard({
         <div className="bg-secondary/40 border border-border/50 p-3 rounded-xl space-y-1">
           <span className="text-[10px] text-muted-foreground block font-sans flex items-center gap-1">
             <Coins size={12} className="text-gdp" />
-            ارزش کل زرادخانه (سقف ۲۰٪ GDP):
+            {t("totalValuation")}
           </span>
           <span className="font-extrabold text-gdp text-xs block truncate">
             {PersianNumberFormatter.formatCurrency(
@@ -65,15 +71,18 @@ export function MilitaryValuationCard({
             )}
           </span>
           <span className="text-[9px] text-muted-foreground block font-sans">
-            {PersianNumberFormatter.toPersianDigits(metrics.capacityRatio)}٪ از
-            سقف مجاز ارتش
+            {t("capacityRatio", {
+              pct: PersianNumberFormatter.toPersianDigits(
+                metrics.capacityRatio,
+              ),
+            })}
           </span>
         </div>
 
         <div className="bg-secondary/40 border border-border/50 p-3 rounded-xl space-y-1">
           <span className="text-[10px] text-muted-foreground block font-sans flex items-center gap-1">
             <TrendingDown size={12} className="text-military" />
-            هزینه نگهداری هر نوبت (۶٪):
+            {t("turnPayroll")}
           </span>
           <span className="font-extrabold text-military text-xs block truncate">
             -{PersianNumberFormatter.formatCurrency(metrics.totalPayroll, true)}
@@ -81,15 +90,14 @@ export function MilitaryValuationCard({
           {metrics.isGdpCapped && (
             <span className="text-[9px] text-amber-400 font-bold block font-sans flex items-center gap-0.5">
               <ShieldCheck size={10} />
-              مهارشده در سقف ۶٪ GDP
+              {t("gdpCapped")}
             </span>
           )}
         </div>
       </div>
 
       <p className="text-[10px] text-muted-foreground leading-relaxed bg-secondary/20 p-2.5 rounded-xl border border-border/40 font-sans">
-        هزینه نگهداری نوبتی ارتش ۶٪ ارزش کل یگان‌هاست و سقف مجاز ارزش ارتش معادل
-        ۲۰٪ تولید ناخالص (GDP) کشور می‌باشد.
+        {t("valuationInfo")}
       </p>
     </div>
   );

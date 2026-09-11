@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Landmark, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import {
   PersianNumberFormatter,
@@ -14,6 +15,8 @@ export function PoliticalStabilityCard({
   stability,
   stabilityDelta,
 }: PoliticalStabilityCardProps) {
+  const t = useTranslations("overview.stabilityCard");
+
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(stability),
     [stability],
@@ -21,8 +24,8 @@ export function PoliticalStabilityCard({
 
   const deltaText =
     stabilityDelta >= 0
-      ? `+${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`
-      : `${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`;
+      ? `+${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ ${t("perTurn")}`
+      : `${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ ${t("perTurn")}`;
 
   return (
     <div
@@ -32,7 +35,7 @@ export function PoliticalStabilityCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
           <Landmark size={15} className="text-diplomacy shrink-0" />
-          <span>ثبات سیاسی داخلی</span>
+          <span>{t("title")}</span>
         </div>
         <span
           className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-bold border ${bracket.badgeStyleClass}`}
@@ -60,7 +63,7 @@ export function PoliticalStabilityCard({
           ) : (
             <TrendingDown size={11} className="text-military" />
           )}
-          نوسان نوبتی ثبات:
+          {t("fluctuation")}
         </span>
         <span
           className={`font-extrabold ${

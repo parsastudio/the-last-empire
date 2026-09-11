@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Landmark } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
@@ -16,6 +17,8 @@ export function GovernmentStatusSection({
   reputation,
   nation,
 }: GovernmentStatusSectionProps) {
+  const t = useTranslations("overview.governance");
+
   const stabilityDelta = nation
     ? StabilityCalculator.calculateTurnStabilityDelta(nation)
     : 0;
@@ -25,7 +28,7 @@ export function GovernmentStatusSection({
       <div className="flex items-center gap-2 px-1">
         <Landmark size={14} className="text-diplomacy" />
         <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
-          وضعیت حکومت، ثبات و اعتبار بین‌المللی
+          {t("title")}
         </span>
       </div>
 

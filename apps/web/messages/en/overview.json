@@ -1,0 +1,100 @@
+{
+  "header": {
+    "governmentTypeLabel": "Regime Structure: {label}",
+    "worldRank": "World Rank #{rank}",
+    "populationLabel": "Total Sovereign Population",
+    "militaryTechLabel": "Defense Technology Level",
+    "industrialTechLabel": "Industrial Tech Level",
+    "difficultyLabel": "Game Difficulty Setting",
+    "levelFormat": "Level {level}"
+  },
+  "economy": {
+    "title": "Macroeconomic Indicators, Treasury & Credit",
+    "gdp": "Gross Domestic Product (GDP)",
+    "treasury": "Available Treasury Reserves",
+    "factories": "Active Industrial Facilities",
+    "factoryUnit": "{count} factories",
+    "imfSectionTitle": "IMF Debt Position & World Bank Credit Line",
+    "imfSectionSubtitle": "Foreign Exchange Facility & Emergency Borrowing Limit",
+    "hasDebt": "Outstanding Debt Active",
+    "noDebt": "Zero External Debt",
+    "totalDebt": "Total Overdue Debt:",
+    "creditCeiling": "Available Credit Headroom:",
+    "turnInterest": "Turn Interest Cost (10%):",
+    "perTurn": "/ turn"
+  },
+  "governance": {
+    "title": "Regime Governance, Stability & Global Standing"
+  },
+  "stabilityCard": {
+    "title": "Domestic Political Stability",
+    "fluctuation": "Turn Stability Fluctuation:",
+    "perTurn": "/ turn"
+  },
+  "reputation": {
+    "title": "Global Standing & Sovereign Prestige",
+    "favorable": "Favorable Standing",
+    "isolated": "Diplomatic Isolation",
+    "neutral": "Neutral",
+    "scoreSubtitle": "International Diplomatic Standing Points",
+    "publicStatus": "Public Standing Status:",
+    "popularPower": "Respected Power",
+    "globalThreat": "Global Threat",
+    "normalStatus": "Normal Standing"
+  },
+  "victory": {
+    "title": "Victory Path & Global Hegemony",
+    "endConditions": "Campaign Victory Conditions",
+    "militaryTitle": "Military Dominance & Territorial Conquest",
+    "militaryTarget": "Target: 65% of World",
+    "territoryExtent": "of Total World Map Area",
+    "economicTitle": "Global Economic Dominance",
+    "economicTarget": "Target: 65% of World",
+    "wealthExtent": "of Total World Wealth"
+  },
+  "militaryValuation": {
+    "title": "Asset Valuation & Armed Forces Maintenance Budget",
+    "activeUnits": "{count} Active Units",
+    "totalValuation": "Total Arsenal Valuation (20% GDP Cap):",
+    "capacityRatio": "{pct}% of Permitted Army Cap",
+    "turnPayroll": "Turn Maintenance Cost (6%):",
+    "gdpCapped": "Capped at 6% GDP Ceiling",
+    "valuationInfo": "Routine military maintenance is 6% of total unit valuation, and maximum allowed army valuation is capped at 20% of national GDP."
+  },
+  "militaryTechUpgrade": {
+    "title": "Military & Defense Technology R&D",
+    "levelBadge": "Level {level}",
+    "stepCost": "Next Step Cost (+0.1):",
+    "progressToNext": "Progress to Next Full Tier:",
+    "submitting": "Conducting Defense R&D...",
+    "upgradeBtn": "Upgrade to Level {level}",
+    "insufficientFunds": "Insufficient Treasury Reserves for R&D"
+  },
+  "quickRecruit": {
+    "title": "Rapid Armed Forces Procurement (Valuation Cap = 20% GDP)",
+    "armyCapOccupancy": "Army Cap Occupancy:",
+    "nationalTreasury": "National Treasury:"
+  },
+  "imf": {
+    "title": "International Monetary Fund (IMF) & Credit",
+    "availableCredit": "Available Credit Headroom (Max 30% GDP):",
+    "overdueLoans": "Total Overdue Debt",
+    "turnInterest": "Turn Interest (10%)",
+    "requestLoan": "Request Loan",
+    "repayDebt": "Repay Debt",
+    "repayFull": "Repay Full Debt",
+    "insufficientToSettle": "Insufficient Funds to Settle",
+    "smallDebtWarning": "Treasury liquidity is lower than overdue principal ({amount}).",
+    "loanDialogTitle": "Obtain Emergency Loan Facility from World Bank",
+    "loanDialogSubtitle": "Turn payment of 10% interest on principal debt from IMF",
+    "repayDialogTitle": "Settle Outstanding National Debt",
+    "repayDialogSubtitle": "Pay down portion of debt to World Bank using liquid treasury",
+    "billionDollars": "Billion Dollars",
+    "maxCreditFull": "National credit limit (30% GDP) reached.",
+    "cannotRepay": "Repayment unavailable."
+  },
+  "modifiers": {
+    "title": "Active Modifiers & Buffs",
+    "turnsRemaining": "{count} Turns"
+  }
+}

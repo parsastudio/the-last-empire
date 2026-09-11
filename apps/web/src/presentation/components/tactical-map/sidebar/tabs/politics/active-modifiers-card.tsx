@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ShieldAlert } from "lucide-react";
 import { ActiveModifier } from "@/domain/nation/nation.schema";
 
@@ -9,6 +10,8 @@ interface ActiveModifiersCardProps {
 export function ActiveModifiersCard({
   modifiers = [],
 }: ActiveModifiersCardProps) {
+  const t = useTranslations("overview.modifiers");
+
   if (!modifiers || modifiers.length === 0) return null;
 
   return (
@@ -16,7 +19,7 @@ export function ActiveModifiersCard({
       <div className="flex items-center gap-2 px-1">
         <ShieldAlert size={13} className="text-military" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          تاثیرات و مودیفایرهای فعال
+          {t("title")}
         </span>
       </div>
 
@@ -36,7 +39,7 @@ export function ActiveModifiersCard({
               </span>
             </div>
             <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground">
-              {mod.turnsRemaining} نوبت
+              {t("turnsRemaining", { count: mod.turnsRemaining })}
             </span>
           </div>
         ))}

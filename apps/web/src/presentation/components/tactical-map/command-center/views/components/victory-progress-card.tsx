@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Swords, Coins, Sparkles, Target } from "lucide-react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
@@ -13,6 +14,8 @@ export function VictoryProgressCard({
   nationId,
   gameState,
 }: VictoryProgressCardProps) {
+  const t = useTranslations("overview.victory");
+
   const metrics = useMemo(() => {
     return VictoryChecker.calculateProgress(gameState || null, nationId);
   }, [gameState, nationId]);
@@ -33,12 +36,12 @@ export function VictoryProgressCard({
         <div className="flex items-center gap-2">
           <Target size={14} className="text-amber-500" />
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
-            مسیر پیروزی و سلطه بر جهان
+            {t("title")}
           </span>
         </div>
         <span className="text-[9px] font-mono bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-lg font-bold flex items-center gap-1">
           <Sparkles size={10} />
-          شروط پایان کمپین
+          {t("endConditions")}
         </span>
       </div>
 
@@ -49,10 +52,10 @@ export function VictoryProgressCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-black text-foreground">
               <Swords size={16} className="text-military shrink-0" />
-              <span>سلطه نظامی و فتح خاک</span>
+              <span>{t("militaryTitle")}</span>
             </div>
             <span className="text-[10px] font-mono text-military font-bold bg-military/10 px-2 py-0.5 rounded-lg border border-military/20">
-              هدف: ۶۵٪ از جهان
+              {t("militaryTarget")}
             </span>
           </div>
 
@@ -65,7 +68,7 @@ export function VictoryProgressCard({
                 ٪
               </span>
               <span className="text-[11px] text-muted-foreground font-sans">
-                از وسعت کل نقشه
+                {t("territoryExtent")}
               </span>
             </div>
 
@@ -84,10 +87,10 @@ export function VictoryProgressCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-black text-foreground">
               <Coins size={16} className="text-gdp shrink-0" />
-              <span>تسخیر نبض اقتصاد جهان</span>
+              <span>{t("economicTitle")}</span>
             </div>
             <span className="text-[10px] font-mono text-gdp font-bold bg-gdp/10 px-2 py-0.5 rounded-lg border border-gdp/20">
-              هدف: ۶۵٪ از جهان
+              {t("economicTarget")}
             </span>
           </div>
 
@@ -97,7 +100,7 @@ export function VictoryProgressCard({
                 {PersianNumberFormatter.toPersianDigits(metrics.gdpSharePct)}٪
               </span>
               <span className="text-[11px] text-muted-foreground font-sans">
-                از ثروت کل دنیا
+                {t("wealthExtent")}
               </span>
             </div>
 
