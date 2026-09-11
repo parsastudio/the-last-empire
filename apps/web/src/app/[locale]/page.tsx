@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { AmbientTacticalGrid } from "@/presentation/components/main-menu/ambient-tactical-grid";
 import { CommandConsole } from "@/presentation/components/main-menu/command-console";
 import { BriefingPanel } from "@/presentation/components/main-menu/briefing-panel";

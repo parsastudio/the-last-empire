@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
 import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/government-type-selector";
