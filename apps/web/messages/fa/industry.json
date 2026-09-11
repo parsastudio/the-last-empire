@@ -1,0 +1,75 @@
+{
+  "tabs": {
+    "domestic": "صنایع و بازسازی بومی",
+    "imports": "واردات ماشین‌آلات صنعتی"
+  },
+  "overview": {
+    "activeFactories": "سوله‌های فعال صنعتی",
+    "totalFactoriesYield": "ارزش کل تمام کارخانه‌ها",
+    "gdpShareDesc": "سهم مستقیم در تولید ناخالص (GDP)",
+    "rndKnowledge": "دانش و پژوهش بومی (R&D)",
+    "rndKnowledgeDesc": "سقف ساخت ادوات در داخل کشور",
+    "equipmentTier": "تراز تجهیزات خطوط تولید",
+    "equipmentTierDesc": "کیفیت ابزارآلات و ماشین‌آلات نصب‌شده",
+    "level": "سطح {level}"
+  },
+  "tiers": {
+    "headerTitle": "خطوط تولید و رده‌های صنعتی کشور",
+    "headerSubtitleDomestic": "پایش تفکیکی رده‌های صنعتی و ارتقای فوری سوله‌ها به آخرین سطح دانش بومی",
+    "headerSubtitleImport": "انتخاب رده جهت واردات ماشین‌آلات و جهش فناوری خطوط تولید",
+    "activeTiersCount": "{count} رده فعال",
+    "lineTier": "خطوط تولید رده #{rank}",
+    "maxEfficiency": "تجهیزات در بالاترین سقف راندمان",
+    "upgradeTarget": "هدف ارتقا: لِوِل {level}",
+    "levelLabel": "سطح {level}",
+    "levelPrefix": "لِوِل {level}",
+    "tierFactoriesLabel": "کارخانجات فعال رده:",
+    "shareOfTotal": "{pct}٪ از کل صنایع",
+    "activeSheds": "{count} سوله فعال",
+    "totalValue": "ارزش کل:",
+    "investPackage": "مبلغ سرمایه‌گذاری بسته:",
+    "maxTechEquipped": "مجهز به سقف فناوری (سطح {level})",
+    "upgradeAction": "{label} ({count} سوله)",
+    "domesticActionDefault": "ارتقای بومی",
+    "importActionDefault": "واردات و تجهیز",
+    "feedbacks": {
+      "domestic": "+{count} سوله مدرن",
+      "import": "+{count} سوله وارداتی"
+    }
+  },
+  "smartBuild": {
+    "title": "احداث زیرساخت کارخانجات ملی",
+    "capacityFull": "ظرفیت ۱۰۰٪",
+    "unitCost": "{cost} / سوله",
+    "occupancy": "ظرفیت اشغال صنعتی کشور:",
+    "ofTotalSlots": "از {max} سوله",
+    "totalSlotsCompleted": "تکمیل کل اسلات‌های دائم:",
+    "allProvincesFull": "ظرفیت ساخت تمامی استان‌ها تکمیل است",
+    "insufficientFunds": "موجودی خزانه ناکافی است",
+    "buildAction": "احداث فوری {count} سوله ({cost})"
+  },
+  "imports": {
+    "title": "فهرست صادرکنندگان تجهیزات و ماشین‌آلات پیشرفته",
+    "desc": "فقط کشورهای هم‌پیمان و دارای تنش کمتر از ۵۰٪ در دسترس هستند.",
+    "searchPlaceholder": "جستجوی نام یا نماد صادرکننده...",
+    "noExportersTitle": "صادرکننده آزادی در دسترس نیست",
+    "noExportersDesc": "هیچ کشوری با فناوری صنعتی بالاتر که در وضعیت صلح و تنش زیر ۵۰٪ باشد یافت نشد.",
+    "countryViewBack": "فهرست صادرکنندگان",
+    "countryViewTitle": "واردات تجهیزات و ابزارآلات صنعتی از {name}",
+    "treasury": "خزانه ملی شما:",
+    "techGapInfo": "شکاف فناوری صنعتی با صادرکننده: +{delta} سطح (قیمت‌گذاری متناسب با نرخ رشد ۱.۵ برابری ارزش تولیدی کارخانجات محاسبه می‌گردد).",
+    "techEqualInfo": "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست.",
+    "importMultiplier": "ضریب واردات: {mult}x"
+  },
+  "techUpgrade": {
+    "title": "تحقیقات و فناوری صنعتی (R&D)",
+    "stepCostLabel": "هزینه گام بعدی (+۰.۱):",
+    "progressToNext": "پیشرفت تا سطح اصلی بعد:",
+    "submitting": "در حال اجرای تحقیقات صنعتی...",
+    "upgradeBtn": "ارتقا به سطح {level}",
+    "insufficientFunds": "موجودی خزانه ناکافی جهت R&D"
+  },
+  "capacityMeter": {
+    "tooltip": "کارخانجات فعال: {active} از {max} اسلات دائم"
+  }
+}

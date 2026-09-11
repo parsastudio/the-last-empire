@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Factory, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import {
   PersianNumberFormatter,
@@ -26,13 +27,19 @@ export function IndustrySmartBuildCard({
   isBuilding,
   onBuild,
 }: IndustrySmartBuildCardProps) {
+  const t = useTranslations("industry.smartBuild");
   const isFull = totalEmptySlots <= 0;
   const occupancyPct =
     totalMaxSlots > 0
       ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
       : 100;
 
-  const unitCostText = `${PersianNumberFormatter.formatCurrency(IndustryCalculator.FACTORY_REBUILD_COST, true)} / سوله`;
+  const unitCostText = t("unitCost", {
+    cost: PersianNumberFormatter.formatCurrency(
+      IndustryCalculator.FACTORY_REBUILD_COST,
+      true,
+    ),
+  });
 
   return (
     <div className="space-y-2.5 dir-rtl text-right font-sans">
@@ -40,7 +47,7 @@ export function IndustrySmartBuildCard({
         <div className="flex items-center gap-2">
           <Factory size={14} className="text-gdp" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            احداث زیرساخت کارخانجات ملی
+            {t("title")}
           </span>
         </div>
         <span
@@ -50,29 +57,32 @@ export function IndustrySmartBuildCard({
               : "bg-gdp/10 text-gdp border-gdp/30"
           }`}
         >
-          {isFull ? "ظرفیت ۱۰۰٪" : unitCostText}
+          {isFull ? t("capacityFull") : unitCostText}
         </span>
       </div>
 
       <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl space-y-3 shadow-sm">
         <div className="flex items-center justify-between text-xs pb-2.5 border-b border-border/50 font-mono">
           <span className="text-muted-foreground font-sans font-bold text-[11px]">
-            ظرفیت اشغال صنعتی کشور:
+            {t("occupancy")}
           </span>
           <span className="font-extrabold text-xs text-foreground">
             {PersianNumberFormatter.formatNumberWithCommas(
               totalActiveFactories,
             )}{" "}
             <span className="text-[10px] text-muted-foreground font-normal">
-              از {PersianNumberFormatter.formatNumberWithCommas(totalMaxSlots)}{" "}
-              سوله
+              {t("ofTotalSlots", {
+                max: PersianNumberFormatter.formatNumberWithCommas(
+                  totalMaxSlots,
+                ),
+              })}
             </span>
           </span>
         </div>
 
         <div className="space-y-1.5 font-mono text-[10px]">
           <div className="flex items-center justify-between text-muted-foreground font-sans">
-            <span>تکمیل کل اسلات‌های دائم:</span>
+            <span>{t("totalSlotsCompleted")}</span>
             <span
               className={`font-bold font-mono ${
                 isFull ? "text-emerald-400" : "text-gdp"
@@ -94,7 +104,7 @@ export function IndustrySmartBuildCard({
         {isFull ? (
           <div className="w-full py-3 bg-secondary/80 text-muted-foreground rounded-xl text-xs font-bold border border-border/60 flex items-center justify-center gap-1.5 select-none">
             <CheckCircle2 size={14} className="text-emerald-400" />
-            <span>ظرفیت ساخت تمامی استان‌ها تکمیل است</span>
+            <span>{t("allProvincesFull")}</span>
           </div>
         ) : (
           <button
@@ -110,8 +120,17 @@ export function IndustrySmartBuildCard({
             )}
             <span>
               {!canAfford
-                ? "موجودی خزانه ناکافی است"
-                : `احداث فوری ${PersianNumberFormatter.formatNumberWithCommas(batchQuantity)} سوله (${PersianNumberFormatter.formatCurrency(batchCost, true)})`}
+                ? t("insufficientFunds")
+                : t("buildAction", {
+                    count:
+                      PersianNumberFormatter.formatNumberWithCommas(
+                        batchQuantity,
+                      ),
+                    cost: PersianNumberFormatter.formatCurrency(
+                      batchCost,
+                      true,
+                    ),
+                  })}
             </span>
           </button>
         )}

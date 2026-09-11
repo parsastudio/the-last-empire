@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Layers, Factory } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { FactoryBatch } from "@geopolitics/domain";
@@ -26,8 +27,10 @@ export function FactoryTiersGrid({
   buyerIndustrialLevel,
   sellerId,
   actionType = "DOMESTIC",
-  actionLabel = "ارتقای بومی",
+  actionLabel,
 }: FactoryTiersGridProps) {
+  const t = useTranslations("industry.tiers");
+
   const { tierUpgradeItems, feedbacks, isSubmitting, handleUpgradeTier } =
     useFactoryTierProcurement({
       nationId,
@@ -40,6 +43,12 @@ export function FactoryTiersGrid({
       actionType,
     });
 
+  const effectiveActionLabel =
+    actionLabel ||
+    (actionType === "IMPORT"
+      ? t("importActionDefault")
+      : t("domesticActionDefault"));
+
   return (
     <div className="space-y-3.5 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
@@ -49,12 +58,12 @@ export function FactoryTiersGrid({
           </div>
           <div>
             <h3 className="text-xs font-black text-foreground">
-              خطوط تولید و رده‌های صنعتی کشور
+              {t("headerTitle")}
             </h3>
             <span className="text-[10px] text-muted-foreground">
               {actionType === "IMPORT"
-                ? "انتخاب رده جهت واردات ماشین‌آلات و جهش فناوری خطوط تولید"
-                : "پایش تفکیکی رده‌های صنعتی و ارتقای فوری سوله‌ها به آخرین سطح دانش بومی"}
+                ? t("headerSubtitleImport")
+                : t("headerSubtitleDomestic")}
             </span>
           </div>
         </div>
@@ -62,8 +71,11 @@ export function FactoryTiersGrid({
         <span className="text-[11px] font-mono bg-secondary/80 border border-border/80 px-3 py-1 rounded-xl font-bold text-muted-foreground flex items-center gap-1.5 shadow-sm">
           <Factory size={12} className="text-gdp" />
           <span>
-            {PersianNumberFormatter.toPersianDigits(tierUpgradeItems.length)}{" "}
-            رده فعال
+            {t("activeTiersCount", {
+              count: PersianNumberFormatter.toPersianDigits(
+                tierUpgradeItems.length,
+              ),
+            })}
           </span>
         </span>
       </div>
@@ -74,7 +86,7 @@ export function FactoryTiersGrid({
             key={`${item.batch.techLevel}-${item.rankIndex}`}
             item={item}
             totalFactories={totalFactories}
-            actionLabel={actionLabel}
+            actionLabel={effectiveActionLabel}
             feedbacks={feedbacks[item.rankIndex]}
             isSubmitting={isSubmitting}
             onUpgrade={handleUpgradeTier}

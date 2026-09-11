@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Factory,
   TrendingUp,
@@ -25,11 +26,13 @@ interface FactoryTierCardProps {
 export function FactoryTierCard({
   item,
   totalFactories,
-  actionLabel = "ارتقای بومی",
+  actionLabel,
   feedbacks = [],
   isSubmitting = false,
   onUpgrade,
 }: FactoryTierCardProps) {
+  const t = useTranslations("industry.tiers");
+
   const {
     batch,
     rankIndex,
@@ -45,6 +48,7 @@ export function FactoryTierCard({
 
   const singleYield = IndustryCalculator.calculateFactoryYield(batch.techLevel);
   const totalTierYield = batch.count * singleYield;
+  const effectiveActionLabel = actionLabel || t("domesticActionDefault");
 
   return (
     <div
@@ -76,13 +80,18 @@ export function FactoryTierCard({
             </div>
             <div className="space-y-0.5">
               <h4 className="text-xs font-black text-foreground">
-                خطوط تولید رده #
-                {PersianNumberFormatter.toPersianDigits(rankIndex + 1)}
+                {t("lineTier", {
+                  rank: PersianNumberFormatter.toPersianDigits(rankIndex + 1),
+                })}
               </h4>
               <span className="text-[10px] font-mono text-muted-foreground block">
                 {isMaxedOut
-                  ? "تجهیزات در بالاترین سقف راندمان"
-                  : `هدف ارتقا: لِوِل ${PersianNumberFormatter.toPersianDigits(targetTech.toFixed(1))}`}
+                  ? t("maxEfficiency")
+                  : t("upgradeTarget", {
+                      level: PersianNumberFormatter.toPersianDigits(
+                        targetTech.toFixed(1),
+                      ),
+                    })}
               </span>
             </div>
           </div>
@@ -91,27 +100,32 @@ export function FactoryTierCard({
             <div className="px-2.5 py-1 rounded-xl border font-mono font-bold text-[11px] flex items-center gap-1 shrink-0 bg-gdp/15 text-gdp border-gdp/40">
               <Sparkles size={11} />
               <span>
-                سطح{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  batch.techLevel.toFixed(1),
-                )}
+                {t("levelLabel", {
+                  level: PersianNumberFormatter.toPersianDigits(
+                    batch.techLevel.toFixed(1),
+                  ),
+                })}
               </span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 font-mono text-[11px] font-black shrink-0">
               <span className="text-muted-foreground bg-secondary/80 border border-border/60 px-2 py-0.5 rounded-lg">
-                لِوِل{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  batch.techLevel.toFixed(1),
-                )}
+                {t("levelPrefix", {
+                  level: PersianNumberFormatter.toPersianDigits(
+                    batch.techLevel.toFixed(1),
+                  ),
+                })}
               </span>
               <ArrowLeft
                 size={13}
                 className="text-gdp shrink-0 animate-pulse"
               />
               <span className="text-gdp bg-gdp/15 border border-gdp/30 px-2 py-0.5 rounded-lg">
-                لِوِل{" "}
-                {PersianNumberFormatter.toPersianDigits(targetTech.toFixed(1))}
+                {t("levelPrefix", {
+                  level: PersianNumberFormatter.toPersianDigits(
+                    targetTech.toFixed(1),
+                  ),
+                })}
               </span>
             </div>
           )}
@@ -121,19 +135,22 @@ export function FactoryTierCard({
           <div className="flex items-center justify-between text-[11px] text-muted-foreground font-sans">
             <span className="flex items-center gap-1.5 font-bold">
               <Building2 size={13} className="text-primary" />
-              <span>کارخانجات فعال رده:</span>
+              <span>{t("tierFactoriesLabel")}</span>
             </span>
             <span className="font-mono font-bold text-gdp bg-gdp/10 border border-gdp/25 px-2 py-0.5 rounded-md text-[10px]">
-              {PersianNumberFormatter.toPersianDigits(percentage)}٪ از کل صنایع
+              {t("shareOfTotal", {
+                pct: PersianNumberFormatter.toPersianDigits(percentage),
+              })}
             </span>
           </div>
 
           <div className="flex items-baseline justify-between pt-0.5">
             <div className="text-xl font-black font-mono text-foreground tracking-tight">
-              {PersianNumberFormatter.formatNumberWithCommas(batch.count)}{" "}
-              <span className="text-[11px] text-muted-foreground font-normal font-sans">
-                سوله فعال
-              </span>
+              {t("activeSheds", {
+                count: PersianNumberFormatter.formatNumberWithCommas(
+                  batch.count,
+                ),
+              })}
             </div>
           </div>
 
@@ -151,7 +168,7 @@ export function FactoryTierCard({
           <div className="flex items-center justify-between pt-2 border-t border-border/40 font-mono text-xs">
             <span className="text-muted-foreground font-sans text-[11px] flex items-center gap-1">
               <TrendingUp size={12} className="text-emerald-400" />
-              <span>ارزش کل:</span>
+              <span>{t("totalValue")}</span>
             </span>
             <span className="font-black text-emerald-400 text-xs">
               {PersianNumberFormatter.formatCurrency(totalTierYield, true)}
@@ -176,11 +193,11 @@ export function FactoryTierCard({
           <div className="w-full py-2.5 bg-emerald-950/20 text-emerald-400/90 rounded-2xl text-[11px] font-bold border border-emerald-500/30 flex items-center justify-center gap-1.5 select-none shadow-inner font-sans">
             <CheckCircle2 size={14} className="text-gdp" />
             <span>
-              مجهز به سقف فناوری (سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                batch.techLevel.toFixed(1),
-              )}
-              )
+              {t("maxTechEquipped", {
+                level: PersianNumberFormatter.toPersianDigits(
+                  batch.techLevel.toFixed(1),
+                ),
+              })}
             </span>
           </div>
         ) : (
@@ -188,7 +205,7 @@ export function FactoryTierCard({
             <div className="flex items-center justify-between px-1 text-[11px]">
               <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
                 <Coins size={11} className="text-amber-400" />
-                <span>مبلغ سرمایه‌گذاری بسته:</span>
+                <span>{t("investPackage")}</span>
               </span>
               <span className="font-extrabold text-foreground text-xs">
                 {PersianNumberFormatter.formatCurrency(batchCost, true)}
@@ -200,13 +217,17 @@ export function FactoryTierCard({
               onClick={() => onUpgrade(item)}
               disabled={!canAfford || isSubmitting}
               className="w-full py-2.5 px-3.5 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-bold font-sans transition-all cursor-pointer shadow-md shadow-gdp/15 hover:scale-[1.005] active:scale-[0.995] flex items-center justify-center gap-1.5 border border-gdp/30"
-              title={`ارتقای ${batchQuantity} سوله به سطح ${targetTech.toFixed(1)}`}
+              title={`${effectiveActionLabel} - ${batchQuantity}`}
             >
               <Plus size={13} strokeWidth={2.5} />
               <span>
-                {actionLabel} (
-                {PersianNumberFormatter.formatNumberWithCommas(batchQuantity)}{" "}
-                سوله)
+                {t("upgradeAction", {
+                  label: effectiveActionLabel,
+                  count:
+                    PersianNumberFormatter.formatNumberWithCommas(
+                      batchQuantity,
+                    ),
+                })}
               </span>
             </button>
           </>
