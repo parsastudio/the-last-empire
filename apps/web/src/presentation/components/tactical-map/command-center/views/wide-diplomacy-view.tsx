@@ -1,10 +1,10 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { DiplomacyListItem } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomacy-list-item";
 import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
 import { DiplomacyTargetCard } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-target-card";
 import { DiplomacyAlliesResolver } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-resolver.utility";
-import { Search } from "lucide-react";
+import { Search, Globe, Shield } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
@@ -33,6 +33,8 @@ export function WideDiplomacyView({
   turnActivity,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
+  const [mobileTab, setMobileTab] = useState<"list" | "details">("details");
+
   const activeHumanId = CountryRegistry.resolveCanonicalId(
     humanNationId || "USA",
   );
@@ -69,81 +71,126 @@ export function WideDiplomacyView({
     }
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right font-sans">
-      <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="text"
-            placeholder="جستجوی نام یا نماد کشور..."
-            value={diplomacy.searchQuery}
-            onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right focus:outline-none focus:border-primary"
-          />
-        </div>
+  const handleSelectCountry = (code: string) => {
+    diplomacy.setActiveCode(code);
+    setMobileTab("details");
+  };
 
-        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
-          {diplomacy.filteredRelations.length === 0 ? (
-            <div className="py-12 text-center text-xs text-muted-foreground italic">
-              هیچ کشوری با این عبارت یافت نشد.
-            </div>
-          ) : (
-            diplomacy.filteredRelations.map((rel) => (
-              <DiplomacyListItem
-                key={rel.code}
-                relation={rel}
-                onSelect={(selected) => diplomacy.setActiveCode(selected.code)}
-              />
-            ))
-          )}
-        </div>
+  return (
+    <div className="space-y-3 animate-in fade-in duration-200 dir-rtl text-right font-sans">
+      <div className="flex md:hidden items-center gap-1.5 p-1 bg-secondary/60 border border-border/80 rounded-xl w-full">
+        <button
+          type="button"
+          onClick={() => setMobileTab("details")}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            mobileTab === "details"
+              ? "bg-card text-foreground shadow-sm border border-border/60"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Shield size={13} />
+          <span>پرونده {diplomacy.selectedRelation.name}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab("list")}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            mobileTab === "list"
+              ? "bg-card text-foreground shadow-sm border border-border/60"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Globe size={13} />
+          <span>فهرست کشورها ({diplomacy.filteredRelations.length})</span>
+        </button>
       </div>
 
-      <div className="lg:col-span-8 space-y-5">
-        <DiplomacyTargetCard
-          name={diplomacy.selectedRelation.name}
-          code={diplomacy.selectedRelation.code}
-          flagCode={diplomacy.selectedRelation.flagCode}
-          stance={diplomacy.selectedRelation.stance}
-          alignment={diplomacy.selectedRelation.alignment}
-          tension={diplomacy.selectedRelation.tension}
-          posture={diplomacy.selectedRelation.posture}
-          hasSecurityGuarantee={diplomacy.selectedRelation.hasSecurityGuarantee}
-          isEmergencyProtectorate={
-            diplomacy.selectedRelation.isEmergencyProtectorate
-          }
-        />
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-6">
+        <div
+          className={`md:col-span-5 lg:col-span-4 space-y-2.5 md:space-y-3 bg-background/30 p-3 md:p-4 border border-border/60 rounded-2xl md:rounded-3xl ${
+            mobileTab === "list" ? "block" : "hidden md:block"
+          }`}
+        >
+          <div className="relative">
+            <Search
+              size={14}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="text"
+              placeholder="جستجوی نام یا نماد کشور..."
+              value={diplomacy.searchQuery}
+              onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
+              className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 md:py-2 pr-9 pl-3 text-xs text-foreground text-right focus:outline-none focus:border-primary"
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <CountryProfileStats
-            data={diplomacy.selectedRelation.profileData}
-            allies={targetAllies}
-            onSelectAlly={(code) => diplomacy.setActiveCode(code)}
-          />
-          <AdvancedDiplomacyActions
-            targetName={diplomacy.selectedRelation.name}
-            targetNationId={diplomacy.targetNationId}
-            targetFlagCode={diplomacy.selectedRelation.flagCode}
-            nationId={activeHumanId}
-            senderGdp={humanGdp}
-            targetGdp={diplomacy.selectedTargetGdp}
-            currentStance={diplomacy.selectedRelation.stance}
+          <div className="space-y-1.5 md:space-y-2 max-h-[320px] md:max-h-[460px] lg:max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
+            {diplomacy.filteredRelations.length === 0 ? (
+              <div className="py-12 text-center text-xs text-muted-foreground italic">
+                هیچ کشوری با این عبارت یافت نشد.
+              </div>
+            ) : (
+              diplomacy.filteredRelations.map((rel) => (
+                <DiplomacyListItem
+                  key={rel.code}
+                  relation={rel}
+                  onSelect={(selected) => handleSelectCountry(selected.code)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        <div
+          className={`md:col-span-7 lg:col-span-8 space-y-3 md:space-y-5 ${
+            mobileTab === "details" ? "block" : "hidden md:block"
+          }`}
+        >
+          <DiplomacyTargetCard
+            name={diplomacy.selectedRelation.name}
+            code={diplomacy.selectedRelation.code}
+            flagCode={diplomacy.selectedRelation.flagCode}
+            stance={diplomacy.selectedRelation.stance}
+            alignment={diplomacy.selectedRelation.alignment}
+            tension={diplomacy.selectedRelation.tension}
+            posture={diplomacy.selectedRelation.posture}
             hasSecurityGuarantee={
               diplomacy.selectedRelation.hasSecurityGuarantee
             }
             isEmergencyProtectorate={
               diplomacy.selectedRelation.isEmergencyProtectorate
             }
-            provincesMap={provincesMap}
-            clientNation={humanNation}
-            targetNation={diplomacy.selectedTargetNation}
-            turnActivity={turnActivity}
-            onOpenProxy={handleOpenEspionage}
           />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 md:gap-5">
+            <CountryProfileStats
+              data={diplomacy.selectedRelation.profileData}
+              allies={targetAllies}
+              onSelectAlly={(code) => handleSelectCountry(code)}
+            />
+            <AdvancedDiplomacyActions
+              targetName={diplomacy.selectedRelation.name}
+              targetNationId={diplomacy.targetNationId}
+              targetFlagCode={diplomacy.selectedRelation.flagCode}
+              nationId={activeHumanId}
+              senderGdp={humanGdp}
+              targetGdp={diplomacy.selectedTargetGdp}
+              currentStance={diplomacy.selectedRelation.stance}
+              hasSecurityGuarantee={
+                diplomacy.selectedRelation.hasSecurityGuarantee
+              }
+              isEmergencyProtectorate={
+                diplomacy.selectedRelation.isEmergencyProtectorate
+              }
+              provincesMap={provincesMap}
+              clientNation={humanNation}
+              targetNation={diplomacy.selectedTargetNation}
+              turnActivity={turnActivity}
+              onOpenProxy={handleOpenEspionage}
+            />
+          </div>
         </div>
       </div>
     </div>

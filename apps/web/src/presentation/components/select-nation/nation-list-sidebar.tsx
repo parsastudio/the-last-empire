@@ -33,32 +33,32 @@ export function NationListSidebar({
   }, [nations, searchQuery]);
 
   return (
-    <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-3xl overflow-hidden shadow-sm h-full">
-      <div className="p-4 border-b border-border space-y-3 shrink-0 dir-rtl text-right">
+    <div className="flex flex-col bg-card border border-border rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm h-full min-h-0">
+      <div className="p-2.5 sm:p-4 border-b border-border space-y-2 sm:space-y-3 shrink-0 dir-rtl text-right">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground">
+          <h2 className="text-xs sm:text-sm font-bold text-foreground">
             فهرست قدرت‌های جهانی
           </h2>
-          <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
+          <span className="text-[9px] sm:text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
             {nations.length} کشور
           </span>
         </div>
         <div className="relative">
           <Search
-            size={14}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            size={13}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
-            placeholder="جستجوی نام کشور یا نماد..."
+            placeholder="جستجوی نام یا نماد..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+            className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin scrollbar-thumb-border">
+      <div className="flex-1 min-h-0 overflow-y-auto p-2 sm:p-3 space-y-1.5 sm:space-y-2 scrollbar-thin scrollbar-thumb-border">
         {filteredNations.map((nation) => (
           <NationListItem
             key={nation.id}

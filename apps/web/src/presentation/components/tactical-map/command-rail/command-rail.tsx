@@ -30,8 +30,10 @@ function RailTabButton({
   return (
     <button
       onClick={handleClick}
-      className={`relative group flex items-center rounded-2xl transition-all cursor-pointer overflow-hidden ${
-        isCollapsed ? "justify-center p-3 w-full" : "gap-3 p-3 w-full"
+      className={`relative group flex items-center rounded-xl md:rounded-2xl transition-all cursor-pointer overflow-hidden ${
+        isCollapsed
+          ? "justify-center p-2 md:p-3 w-full"
+          : "gap-2.5 md:gap-3 p-2 md:p-3 w-full"
       } ${
         isActive
           ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold ring-1 ring-primary/40"
@@ -40,12 +42,12 @@ function RailTabButton({
       title={isCollapsed ? label : undefined}
     >
       {isActive && (
-        <div className="absolute right-0 top-2 bottom-2 w-1 bg-white rounded-l-full animate-laser-glow" />
+        <div className="absolute right-0 top-1.5 bottom-1.5 md:top-2 md:bottom-2 w-1 bg-white rounded-l-full animate-laser-glow" />
       )}
 
       <Icon
-        size={18}
-        className="shrink-0 transition-transform group-hover:scale-110"
+        size={16}
+        className="shrink-0 transition-transform group-hover:scale-110 md:w-[18px] md:h-[18px]"
       />
       {!isCollapsed && (
         <span className="text-xs font-sans whitespace-nowrap truncate font-semibold">
@@ -77,10 +79,10 @@ function RailToggleButton({
   return (
     <button
       onClick={handleToggle}
-      className="p-2.5 rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
+      className="p-1.5 md:p-2.5 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
       title={isCollapsed ? "باز کردن نوار فرماندهی" : "جمع کردن نوار"}
     >
-      {isCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+      {isCollapsed ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
     </button>
   );
 }
@@ -113,24 +115,29 @@ export function CommandRail({
     <aside
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/95 backdrop-blur-3xl border border-border/80 rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ring-1 ring-white/5 ${
-        isCollapsed ? "w-16" : "w-48"
+      style={{
+        right: "max(0.75rem, env(safe-area-inset-right))",
+        top: "max(0.5rem, env(safe-area-inset-top))",
+        bottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
+      className={`fixed z-40 bg-card/95 backdrop-blur-3xl border border-border/80 rounded-2xl md:rounded-3xl shadow-2xl flex flex-col justify-between p-2 md:p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ring-1 ring-white/5 ${
+        isCollapsed ? "w-13 md:w-16" : "w-44 md:w-48"
       }`}
     >
-      <div className="space-y-3 overflow-x-hidden">
-        <div className="flex items-center justify-between px-0.5">
+      <div className="space-y-1.5 md:space-y-3 overflow-x-hidden flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between px-0.5 shrink-0">
           <RailToggleButton
             isCollapsed={isCollapsed}
             onToggle={onToggleCollapse}
           />
           {!isCollapsed && (
-            <span className="text-[10px] font-mono font-black text-gdp truncate uppercase tracking-widest">
+            <span className="text-[9px] md:text-[10px] font-mono font-black text-gdp truncate uppercase tracking-widest">
               اتاق فرماندهی
             </span>
           )}
         </div>
 
-        <nav className="space-y-1.5 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-160px)] scrollbar-none py-0.5">
+        <nav className="space-y-1 md:space-y-1.5 overflow-y-auto overflow-x-hidden flex-1 scrollbar-none py-0.5">
           {COMMAND_RAIL_TABS.map((tab) => (
             <RailTabButton
               key={tab.id}
@@ -145,16 +152,16 @@ export function CommandRail({
         </nav>
       </div>
 
-      <div className="pt-2.5 border-t border-border/80 overflow-x-hidden">
+      <div className="pt-1.5 md:pt-2.5 border-t border-border/80 overflow-x-hidden shrink-0">
         {isCollapsed ? (
           <button
             onClick={handleNextTurn}
             disabled={isProcessingTurn}
-            className="w-full py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-mono text-xs font-black transition-all shadow-lg shadow-gdp/20 flex items-center justify-center cursor-pointer border border-gdp/30"
+            className="w-full py-2.5 md:py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-xl md:rounded-2xl font-mono text-xs font-black transition-all shadow-lg shadow-gdp/20 flex items-center justify-center cursor-pointer border border-gdp/30"
             title={`پایان نوبت ${currentTurn}`}
           >
             {isProcessingTurn ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={15} className="animate-spin" />
             ) : (
               currentTurn
             )}
