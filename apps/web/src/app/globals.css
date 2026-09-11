@@ -87,11 +87,28 @@
   --intel: #a855f7;
 
   --font-vazirmatn: "Vazirmatn", system-ui, sans-serif;
+  --font-latin:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-latin-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --font-active-sans: var(--font-vazirmatn);
+  --font-active-mono: var(--font-vazirmatn);
+}
+
+:root[lang="fa"] {
+  --font-active-sans: var(--font-vazirmatn);
+  --font-active-mono: var(--font-vazirmatn);
+}
+
+:root[lang="en"] {
+  --font-active-sans: var(--font-latin);
+  --font-active-mono: var(--font-latin-mono);
 }
 
 @theme {
-  --font-sans: var(--font-vazirmatn);
-  --font-mono: var(--font-vazirmatn);
+  --font-sans: var(--font-active-sans);
+  --font-mono: var(--font-active-mono);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -221,7 +238,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-vazirmatn);
+  font-family: var(--font-sans);
   overflow: hidden;
 }
 

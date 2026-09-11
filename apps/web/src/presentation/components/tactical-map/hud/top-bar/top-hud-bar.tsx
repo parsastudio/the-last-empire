@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Coins, Volume2, VolumeX } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -9,6 +9,7 @@ import { ResourceBadge } from "@/presentation/components/tactical-map/hud/top-ba
 import { CapacityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/capacity-meter-badge";
 import { StabilityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/stability-meter-badge";
 import { ThreatRadarBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/threat-radar-badge";
+import { LanguageSwitcher } from "@/presentation/components/common/language-switcher";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface TopHudBarProps {
@@ -17,6 +18,7 @@ interface TopHudBarProps {
 
 export function TopHudBar({ metrics }: TopHudBarProps) {
   const t = useTranslations("hud.topBar");
+  const locale = useLocale();
   const [isMuted, setIsMuted] = useState<boolean>(() =>
     TacticalSound.isMuted(),
   );
@@ -54,8 +56,8 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       style={{
         top: "max(0.5rem, env(safe-area-inset-top))",
       }}
-      className="fixed left-1/2 -translate-x-1/2 z-50 bg-card/90 backdrop-blur-3xl border border-border/80 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/80 flex items-center justify-between gap-2 md:gap-3 text-foreground select-none w-max max-w-[96vw] dir-rtl transition-all pointer-events-auto ring-1 ring-white/10"
-      dir="rtl"
+      className="fixed left-1/2 -translate-x-1/2 z-50 bg-card/90 backdrop-blur-3xl border border-border/80 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/80 flex items-center justify-between gap-2 md:gap-3 text-foreground select-none w-max max-w-[96vw] transition-all pointer-events-auto ring-1 ring-white/10"
+      dir={locale === "fa" ? "rtl" : "ltr"}
     >
       <div className="flex items-center gap-1.5 md:gap-2.5 overflow-x-auto scrollbar-none py-0.5 shrink-0">
         <ResourceBadge
@@ -84,6 +86,8 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       </div>
 
       <div className="flex items-center gap-1.5 md:gap-2 shrink-0 border-r border-border/80 pr-2 md:pr-3 mr-0.5 md:mr-1">
+        <LanguageSwitcher />
+
         <button
           type="button"
           onClick={handleToggleMute}
