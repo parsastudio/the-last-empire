@@ -224,3 +224,14 @@ body {
   font-family: var(--font-vazirmatn);
   overflow: hidden;
 }
+
+@media (hover: none) and (pointer: coarse) {
+  .backdrop-blur-3xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+}

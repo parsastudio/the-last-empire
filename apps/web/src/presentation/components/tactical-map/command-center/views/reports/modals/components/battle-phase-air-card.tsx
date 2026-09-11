@@ -239,24 +239,6 @@ export function BattlePhaseAirCard({
           </div>
         </div>
       </div>
-
-      {defArmorDestroyedByAir > 0 && (
-        <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between text-xs text-foreground shadow-sm">
-          <div className="flex items-center gap-2">
-            <Zap size={15} className="text-emerald-400" />
-            <span>
-              پشتیبانی نزدیک هوایی (CAS): جنگنده‌های {attackerName} قبل از رسیدن
-              نیروهای زمینی، ستون‌های زرهی مدافع را زیر آتش گرفتند.
-            </span>
-          </div>
-          <span className="font-mono font-extrabold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-lg border border-emerald-500/30">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              defArmorDestroyedByAir,
-            )}{" "}
-            تانک منهدم شد
-          </span>
-        </div>
-      )}
     </div>
   );
 }

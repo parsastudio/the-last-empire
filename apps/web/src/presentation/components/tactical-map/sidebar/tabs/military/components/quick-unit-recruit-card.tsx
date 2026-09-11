@@ -7,13 +7,13 @@ import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visu
 
 interface QuickUnitRecruitCardProps {
   info: QuickUnitBatchInfo;
-  feedbacks: FloatingFeedback[];
+  feedbacks?: FloatingFeedback[];
   onBuy: (info: QuickUnitBatchInfo) => void;
 }
 
 export function QuickUnitRecruitCard({
   info,
-  feedbacks,
+  feedbacks = [],
   onBuy,
 }: QuickUnitRecruitCardProps) {
   const visual = MILITARY_UNIT_VISUALS[info.type];

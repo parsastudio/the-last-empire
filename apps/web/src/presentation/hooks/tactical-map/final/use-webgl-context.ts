@@ -10,7 +10,7 @@ export function useWebGLContext(
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(dimensions.width * dpr);
     canvas.height = Math.round(dimensions.height * dpr);
 

@@ -28,6 +28,7 @@ export function BetrayalConfirmModal({
       title="هشدار حمله غافلگیرانه و نقض پیمان"
       subtitle={`شما بدون لغو قبلی معاهدات صلح قصد شبیخون به ${targetName} را دارید`}
       maxWidthClass="max-w-md"
+      zIndexClass="z-[60]"
       onClose={onClose}
     >
       <div className="space-y-4 text-right dir-rtl font-sans">

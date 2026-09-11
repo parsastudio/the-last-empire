@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useModalKeyboardShortcut } from "./hooks/use-modal-keyboard-shortcut";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
@@ -10,6 +11,7 @@ interface UnifiedModalShellProps {
   title: string;
   subtitle?: string;
   maxWidthClass?: string;
+  zIndexClass?: string;
   onClose: () => void;
   children: React.ReactNode;
 }
@@ -19,10 +21,17 @@ export function UnifiedModalShell({
   title,
   subtitle,
   maxWidthClass = "max-w-6xl",
+  zIndexClass = "z-50",
   onClose,
   children,
 }: UnifiedModalShellProps) {
+  const [mounted, setMounted] = useState(false);
+
   useModalKeyboardShortcut(isOpen, onClose);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,23 +44,21 @@ export function UnifiedModalShell({
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const modalContent = (
     <div
       onClick={handleClose}
       onWheel={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
       style={{
         paddingTop: "max(0.5rem, env(safe-area-inset-top))",
         paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
         paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
         paddingRight: "max(0.75rem, env(safe-area-inset-right))",
       }}
-      className="fixed inset-0 bg-background/85 backdrop-blur-2xl z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl pointer-events-auto"
+      className={`fixed inset-0 bg-background/85 backdrop-blur-2xl ${zIndexClass} flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl pointer-events-auto overscroll-contain`}
       dir="rtl"
     >
       <div
@@ -85,10 +92,12 @@ export function UnifiedModalShell({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-1 scroll-mask-y scrollbar-thin scrollbar-thumb-border/60 scrollbar-track-transparent">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-1 pb-2 touch-pan-y overscroll-contain scrollbar-thin scrollbar-thumb-border/60 scrollbar-track-transparent">
           {children}
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

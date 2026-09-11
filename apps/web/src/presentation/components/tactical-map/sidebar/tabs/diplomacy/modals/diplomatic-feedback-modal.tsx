@@ -42,6 +42,7 @@ export function DiplomaticFeedbackModal({
       isOpen={isOpen}
       title=""
       maxWidthClass={isWar ? "max-w-md" : "max-w-sm"}
+      zIndexClass="z-[60]"
       onClose={onClose}
     >
       {isWar ? (

@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fa" dir="rtl" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-background text-foreground select-none touch-none overscroll-none overflow-hidden">
+      <body className="min-h-full flex flex-col bg-background text-foreground select-none overflow-hidden">
         <ToastProvider>
           {children}
           <StrategicToastContainer />

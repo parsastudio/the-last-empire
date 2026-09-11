@@ -7,13 +7,13 @@ import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visu
 
 interface AlliedUnitBuyCardProps {
   info: AlliedUnitProcurementInfo;
-  feedbacks: FloatingFeedback[];
+  feedbacks?: FloatingFeedback[];
   onBuy: (info: AlliedUnitProcurementInfo) => void;
 }
 
 export function AlliedUnitBuyCard({
   info,
-  feedbacks,
+  feedbacks = [],
   onBuy,
 }: AlliedUnitBuyCardProps) {
   const visual = MILITARY_UNIT_VISUALS[info.type];

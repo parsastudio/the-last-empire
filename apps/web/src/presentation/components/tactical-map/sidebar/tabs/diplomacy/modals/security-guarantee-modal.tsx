@@ -104,6 +104,7 @@ export function SecurityGuaranteeModal({
       title="پیمان دفاعی و امنیت سرزمینی متقابل"
       subtitle={`پیش‌نویس توافق‌نامه تعهد دفاعی با امپراتوری ${targetName}`}
       maxWidthClass="max-w-xl"
+      zIndexClass="z-[60]"
       onClose={onClose}
     >
       <div className="space-y-4 text-right dir-rtl font-sans pb-1">
@@ -207,11 +208,20 @@ export function SecurityGuaranteeModal({
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2">
           <button
+            type="button"
+            onClick={onClose}
+            className="sm:col-span-4 py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <span>انصراف</span>
+          </button>
+
+          <button
+            type="button"
             onClick={handleSign}
             disabled={!validation.isValid || isSubmitting}
-            className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 disabled:bg-secondary disabled:text-muted-foreground text-white rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-cyan-600/20 hover:scale-[1.005] active:scale-[0.995] border border-cyan-400/40"
+            className="sm:col-span-8 py-3.5 bg-cyan-600 hover:bg-cyan-500 disabled:bg-secondary disabled:text-muted-foreground text-white rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-cyan-600/20 hover:scale-[1.005] active:scale-[0.995] border border-cyan-400/40"
           >
             {isSubmitting ? (
               <Loader2 size={16} className="animate-spin" />
