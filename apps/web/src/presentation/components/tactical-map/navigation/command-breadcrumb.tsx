@@ -1,7 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, Home } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { COMMAND_CENTER_TABS_CONFIG } from "@/presentation/configs/command-center-tabs.config";
 
 interface CommandBreadcrumbProps {
   activeTab: SidebarTabType;
@@ -16,8 +16,8 @@ export function CommandBreadcrumb({
   targetName,
   onNavigateTab,
 }: CommandBreadcrumbProps) {
-  const tabLabel =
-    COMMAND_CENTER_TABS_CONFIG[activeTab]?.shortLabel || "اتاق فرماندهی";
+  const t = useTranslations("hud");
+  const tabLabel = t(`rail.tabs.${activeTab}`);
 
   return (
     <nav className="flex items-center gap-1.5 text-xs text-muted-foreground dir-rtl select-none overflow-x-auto scrollbar-none py-0.5">
@@ -26,7 +26,7 @@ export function CommandBreadcrumb({
         className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer shrink-0 font-medium"
       >
         <Home size={13} className="text-primary" />
-        <span>فرماندهی</span>
+        <span>{t("breadcrumb.command")}</span>
       </button>
 
       <ChevronLeft size={12} className="shrink-0 text-muted-foreground/60" />

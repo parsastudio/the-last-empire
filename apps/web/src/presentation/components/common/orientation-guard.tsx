@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Smartphone, Maximize2, RotateCcw } from "lucide-react";
 
 interface LockableScreenOrientation {
@@ -8,6 +9,7 @@ interface LockableScreenOrientation {
 }
 
 export function OrientationGuard() {
+  const t = useTranslations("hud.orientation");
   const [canFullscreen, setCanFullscreen] = useState(false);
 
   useEffect(() => {
@@ -48,12 +50,11 @@ export function OrientationGuard() {
       </div>
 
       <h2 className="text-base font-black text-foreground mb-2">
-        لطفاً گوشی را ۹۰ درجه بچرخانید
+        {t("title")}
       </h2>
 
       <p className="text-xs text-muted-foreground max-w-xs leading-relaxed mb-6">
-        برای اجرای بازی و دید کامل نقشه، دستگاه خود را در حالت افقی (Landscape)
-        قرار دهید.
+        {t("desc")}
       </p>
 
       {canFullscreen && (
@@ -63,7 +64,7 @@ export function OrientationGuard() {
           className="py-2.5 px-4 bg-secondary/90 hover:bg-secondary border border-border/80 rounded-xl text-xs font-bold text-foreground transition-all cursor-pointer flex items-center gap-2 shadow-sm"
         >
           <Maximize2 size={14} className="text-primary" />
-          <span>چرخش خودکار و تمام‌صفحه</span>
+          <span>{t("fullscreen")}</span>
         </button>
       )}
     </aside>

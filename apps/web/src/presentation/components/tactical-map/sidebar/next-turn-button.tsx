@@ -1,5 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Play, Loader2 } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface NextTurnButtonProps {
   currentTurn: number;
@@ -12,6 +14,8 @@ export function NextTurnButton({
   isProcessing = false,
   onNextTurn,
 }: NextTurnButtonProps) {
+  const t = useTranslations("hud.rail");
+
   return (
     <button
       onClick={onNextTurn}
@@ -29,11 +33,13 @@ export function NextTurnButton({
           />
         )}
         <span className="font-sans">
-          {isProcessing ? "در حال محاسبه نوبت..." : "پایان نوبت"}
+          {isProcessing ? t("processing") : t("endTurnShort")}
         </span>
       </div>
       <span className="font-mono bg-black/25 px-2.5 py-1 rounded-xl text-[10px] font-bold">
-        نوبت: {currentTurn}
+        {t("turn", {
+          turn: PersianNumberFormatter.toPersianDigits(currentTurn),
+        })}
       </span>
     </button>
   );

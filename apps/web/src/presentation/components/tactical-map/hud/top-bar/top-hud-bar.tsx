@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Coins, Volume2, VolumeX } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -15,6 +16,7 @@ interface TopHudBarProps {
 }
 
 export function TopHudBar({ metrics }: TopHudBarProps) {
+  const t = useTranslations("hud.topBar");
   const [isMuted, setIsMuted] = useState<boolean>(() =>
     TacticalSound.isMuted(),
   );
@@ -59,7 +61,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
         <ResourceBadge
           icon={Coins}
           iconColor="text-gdp"
-          label="خزانه ملی و سود نوبتی"
+          label={t("treasuryTooltip")}
           value={formatted.formattedTreasury}
           subValue={formatted.formattedIncome}
           subValueColor={
@@ -90,14 +92,14 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
               ? "bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25"
               : "bg-secondary/80 border-border/70 text-muted-foreground hover:text-foreground hover:bg-secondary shadow-inner"
           }`}
-          title={isMuted ? "فعال‌سازی صدای بازی" : "قطع صدای بازی"}
+          title={isMuted ? t("enableSound") : t("muteSound")}
         >
           {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
 
         <div className="flex flex-col items-center leading-none font-mono px-2.5 py-0.5 md:px-3 md:py-1 bg-secondary/80 rounded-xl border border-border/70 shadow-inner">
           <span className="text-[8px] md:text-[9px] text-muted-foreground font-sans font-bold">
-            نوبت
+            {t("turnLabel")}
           </span>
           <span className="text-[11px] md:text-xs font-black text-foreground">
             {PersianNumberFormatter.toPersianDigits(metrics.currentTurn)}

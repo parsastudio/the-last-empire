@@ -31,6 +31,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const gameOver = (await import(`../../messages/${locale}/game-over.json`))
     .default;
   const attack = (await import(`../../messages/${locale}/attack.json`)).default;
+  const menu = (await import(`../../messages/${locale}/menu.json`)).default;
+  const selectNation = (
+    await import(`../../messages/${locale}/select-nation.json`)
+  ).default;
+  const hud = (await import(`../../messages/${locale}/hud.json`)).default;
 
   return {
     locale,
@@ -47,6 +52,9 @@ export default getRequestConfig(async ({ requestLocale }) => {
       reports,
       gameOver,
       attack,
+      menu,
+      selectNation,
+      hud,
     },
   };
 });
