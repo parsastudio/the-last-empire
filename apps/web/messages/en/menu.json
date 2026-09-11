@@ -1,0 +1,13 @@
+{
+  "version": "Strategic Core v0.1.0",
+  "title": "THE LAST EMPIRE",
+  "hero": {
+    "prefix": "The destiny of the world is in your hands; forge your realm through ",
+    "military": "military might",
+    "mid": ", ",
+    "economic": "economic dominance",
+    "or": " or ",
+    "diplomacy": "diplomatic statecraft",
+    "suffix": " to conquer the globe."
+  }
+}
