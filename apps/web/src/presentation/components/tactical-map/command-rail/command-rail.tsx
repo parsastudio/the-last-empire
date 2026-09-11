@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, ChevronRight, ChevronLeft, LucideIcon } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { NextTurnButton } from "@/presentation/components/tactical-map/sidebar/next-turn-button";
@@ -67,9 +68,13 @@ function RailTabButton({
 function RailToggleButton({
   isCollapsed,
   onToggle,
+  expandLabel,
+  collapseLabel,
 }: {
   isCollapsed: boolean;
   onToggle: () => void;
+  expandLabel: string;
+  collapseLabel: string;
 }) {
   const handleToggle = () => {
     TacticalSound.playUiClick();
@@ -80,7 +85,7 @@ function RailToggleButton({
     <button
       onClick={handleToggle}
       className="p-1.5 md:p-2.5 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
-      title={isCollapsed ? "باز کردن نوار فرماندهی" : "جمع کردن نوار"}
+      title={isCollapsed ? expandLabel : collapseLabel}
     >
       {isCollapsed ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
     </button>
@@ -106,6 +111,8 @@ export function CommandRail({
   onToggleCollapse,
   onNextTurn,
 }: CommandRailProps) {
+  const t = useTranslations("hud.rail");
+
   const handleNextTurn = () => {
     TacticalSound.playTurnAdvance();
     onNextTurn();
@@ -129,10 +136,12 @@ export function CommandRail({
           <RailToggleButton
             isCollapsed={isCollapsed}
             onToggle={onToggleCollapse}
+            expandLabel={t("expand")}
+            collapseLabel={t("collapse")}
           />
           {!isCollapsed && (
             <span className="text-[9px] md:text-[10px] font-mono font-black text-gdp truncate uppercase tracking-widest">
-              اتاق فرماندهی
+              {t("warRoom")}
             </span>
           )}
         </div>
@@ -142,7 +151,7 @@ export function CommandRail({
             <RailTabButton
               key={tab.id}
               id={tab.id}
-              label={tab.label}
+              label={t(`tabs.${tab.id}`)}
               icon={tab.icon}
               isActive={activeTab === tab.id}
               isCollapsed={isCollapsed}
@@ -158,7 +167,7 @@ export function CommandRail({
             onClick={handleNextTurn}
             disabled={isProcessingTurn}
             className="w-full py-2.5 md:py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-xl md:rounded-2xl font-mono text-xs font-black transition-all shadow-lg shadow-gdp/20 flex items-center justify-center cursor-pointer border border-gdp/30"
-            title={`پایان نوبت ${currentTurn}`}
+            title={t("endTurnShort")}
           >
             {isProcessingTurn ? (
               <Loader2 size={15} className="animate-spin" />

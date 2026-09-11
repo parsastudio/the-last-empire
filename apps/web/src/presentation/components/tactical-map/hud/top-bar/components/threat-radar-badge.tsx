@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ShieldAlert, Globe } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -7,6 +8,7 @@ interface ThreatRadarBadgeProps {
 }
 
 export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
+  const t = useTranslations("hud.radar");
   const isHighThreat = globalReputation <= -30;
   const isPositive = globalReputation > 0;
 
@@ -19,7 +21,7 @@ export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
             ? "bg-gdp/15 border-gdp/50 text-gdp"
             : "bg-secondary/60 border-border/80 text-muted-foreground"
       }`}
-      title="شاخص پرستیژ و جایگاه بین‌المللی کشور"
+      title={t("threatRadarTooltip")}
     >
       {isHighThreat ? (
         <ShieldAlert size={14} className="animate-pulse text-military" />
@@ -31,7 +33,7 @@ export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
       )}
       <div className="flex items-center gap-1 whitespace-nowrap">
         <span className="text-[10px] font-sans font-medium">
-          {isHighThreat ? "خطر ائتلاف:" : "اعتبار:"}
+          {isHighThreat ? t("coalitionRisk") : t("reputation")}
         </span>
         <span className="font-bold">
           {globalReputation > 0 ? "+" : ""}

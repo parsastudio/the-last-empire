@@ -1,0 +1,47 @@
+{
+  "topBar": {
+    "treasuryTooltip": "National Treasury & Turn Income",
+    "turnLabel": "Turn",
+    "muteSound": "Mute Game Sound",
+    "enableSound": "Enable Game Sound"
+  },
+  "radar": {
+    "threatRadarTooltip": "Sovereign International Prestige & Stance Index",
+    "coalitionRisk": "Coalition Risk:",
+    "reputation": "Prestige:"
+  },
+  "rail": {
+    "warRoom": "War Room",
+    "expand": "Expand Command Rail",
+    "collapse": "Collapse Command Rail",
+    "endTurnShort": "End Turn",
+    "turn": "Turn: {turn}",
+    "processing": "Advancing Turn...",
+    "tabs": {
+      "overview": "Overview",
+      "military": "Military",
+      "industry": "Industry",
+      "projects": "Projects",
+      "politics": "Politics",
+      "espionage": "Espionage",
+      "reports": "Reports",
+      "diplomacy": "Diplomacy"
+    }
+  },
+  "breadcrumb": {
+    "command": "Command",
+    "defaultTitle": "War Room"
+  },
+  "orientation": {
+    "title": "Please Rotate Your Device 90°",
+    "desc": "For tactical map controls and full war room access, place your device in landscape orientation.",
+    "fullscreen": "Auto-Rotate & Fullscreen"
+  },
+  "notFound": {
+    "title": "Campaign Archive Not Found",
+    "subtitle": "Dossier ID: {id}",
+    "desc": "No archived records matching dossier ID {id} exist in this browser's local storage.",
+    "startNew": "Found New Campaign",
+    "backToMenu": "Return to Main Menu"
+  }
+}

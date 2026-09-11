@@ -1,0 +1,47 @@
+{
+  "topBar": {
+    "treasuryTooltip": "خزانه ملی و سود نوبتی",
+    "turnLabel": "نوبت",
+    "muteSound": "قطع صدای بازی",
+    "enableSound": "فعال‌سازی صدای بازی"
+  },
+  "radar": {
+    "threatRadarTooltip": "شاخص پرستیژ و جایگاه بین‌المللی کشور",
+    "coalitionRisk": "خطر ائتلاف:",
+    "reputation": "اعتبار:"
+  },
+  "rail": {
+    "warRoom": "اتاق فرماندهی",
+    "expand": "باز کردن نوار فرماندهی",
+    "collapse": "جمع کردن نوار",
+    "endTurnShort": "پایان نوبت",
+    "turn": "نوبت: {turn}",
+    "processing": "در حال محاسبه نوبت...",
+    "tabs": {
+      "overview": "نما",
+      "military": "ارتش و تسلیحات",
+      "industry": "صنایع و تولید",
+      "projects": "برنامه‌های ملی",
+      "politics": "سیاست",
+      "espionage": "جاسوسی",
+      "reports": "گزارش‌ها",
+      "diplomacy": "دیپلماسی"
+    }
+  },
+  "breadcrumb": {
+    "command": "فرماندهی",
+    "defaultTitle": "اتاق فرماندهی"
+  },
+  "orientation": {
+    "title": "لطفاً گوشی را ۹۰ درجه بچرخانید",
+    "desc": "برای اجرای بازی و دید کامل نقشه، دستگاه خود را در حالت افقی (Landscape) قرار دهید.",
+    "fullscreen": "چرخش خودکار و تمام‌صفحه"
+  },
+  "notFound": {
+    "title": "پرونده کمپین یافت نشد",
+    "subtitle": "شناسه پرونده: {id}",
+    "desc": "هیچ اطلاعات ذخیره‌شده‌ای برای آدرس شناسه {id} در حافظه مرورگر این دستگاه وجود ندارد.",
+    "startNew": "شروع کمپین جدید",
+    "backToMenu": "بازگشت به منوی اصلی"
+  }
+}

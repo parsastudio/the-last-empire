@@ -1,6 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { FolderX, Home, PlusCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 interface CampaignNotFoundModalProps {
@@ -12,6 +13,7 @@ export function CampaignNotFoundModal({
   isOpen,
   gameId,
 }: CampaignNotFoundModalProps) {
+  const t = useTranslations("hud.notFound");
   const router = useRouter();
 
   if (!isOpen) return null;
@@ -19,8 +21,8 @@ export function CampaignNotFoundModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="پرونده کمپین یافت نشد"
-      subtitle={`شناسه پرونده: ${gameId}`}
+      title={t("title")}
+      subtitle={t("subtitle", { id: gameId })}
       maxWidthClass="max-w-md"
       onClose={() => router.push("/")}
     >
@@ -30,9 +32,7 @@ export function CampaignNotFoundModal({
             <FolderX size={28} />
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            هیچ اطلاعات ذخیره‌شده‌ای برای آدرس شناسه{" "}
-            <strong className="font-mono text-foreground">{gameId}</strong> در
-            حافظه مرورگر این دستگاه وجود ندارد.
+            {t("desc", { id: gameId })}
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export function CampaignNotFoundModal({
             className="w-full py-3.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gdp/10"
           >
             <PlusCircle size={15} />
-            <span>شروع کمپین جدید</span>
+            <span>{t("startNew")}</span>
           </button>
 
           <button
@@ -50,7 +50,7 @@ export function CampaignNotFoundModal({
             className="w-full py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
           >
             <Home size={15} />
-            <span>بازگشت به منوی اصلی</span>
+            <span>{t("backToMenu")}</span>
           </button>
         </div>
       </div>
