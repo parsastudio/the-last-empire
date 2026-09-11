@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { Trophy } from "lucide-react";
 import { BattleSpoilsMetricsGrid } from "./spoils/battle-spoils-metrics-grid";
@@ -21,6 +22,7 @@ export function BattleSpoilsCard({
   defenderFlag,
   humanNationId,
 }: BattleSpoilsCardProps) {
+  const t = useTranslations("reports.spoils");
   const spoils = reportData.spoils;
   const isAttackerWin = reportData.isAttackerVictory;
   const winnerName = isAttackerWin ? attackerName : defenderName;
@@ -47,13 +49,13 @@ export function BattleSpoilsCard({
             <div className="flex items-center gap-1.5">
               <Trophy size={16} className="text-amber-400" />
               <h3 className="text-sm font-black text-foreground">
-                کارنامه فتوحات و غنائم جنگی امپراتوری {winnerName}
+                {t("ledgerTitle", { name: winnerName })}
               </h3>
             </div>
             <p className="text-[11px] text-muted-foreground">
               {reportData.isFullCapitulation
-                ? "تسلیم کامل دولت مقابل و الحاق کامل تمامیت ارضی، خزانه و تسلیحات به کشور فاتح."
-                : "الحاق رسمی قلمرو هدف و غارت منابع به همراه الحاق ادوات به ارتش پیروز."}
+                ? t("capitulationText")
+                : t("conquestText")}
             </p>
           </div>
         </div>

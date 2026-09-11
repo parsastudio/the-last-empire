@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Swords,
   Flame,
@@ -34,6 +35,7 @@ export function BattleDebriefModal({
   humanNationId,
   onClose,
 }: BattleDebriefModalProps) {
+  const t = useTranslations("reports.debrief");
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   const isAttackerWin = reportData?.isAttackerVictory ?? false;
@@ -77,22 +79,30 @@ export function BattleDebriefModal({
   let modalTitle = "";
   if (isHumanAttacker) {
     if (reportData.isFullCapitulation && isAttackerWin) {
-      modalTitle = `پیروزی قاطع و فتح کامل ${defenderName}`;
+      modalTitle = t("titles.humanAttackerCapitulation", {
+        name: defenderName,
+      });
     } else if (isAttackerWin) {
-      modalTitle = `پیروزی در حمله به ${defenderName}`;
+      modalTitle = t("titles.humanAttackerWin", { name: defenderName });
     } else {
-      modalTitle = `شکست در حمله به ${defenderName}`;
+      modalTitle = t("titles.humanAttackerLoss", { name: defenderName });
     }
   } else if (humanNationId === reportData.defenderId) {
     if (!isAttackerWin) {
-      modalTitle = `دفاع موفق مقابل ${attackerName}`;
+      modalTitle = t("titles.humanDefenderWin", { name: attackerName });
     } else {
-      modalTitle = `شکست دفاعی مقابل ${attackerName}`;
+      modalTitle = t("titles.humanDefenderLoss", { name: attackerName });
     }
   } else {
     modalTitle = isAttackerWin
-      ? `پیروزی ${attackerName} در نبرد با ${defenderName}`
-      : `دفاع موفق ${defenderName} مقابل ${attackerName}`;
+      ? t("titles.thirdPartyAttackerWin", {
+          attacker: attackerName,
+          defender: defenderName,
+        })
+      : t("titles.thirdPartyDefenderWin", {
+          attacker: attackerName,
+          defender: defenderName,
+        });
   }
 
   return (
@@ -112,8 +122,8 @@ export function BattleDebriefModal({
               </span>
               <span className="text-[10px] text-primary font-mono font-bold">
                 {reportData.attackType === "NAVAL"
-                  ? "متهاجم (هجوم دریایی ⚓)"
-                  : "متهاجم (تهاجم زمینی ⚔️)"}
+                  ? t("titles.attackerNaval")
+                  : t("titles.attackerLand")}
               </span>
             </div>
           </div>
@@ -134,7 +144,7 @@ export function BattleDebriefModal({
                 {defenderName}
               </span>
               <span className="text-[10px] text-military font-mono font-bold">
-                دولت مدافع
+                {t("titles.defenderState")}
               </span>
             </div>
           </div>
@@ -142,11 +152,11 @@ export function BattleDebriefModal({
 
         <div className="grid grid-cols-5 gap-1.5 font-sans">
           {[
-            { step: 1, title: "۱. موشکی", icon: Flame },
-            { step: 2, title: "۲. هوایی", icon: Plane },
-            { step: 3, title: "۳. زمینی", icon: ShieldAlert },
-            { step: 4, title: "۴. تلفات", icon: BarChart3 },
-            { step: 5, title: "۵. غنائم", icon: Trophy },
+            { step: 1, title: t("steps.missile"), icon: Flame },
+            { step: 2, title: t("steps.air"), icon: Plane },
+            { step: 3, title: t("steps.ground"), icon: ShieldAlert },
+            { step: 4, title: t("steps.casualties"), icon: BarChart3 },
+            { step: 5, title: t("steps.spoils"), icon: Trophy },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = activeStep === item.step;

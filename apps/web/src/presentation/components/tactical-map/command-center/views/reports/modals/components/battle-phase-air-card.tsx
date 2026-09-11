@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -27,6 +28,8 @@ export function BattlePhaseAirCard({
   attackerFlag,
   defenderFlag,
 }: BattlePhaseAirCardProps) {
+  const t = useTranslations("reports.phase2");
+
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
     ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
@@ -46,16 +49,16 @@ export function BattlePhaseAirCard({
             </div>
             <div>
               <h3 className="text-sm font-black text-foreground">
-                فاز دوم: داگ‌فایت هوایی و بمباران سنگین تانک‌های دشمن
+                {t("title")}
               </h3>
               <span className="text-[10px] text-muted-foreground">
-                حاکمیت بر آسمان و پاکسازی ستون‌های زرهی مدافع
+                {t("subtitle")}
               </span>
             </div>
           </div>
           <span className="px-3.5 py-1.5 rounded-2xl text-xs font-black border bg-secondary/80 text-muted-foreground border-border/70 flex items-center gap-1.5 shadow-sm">
             <Ban size={14} />
-            <span>نبرد هوایی انجام نشد</span>
+            <span>{t("skippedBadge")}</span>
           </span>
         </div>
 
@@ -64,11 +67,10 @@ export function BattlePhaseAirCard({
             🚫
           </div>
           <span className="text-sm font-bold text-foreground block">
-            هیچ اسکادران جنگنده‌ای در آسمان حضور نداشت
+            {t("skippedTitle")}
           </span>
           <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
-            طرفین نبرد بدون اعزام نیروی هوایی، نتیجه سرنوشت‌ساز را به صف‌آرایی
-            لشکرهای زرهی و پیاده‌نظام در فاز سوم سپردند.
+            {t("skippedDesc")}
           </p>
         </div>
       </div>
@@ -95,11 +97,9 @@ export function BattlePhaseAirCard({
             🛩️
           </div>
           <div>
-            <h3 className="text-sm font-black text-foreground">
-              فاز دوم: داگ‌فایت هوایی و بمباران سنگین تانک‌های دشمن
-            </h3>
+            <h3 className="text-sm font-black text-foreground">{t("title")}</h3>
             <span className="text-[10px] text-muted-foreground">
-              مصاف شکاری‌ها، دفاع پدافند و بمباران ادوات زرهی
+              {t("subtitle")}
             </span>
           </div>
         </div>
@@ -121,10 +121,10 @@ export function BattlePhaseAirCard({
           )}
           <span>
             {isAttackerWin
-              ? `برتری مطلق هوایی ${attackerName}`
+              ? t("winnerAttacker", { name: attackerName })
               : isDefenderWin
-                ? `برتری هوایی و پدافندی ${defenderName}`
-                : "موازنه هوایی بدون برتری قاطع"}
+                ? t("winnerDefender", { name: defenderName })
+                : t("winnerDraw")}
           </span>
         </span>
       </div>
@@ -134,10 +134,10 @@ export function BattlePhaseAirCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-primary flex items-center gap-2">
               <span className="text-xl">{attackerFlag}</span>
-              <span>اسکادران‌های هوایی {attackerName}</span>
+              <span>{t("attackerBranch", { name: attackerName })}</span>
             </span>
             <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 rounded-lg">
-              هواگردهای مهاجم
+              {t("strikeWings")}
             </span>
           </div>
 
@@ -145,35 +145,35 @@ export function BattlePhaseAirCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Plane size={13} className="text-primary" />
-                <span>جنگنده‌های اعزامی به صحنه نبرد:</span>
+                <span>{t("attAirForce")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(attTotalAir)}{" "}
-                فروند 🛩️
+                {t("aircraftUnit")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Flame size={13} className="text-amber-400" />
-                <span>جنگنده‌های سرنگون‌شده در نبرد هوایی تن‌به‌تن:</span>
+                <span>{t("attDogfightLost")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {attLostDogfight > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostDogfight)} فروند 💥`
-                  : "بدون تلفات"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostDogfight)} ${t("lostAircraftUnit")}`
+                  : t("noCasualties")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Crosshair size={13} className="text-diplomacy" />
-                <span>هدف‌قرارگرفته توسط پدافند دشمن:</span>
+                <span>{t("attAirDefenseLost")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {attLostAirDefense > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostAirDefense)} فروند 🎯`
-                  : "۰ فروند"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostAirDefense)} ${t("targetAirDefenseUnit")}`
+                  : t("zeroLosses")}
               </span>
             </div>
           </div>
@@ -183,20 +183,22 @@ export function BattlePhaseAirCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-military flex items-center gap-2">
               <span className="text-xl">{defenderFlag}</span>
-              <span>نیروی هوایی و تلفات {defenderName}</span>
+              <span>{t("defenderBranch", { name: defenderName })}</span>
             </span>
             {aux && aux.isEmergencyProtectorate ? (
               <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 border bg-rose-950/40 text-rose-300 border-rose-500/40">
                 <span>{auxFlag}</span>
                 <span>
-                  +
-                  {PersianNumberFormatter.toPersianDigits(aux.deployedAirForce)}{" "}
-                  جنگنده کمکی
+                  {t("auxAirForce", {
+                    count: PersianNumberFormatter.toPersianDigits(
+                      aux.deployedAirForce,
+                    ),
+                  })}
                 </span>
               </span>
             ) : (
               <span className="text-[10px] font-mono font-bold bg-military/10 text-military border border-military/30 px-2 py-0.5 rounded-lg">
-                آرایش مدافع
+                {t("defensiveArray")}
               </span>
             )}
           </div>
@@ -205,35 +207,35 @@ export function BattlePhaseAirCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Plane size={13} className="text-military" />
-                <span>جنگنده‌های رهگیر پایگاه دفاعی:</span>
+                <span>{t("defAirForce")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(defTotalAir)}{" "}
-                فروند 🛩️
+                {t("aircraftUnit")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Flame size={13} className="text-rose-400" />
-                <span>جنگنده‌های ساقط‌شده در آسمان:</span>
+                <span>{t("defAirLost")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {defAirLost > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defAirLost)} فروند 💥`
-                  : "بدون تلفات"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defAirLost)} ${t("lostAircraftUnit")}`
+                  : t("noCasualties")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Zap size={13} className="text-emerald-400" />
-                <span>تانک‌های شکارشده توسط بمب‌افکن‌ها:</span>
+                <span>{t("defArmorDestroyed")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {defArmorDestroyedByAir > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defArmorDestroyedByAir)} واحد 🛡️`
-                  : "بدون بمباران زرهی"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defArmorDestroyedByAir)} ${t("armorDestroyedUnit")}`
+                  : t("noArmorBombing")}
               </span>
             </div>
           </div>

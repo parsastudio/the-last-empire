@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -28,6 +29,8 @@ export function BattlePhaseMissileCard({
   attackerFlag,
   defenderFlag,
 }: BattlePhaseMissileCardProps) {
+  const t = useTranslations("reports.phase1");
+
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
     ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
@@ -47,16 +50,16 @@ export function BattlePhaseMissileCard({
             </div>
             <div>
               <h3 className="text-sm font-black text-foreground">
-                فاز اول: رگبار موشکی و مصاف با گنبد پدافند هوایی
+                {t("title")}
               </h3>
               <span className="text-[10px] text-muted-foreground">
-                نابودی سکوهای ضدهوایی و بمباران زیرساخت‌های حیاتی
+                {t("subtitle")}
               </span>
             </div>
           </div>
           <span className="px-3.5 py-1.5 rounded-2xl text-xs font-black border bg-secondary/80 text-muted-foreground border-border/70 flex items-center gap-1.5 shadow-sm">
             <Ban size={14} />
-            <span>عملیات موشکی انجام نشد</span>
+            <span>{t("skippedBadge")}</span>
           </span>
         </div>
 
@@ -65,11 +68,10 @@ export function BattlePhaseMissileCard({
             🚫
           </div>
           <span className="text-sm font-bold text-foreground block">
-            هیچ موشک بالستیک یا پهپاد انتحاری در این تهاجم شلیک نگردید
+            {t("skippedTitle")}
           </span>
           <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
-            فرماندهی تهاجم بدون اجرای آتش موشکی پیش‌دستانه، مستقیماً وارد فاز
-            درگیری‌های هوایی و پیشروی زمینی شد.
+            {t("skippedDesc")}
           </p>
         </div>
       </div>
@@ -95,11 +97,9 @@ export function BattlePhaseMissileCard({
             🚀
           </div>
           <div>
-            <h3 className="text-sm font-black text-foreground">
-              فاز اول: رگبار موشکی و مصاف با گنبد پدافند هوایی
-            </h3>
+            <h3 className="text-sm font-black text-foreground">{t("title")}</h3>
             <span className="text-[10px] text-muted-foreground">
-              نابودی سکوهای ضدهوایی و بمباران زیرساخت‌های حیاتی
+              {t("subtitle")}
             </span>
           </div>
         </div>
@@ -113,8 +113,8 @@ export function BattlePhaseMissileCard({
           {isAttackerWin ? <Flame size={15} /> : <ShieldCheck size={15} />}
           <span>
             {isAttackerWin
-              ? `نفوذ موفق موشک‌های ${attackerName}`
-              : `دفع آتش توسط پدافند ${defenderName}`}
+              ? t("winnerAttacker", { name: attackerName })
+              : t("winnerDefender", { name: defenderName })}
           </span>
         </span>
       </div>
@@ -124,10 +124,10 @@ export function BattlePhaseMissileCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-primary flex items-center gap-2">
               <span className="text-xl">{attackerFlag}</span>
-              <span>عملیات پرتابی {attackerName}</span>
+              <span>{t("attackerBranch", { name: attackerName })}</span>
             </span>
             <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-2 py-0.5 rounded-lg">
-              یگان موشکی
+              {t("missileCorps")}
             </span>
           </div>
 
@@ -135,39 +135,39 @@ export function BattlePhaseMissileCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Radio size={13} className="text-primary" />
-                <span>کل موشک‌ها و پهپادهای شلیک‌شده:</span>
+                <span>{t("launched")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(
                   missilesLaunched,
                 )}{" "}
-                فروند 🚀
+                {t("missilesUnit")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <ShieldCheck size={13} className="text-emerald-400" />
-                <span>شکار و رهگیری‌شده توسط پدافند:</span>
+                <span>{t("intercepted")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(
                   missilesIntercepted,
                 )}{" "}
-                فروند 💥
+                {t("interceptedUnit")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Flame size={13} className="text-amber-400" />
-                <span>موشک‌های عبورکرده و اصابت به هدف:</span>
+                <span>{t("penetrated")}</span>
               </span>
               <span className="font-black text-emerald-400 text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(
                   missilesPenetrated,
                 )}{" "}
-                فروند 🎯
+                {t("penetratedUnit")}
               </span>
             </div>
           </div>
@@ -177,22 +177,22 @@ export function BattlePhaseMissileCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-military flex items-center gap-2">
               <span className="text-xl">{defenderFlag}</span>
-              <span>شبکه پدافندی و خسارات {defenderName}</span>
+              <span>{t("defenderBranch", { name: defenderName })}</span>
             </span>
             {aux && aux.isEmergencyProtectorate ? (
               <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 border bg-rose-950/40 text-rose-300 border-rose-500/40">
                 <span>{auxFlag}</span>
                 <span>
-                  +
-                  {PersianNumberFormatter.toPersianDigits(
-                    aux.deployedAirDefense,
-                  )}{" "}
-                  پدافند کمکی
+                  {t("auxAirDefense", {
+                    count: PersianNumberFormatter.toPersianDigits(
+                      aux.deployedAirDefense,
+                    ),
+                  })}
                 </span>
               </span>
             ) : (
               <span className="text-[10px] font-mono font-bold bg-military/10 text-military border border-military/30 px-2 py-0.5 rounded-lg">
-                سپر دفاعی
+                {t("defenseShield")}
               </span>
             )}
           </div>
@@ -201,37 +201,37 @@ export function BattlePhaseMissileCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Crosshair size={13} className="text-diplomacy" />
-                <span>سامانه‌های پدافند هوایی مستقر:</span>
+                <span>{t("defAirDefense")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
                 {PersianNumberFormatter.formatNumberWithCommas(
                   reportData.phase1Missile.defAirDefense,
                 )}{" "}
-                واحد 🛡️
+                {t("airDefenseUnit")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <ShieldAlert size={13} className="text-rose-400" />
-                <span>آتشبار پدافند نابودشده در حمله:</span>
+                <span>{t("airDefenseLost")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {airDefenseLost > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(airDefenseLost)} واحد 💥`
-                  : "بدون تلفات"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(airDefenseLost)} ${t("lostUnit")}`
+                  : t("noCasualties")}
               </span>
             </div>
 
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Factory size={13} className="text-amber-400" />
-                <span>کارخانجات و زیرساخت‌های تخریب‌شده:</span>
+                <span>{t("factoriesDestroyed")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {factoriesDestroyed > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(factoriesDestroyed)} سوله 🏭`
-                  : "بدون خسارت صنعتی"}
+                  ? `-${PersianNumberFormatter.formatNumberWithCommas(factoriesDestroyed)} ${t("factoriesUnit")}`
+                  : t("noDestruction")}
               </span>
             </div>
           </div>
@@ -243,12 +243,18 @@ export function BattlePhaseMissileCard({
           <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1 text-right">
             <span className="font-black text-amber-400 block">
-              مناطق بمباران‌شده صنعتی:
+              {t("bombardmentAreasTitle")}
             </span>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
               {destructionScope === "OTHER_PROVINCES"
-                ? `از آنجا که استان هدف در آستانه تصرف قرار دارد، موشک‌های مهاجم خطوط تولید را در «سایر استان‌های کشور ${defenderName}» بمباران و تخریب کردند تا زیرساخت استان فتح‌شده برای شما سالم بماند.`
-                : `تعداد ${PersianNumberFormatter.formatNumberWithCommas(factoriesDestroyed)} سوله کارخانه به صورت متوازن در «تمامی استان‌های صنعتی کشور ${defenderName}» تخریب شد.`}
+                ? t("otherProvincesBombarded", { name: defenderName })
+                : t("allProvincesBombarded", {
+                    name: defenderName,
+                    count:
+                      PersianNumberFormatter.formatNumberWithCommas(
+                        factoriesDestroyed,
+                      ),
+                  })}
             </p>
           </div>
         </div>
