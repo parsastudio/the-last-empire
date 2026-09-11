@@ -38,6 +38,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const hud = (await import(`../../messages/${locale}/hud.json`)).default;
   const overview = (await import(`../../messages/${locale}/overview.json`))
     .default;
+  const map = (await import(`../../messages/${locale}/map.json`)).default;
 
   return {
     locale,
@@ -58,6 +59,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       selectNation,
       hud,
       overview,
+      map,
     },
   };
 });

@@ -1,0 +1,40 @@
+{
+  "stamps": {
+    "player": "Your Empire",
+    "war": "War Front",
+    "partnership": "Strategic Partner",
+    "nonAggression": "Non-Aggression",
+    "guarantee": "Defense Umbrella"
+  },
+  "layers": {
+    "political": "Political Map",
+    "gdp": "GDP Economy View",
+    "updating": "Updating...",
+    "layersLabel": "Layers:"
+  },
+  "contextMenu": {
+    "info": "Dossier",
+    "attack": "Territorial Strike"
+  },
+  "hud": {
+    "worldRank": "World Rank: #{rank}",
+    "provinceEconomy": "Province GDP:",
+    "gdpShare": "{pct}% of Sovereign GDP",
+    "countryGdp": "National Total GDP:",
+    "gdpRank": "Rank #{rank} World Economy",
+    "provinceFallback": "Province #{id}",
+    "stances": {
+      "yourEmpire": "Your Realm",
+      "warState": "State of War",
+      "strategicPartnership": "Strategic Partnership",
+      "nonAggression": "Non-Aggression",
+      "normalDiplomacy": "Normal Diplomacy",
+      "underSuperpowerProtectorate": "Superpower Protectorate",
+      "targetUnderYourProtectorate": "Under Your Protectorate",
+      "defenseGuarantorOfHuman": "Your Defense Guarantor",
+      "humanDefenseGuarantorOfTarget": "Guaranteed by Your Realm",
+      "unknownCountry": "Unknown Sovereign",
+      "unknownRegion": "Unknown Territory"
+    }
+  }
+}

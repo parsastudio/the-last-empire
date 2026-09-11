@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Coins, MapPin, Landmark } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -30,6 +31,10 @@ interface WebGLHoverHudProps {
 }
 
 export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
+  const t = useTranslations("map.hud");
+  const locale = useLocale();
+  const isRtl = locale === "fa";
+
   useEffect(() => {
     if (hoverData && hudRef.current) {
       HoverHudPositionUtility.reapplyLastPosition(hudRef.current);
@@ -43,7 +48,9 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
   return (
     <div
       ref={hudRef}
-      className="fixed z-50 pointer-events-none w-80 animate-fade-smooth dir-rtl text-right"
+      className={`fixed z-50 pointer-events-none w-80 animate-fade-smooth text-start ${
+        isRtl ? "dir-rtl" : "dir-ltr"
+      }`}
       style={{
         left: HoverHudPositionUtility.getLastLeft(),
         top: HoverHudPositionUtility.getLastTop(),
@@ -69,8 +76,9 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
                 </span>
               </div>
               <span className="text-[9px] font-mono font-bold text-amber-500 block">
-                رتبه جهانی: #
-                {PersianNumberFormatter.toPersianDigits(hoverData.rank)}
+                {t("worldRank", {
+                  rank: PersianNumberFormatter.toPersianDigits(hoverData.rank),
+                })}
               </span>
             </div>
           </div>
@@ -97,17 +105,18 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
               <div className="bg-secondary/40 border border-border/60 p-2 rounded-xl space-y-0.5">
                 <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-sans">
                   <Coins size={11} className="text-gdp" />
-                  <span>اقتصاد این استان:</span>
+                  <span>{t("provinceEconomy")}</span>
                 </div>
                 <span className="text-xs font-black text-gdp block truncate">
                   {hoverData.regionGdpText}
                 </span>
                 {hoverData.gdpSharePct !== undefined && (
                   <span className="text-[8px] text-muted-foreground block font-sans">
-                    {PersianNumberFormatter.toPersianDigits(
-                      hoverData.gdpSharePct,
-                    )}
-                    ٪ از کل تولید ملی
+                    {t("gdpShare", {
+                      pct: PersianNumberFormatter.toPersianDigits(
+                        hoverData.gdpSharePct,
+                      ),
+                    })}
                   </span>
                 )}
               </div>
@@ -115,17 +124,17 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
               <div className="bg-secondary/40 border border-border/60 p-2 rounded-xl space-y-0.5">
                 <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-sans">
                   <Landmark size={11} className="text-primary" />
-                  <span>GDP کل کشور:</span>
+                  <span>{t("countryGdp")}</span>
                 </div>
                 <span className="text-xs font-black text-foreground block truncate">
                   {hoverData.totalGdpText}
                 </span>
                 <span className="text-[8px] text-muted-foreground block font-sans">
-                  رتبه #
-                  {PersianNumberFormatter.toPersianDigits(
-                    hoverData.gdpRank ?? hoverData.rank,
-                  )}{" "}
-                  اقتصاد جهان
+                  {t("gdpRank", {
+                    rank: PersianNumberFormatter.toPersianDigits(
+                      hoverData.gdpRank ?? hoverData.rank,
+                    ),
+                  })}
                 </span>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Info, Swords, LucideIcon } from "lucide-react";
 
 export type ContextActionType = "profile" | "attack";
@@ -48,6 +49,8 @@ export function MapContextMenu({
   isOwnCountry = false,
   onSelectAction,
 }: MapContextMenuProps) {
+  const t = useTranslations("map.contextMenu");
+
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -62,7 +65,7 @@ export function MapContextMenu({
 
         <QuickActionButton
           icon={Info}
-          label="اطلاعات"
+          label={t("info")}
           colorClass="text-primary"
           bgHoverClass="hover:bg-primary/15"
           onClick={() => onSelectAction("profile")}
@@ -71,7 +74,7 @@ export function MapContextMenu({
         {!isOwnCountry && (
           <QuickActionButton
             icon={Swords}
-            label="تهاجم سرزمینی"
+            label={t("attack")}
             colorClass="text-military"
             bgHoverClass="hover:bg-military/15"
             onClick={() => onSelectAction("attack")}

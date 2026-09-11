@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
@@ -27,6 +28,9 @@ export function useHoverNationResolver({
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
+  const t = useTranslations("map.hud.stances");
+  const locale = useLocale();
+
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
       if (
@@ -46,7 +50,13 @@ export function useHoverNationResolver({
         ? nationsMap[canonicalOwnerId] || nationsMap[province.ownerNationId]
         : null;
 
-      const realName = ownerNation ? ownerNation.name : "کشور نامشخص";
+      const profile = CountryRegistry.getCountry(canonicalOwnerId);
+      const realName = ownerNation
+        ? locale === "en"
+          ? profile?.nameEn || ownerNation.name
+          : ownerNation.name
+        : t("unknownCountry");
+
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation
         ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
@@ -65,7 +75,7 @@ export function useHoverNationResolver({
         ownerNation?.equipmentTechLevel ?? 1.0,
       );
 
-      let stanceLabel = "دیپلماسی عادی";
+      let stanceLabel = t("normalDiplomacy");
       let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
       let isOwnCountry = false;
       let hasSecurityGuarantee = false;
@@ -74,7 +84,7 @@ export function useHoverNationResolver({
         const canonicalHuman =
           CountryRegistry.resolveCanonicalId(humanNationId);
         if (canonicalOwnerId === canonicalHuman) {
-          stanceLabel = "امپراتوری شما";
+          stanceLabel = t("yourEmpire");
           isOwnCountry = true;
         } else {
           const humanNation =
@@ -84,11 +94,12 @@ export function useHoverNationResolver({
             canonicalOwnerId,
           );
           rawStance = stance;
-          if (stance === "WAR") stanceLabel = "وضعیت نبرد";
+          if (stance === "WAR") stanceLabel = t("warState");
           else if (stance === "STRATEGIC_PARTNERSHIP")
-            stanceLabel = "شراکت استراتژیک";
-          else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
-          else stanceLabel = "دیپلماسی عادی";
+            stanceLabel = t("strategicPartnership");
+          else if (stance === "NON_AGGRESSION_PACT")
+            stanceLabel = t("nonAggression");
+          else stanceLabel = t("normalDiplomacy");
 
           const isEmergencyGuarantorOfHuman =
             Boolean(humanNation?.securityGuarantorId) &&
@@ -117,16 +128,16 @@ export function useHoverNationResolver({
           );
 
           if (isEmergencyGuarantorOfHuman) {
-            stanceLabel = "تحت استمداد ابرقدرت";
+            stanceLabel = t("underSuperpowerProtectorate");
             hasSecurityGuarantee = true;
           } else if (isHumanEmergencyGuarantorOfTarget) {
-            stanceLabel = "کشور تحت استمداد شما";
+            stanceLabel = t("targetUnderYourProtectorate");
             hasSecurityGuarantee = true;
           } else if (isDefenseGuarantorOfHuman) {
-            stanceLabel = "ضامن دفاعی شما (پیمان دفاعی)";
+            stanceLabel = t("defenseGuarantorOfHuman");
             hasSecurityGuarantee = true;
           } else if (isHumanDefenseGuarantorOfTarget) {
-            stanceLabel = "تحت ضمانت دفاعی شما";
+            stanceLabel = t("humanDefenseGuarantorOfTarget");
             hasSecurityGuarantee = true;
           }
         }
@@ -137,7 +148,7 @@ export function useHoverNationResolver({
 
       const regionName = MapTopologyRegistry.getNameFa(
         province.provinceId,
-        "منطقه نامشخص",
+        t("unknownRegion"),
       );
 
       return {
@@ -156,7 +167,7 @@ export function useHoverNationResolver({
         hasSecurityGuarantee,
       };
     },
-    [provincesMap, nationsMap, humanNationId],
+    [provincesMap, nationsMap, humanNationId, locale, t],
   );
 
   return { resolveHoverInfo };
