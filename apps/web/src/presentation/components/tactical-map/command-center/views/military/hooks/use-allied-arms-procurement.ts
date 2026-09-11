@@ -15,7 +15,6 @@ import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feed
 
 export interface AlliedUnitProcurementInfo {
   type: UnitType;
-  nameFa: string;
   unitPrice: number;
   techMultiplier: number;
   techDelta: number;
@@ -128,7 +127,6 @@ export function useAlliedArmsProcurement({
 
       return {
         type,
-        nameFa: stat.nameFa,
         unitPrice: marketUnitPrice,
         techMultiplier,
         techDelta,

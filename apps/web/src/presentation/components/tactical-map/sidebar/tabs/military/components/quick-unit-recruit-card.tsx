@@ -1,6 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Coins, ShieldCheck, Zap } from "lucide-react";
-import { PersianNumberFormatter } from "@geopolitics/domain";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { QuickUnitBatchInfo } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { FloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
@@ -16,6 +17,7 @@ export function QuickUnitRecruitCard({
   feedbacks = [],
   onBuy,
 }: QuickUnitRecruitCardProps) {
+  const t = useTranslations("military");
   const visual = MILITARY_UNIT_VISUALS[info.type];
   const Icon = visual.icon;
 
@@ -39,24 +41,26 @@ export function QuickUnitRecruitCard({
         <div className="space-y-0.5 text-right">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-foreground">
-              {info.nameFa}
+              {t(`${info.type}.name`)}
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
-              قیمت واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
+              {t("unitPrice", {
+                price: PersianNumberFormatter.formatCurrency(info.unitPrice),
+              })}
             </span>
             <span className="text-[9px] text-foreground font-sans">
-              (ظرفیت باقی‌مانده:{" "}
-              {PersianNumberFormatter.formatNumberWithCommas(
-                info.remainingRoom,
-              )}
-              )
+              {t("remainingRoom", {
+                count: PersianNumberFormatter.formatNumberWithCommas(
+                  info.remainingRoom,
+                ),
+              })}
             </span>
             <span className="flex items-center gap-0.5 text-emerald-400 font-sans">
               <Zap size={10} />
-              تحویل آنی
+              {t("instantDelivery")}
             </span>
           </div>
         </div>
@@ -77,7 +81,7 @@ export function QuickUnitRecruitCard({
         {info.isCapReached ? (
           <div className="py-2 px-3 bg-amber-500/15 text-amber-400 rounded-xl text-[10px] font-mono border border-amber-500/30 flex items-center gap-1">
             <ShieldCheck size={12} />
-            <span>سقف ظرفیت</span>
+            <span>{t("capReached")}</span>
           </div>
         ) : (
           <button
@@ -85,7 +89,9 @@ export function QuickUnitRecruitCard({
             onClick={() => onBuy(info)}
             disabled={!info.canAfford}
             className="py-2.5 px-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-gdp/30"
-            title={`خرید فوری با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
+            title={t("quickProcurementTitle", {
+              cost: PersianNumberFormatter.formatCurrency(info.batchCost),
+            })}
           >
             <Plus size={14} strokeWidth={3} />
             <Coins size={12} className="opacity-90 shrink-0" />
@@ -93,11 +99,11 @@ export function QuickUnitRecruitCard({
               {PersianNumberFormatter.formatCurrency(info.batchCost)}
             </span>
             <span className="text-[10px] font-medium opacity-85 mr-0.5">
-              (
-              {PersianNumberFormatter.formatNumberWithCommas(
-                info.batchQuantity,
-              )}{" "}
-              یگان)
+              {t("unitCountBadge", {
+                count: PersianNumberFormatter.formatNumberWithCommas(
+                  info.batchQuantity,
+                ),
+              })}
             </span>
           </button>
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Ship, Anchor, Coins, ShieldCheck, Zap, Lock } from "lucide-react";
 import {
   PersianNumberFormatter,
@@ -25,6 +26,7 @@ export function NavalFleetProcurementCard({
   navalFleetCount,
   hasSeaAccess,
 }: NavalFleetProcurementCardProps) {
+  const t = useTranslations("military");
   const { dispatchAction, isSubmitting } = useGameActions();
   const { triggerFeedback, getFeedbacksFor } = useFloatingFeedback<string>();
 
@@ -61,7 +63,7 @@ export function NavalFleetProcurementCard({
 
     triggerFeedback(
       "fleet",
-      `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`,
+      `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)}`,
       { playSound: false },
     );
 
@@ -84,16 +86,19 @@ export function NavalFleetProcurementCard({
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-xs font-black text-foreground">
-                ناوگان راهبردی دریایی (Naval Fleet)
+                {t("navalFleetTitle")}
               </h4>
               <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-lg">
-                موجودی:{" "}
-                {PersianNumberFormatter.toPersianDigits(navalFleetCount)} فروند
+                {t("navalFleetInStock", {
+                  count:
+                    PersianNumberFormatter.toPersianDigits(navalFleetCount),
+                })}
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono block">
-              قیمت واحد: {PersianNumberFormatter.formatCurrency(fleetCost)} •
-              بدون هزینه نگهداری
+              {t("navalFleetPrice", {
+                price: PersianNumberFormatter.formatCurrency(fleetCost),
+              })}
             </span>
           </div>
         </div>
@@ -111,7 +116,7 @@ export function NavalFleetProcurementCard({
           {!hasSeaAccess ? (
             <div className="py-2 px-3 bg-secondary/80 text-muted-foreground rounded-xl text-[10px] font-sans border border-border/60 flex items-center gap-1">
               <Lock size={12} />
-              <span>فاقد مرز دریایی</span>
+              <span>{t("navalNoSeaAccess")}</span>
             </div>
           ) : (
             <button
@@ -123,8 +128,11 @@ export function NavalFleetProcurementCard({
               <Zap size={13} />
               <Coins size={12} />
               <span>
-                خرید فوری (
-                {PersianNumberFormatter.formatCurrency(batchInfo.batchCost)})
+                {t("navalBuyInstant", {
+                  cost: PersianNumberFormatter.formatCurrency(
+                    batchInfo.batchCost,
+                  ),
+                })}
               </span>
             </button>
           )}
@@ -135,31 +143,35 @@ export function NavalFleetProcurementCard({
         <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
             <Coins size={11} className="text-gdp" />
-            درآمد امنیت بین‌المللی ({revenuePercentText}٪):
+            {t("navalRevenue", { pct: revenuePercentText })}
           </span>
           <span className="font-extrabold text-gdp text-xs block">
-            +{PersianNumberFormatter.formatCurrency(turnRevenue, true)} / نوبت
+            +{PersianNumberFormatter.formatCurrency(turnRevenue, true)}{" "}
+            {t("perTurn")}
           </span>
         </div>
 
         <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
             <Anchor size={11} className="text-cyan-400" />
-            ظرفیت ترابری هر ناوگان:
+            {t("navalTransportCapacityPerFleet")}
           </span>
           <span className="font-extrabold text-cyan-300 text-xs block font-sans">
-            ۶۰ پیاده‌نظام یا ۱۵ تانک
+            {t("navalTransportRatio")}
           </span>
         </div>
 
         <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
             <ShieldCheck size={11} className="text-primary" />
-            کل ظرفیت ترابری دریایی:
+            {t("navalTotalTransportCapacity")}
           </span>
           <span className="font-extrabold text-foreground text-xs block">
-            {PersianNumberFormatter.toPersianDigits(totalTransportCapacity)}{" "}
-            یگان ظرفیت
+            {t("navalTotalUnits", {
+              count: PersianNumberFormatter.toPersianDigits(
+                totalTransportCapacity,
+              ),
+            })}
           </span>
         </div>
       </div>

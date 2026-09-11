@@ -1,0 +1,46 @@
+{
+  "militaryForcesHeader": "Armed Forces Strength & Branch Tech Levels",
+  "readinessTitle": "Defense Technology Level",
+  "techLevelBadge": "Level {level}",
+  "efficiencyBonus": "(+{pct}% Efficiency)",
+  "averageTech": "Average Tech:",
+  "unitPrice": "Unit Price: {price}",
+  "remainingRoom": "(Remaining Capacity: {count})",
+  "instantDelivery": "Instant Delivery",
+  "capReached": "Cap Reached",
+  "armyCapReached": "Army Cap Reached",
+  "techDisparity": "+{pct}% Tech Gap",
+  "navalFleetTitle": "Strategic Naval Fleet",
+  "navalFleetInStock": "In Service: {count} Fleets",
+  "navalFleetPrice": "Unit Price: {price} • Zero Maintenance Upkeep",
+  "navalRevenue": "Maritime Security Revenue ({pct}%):",
+  "navalTransportCapacityPerFleet": "Transport Capacity per Fleet:",
+  "navalTransportRatio": "60 Infantry or 15 Armor Divisions",
+  "navalTotalTransportCapacity": "Total Sea Lift Capacity:",
+  "navalTotalUnits": "{count} Unit Capacity",
+  "navalNoSeaAccess": "Landlocked (No Sea Access)",
+  "navalBuyInstant": "Instant Procurement ({cost})",
+  "perTurn": "/ turn",
+  "quickProcurementTitle": "Instant procurement cost {cost}",
+  "unitCountBadge": "({count} units)",
+  "INFANTRY": {
+    "name": "Combat Infantry Divisions",
+    "unit": "Division"
+  },
+  "ARMOR": {
+    "name": "Armored & Heavy Tank Divisions",
+    "unit": "Division"
+  },
+  "AIR_DEFENSE": {
+    "name": "Air & Missile Defense Batteries",
+    "unit": "Battery"
+  },
+  "AIR_FORCE": {
+    "name": "Air Superiority Fighter Squadrons",
+    "unit": "Squadron"
+  },
+  "DRONE_MISSILE": {
+    "name": "Precision Missiles & Attack Drones",
+    "unit": "Brigade"
+  }
+}
