@@ -1,0 +1,40 @@
+{
+  "stamps": {
+    "player": "امپراتوری شما",
+    "war": "جبهه نبرد",
+    "partnership": "شراکت استراتژیک",
+    "nonAggression": "عدم تخاصم",
+    "guarantee": "چتر امنیتی"
+  },
+  "layers": {
+    "political": "نقشه سیاسی",
+    "gdp": "پایش اقتصاد GDP",
+    "updating": "در حال به‌روزرسانی...",
+    "layersLabel": "لایه‌ها:"
+  },
+  "contextMenu": {
+    "info": "اطلاعات",
+    "attack": "تهاجم سرزمینی"
+  },
+  "hud": {
+    "worldRank": "رتبه جهانی: #{rank}",
+    "provinceEconomy": "اقتصاد این استان:",
+    "gdpShare": "{pct}٪ از کل تولید ملی",
+    "countryGdp": "GDP کل کشور:",
+    "gdpRank": "رتبه #{rank} اقتصاد جهان",
+    "provinceFallback": "استان #{id}",
+    "stances": {
+      "yourEmpire": "امپراتوری شما",
+      "warState": "وضعیت نبرد",
+      "strategicPartnership": "شراکت استراتژیک",
+      "nonAggression": "عدم تخاصم",
+      "normalDiplomacy": "دیپلماسی عادی",
+      "underSuperpowerProtectorate": "تحت استمداد ابرقدرت",
+      "targetUnderYourProtectorate": "کشور تحت استمداد شما",
+      "defenseGuarantorOfHuman": "ضامن دفاعی شما (پیمان دفاعی)",
+      "humanDefenseGuarantorOfTarget": "تحت ضمانت دفاعی شما",
+      "unknownCountry": "کشور نامشخص",
+      "unknownRegion": "منطقه نامشخص"
+    }
+  }
+}

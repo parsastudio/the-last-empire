@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useLocale } from "next-intl";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
@@ -16,6 +17,7 @@ export interface ContextMenuState {
 }
 
 export function useContextMenu() {
+  const locale = useLocale();
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
@@ -40,7 +42,7 @@ export function useContextMenu() {
         : null;
       const provinceName = MapTopologyRegistry.getNameFa(
         provinceId,
-        `استان #${provinceId}`,
+        locale === "en" ? `Province #${provinceId}` : `استان #${provinceId}`,
       );
 
       const ownerNationId = province ? province.ownerNationId : "";
@@ -51,7 +53,15 @@ export function useContextMenu() {
           ? nationsMap[canonicalOwnerId] || nationsMap[ownerNationId]
           : null;
 
-      const countryName = ownerNation ? ownerNation.name : "نامشخص";
+      const profile = CountryRegistry.getCountry(canonicalOwnerId);
+      const countryName = ownerNation
+        ? locale === "en"
+          ? profile?.nameEn || ownerNation.name
+          : ownerNation.name
+        : locale === "en"
+          ? "Unknown"
+          : "نامشخص";
+
       const countryCode = ownerNation
         ? ownerNation.id
         : canonicalOwnerId || "IRN";
@@ -70,7 +80,7 @@ export function useContextMenu() {
         isOwnCountry,
       });
     },
-    [],
+    [locale],
   );
 
   const closeContextMenu = useCallback(() => {

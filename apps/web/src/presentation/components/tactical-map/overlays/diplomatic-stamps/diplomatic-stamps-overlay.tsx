@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useMemo, useRef, useEffect } from "react";
-import { Nation, ProvinceDynamicState } from "@geopolitics/domain";
+import { useTranslations, useLocale } from "next-intl";
+import {
+  Nation,
+  ProvinceDynamicState,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { DiplomaticStampBuilderUtility } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/utils/diplomatic-stamp-builder.utility";
 import { DiplomaticStampVariant } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/types/diplomatic-stamp.types";
@@ -24,52 +29,6 @@ interface BadgeStyleConfig {
   approxWidth: number;
 }
 
-const BADGE_CONFIGS: Record<
-  Exclude<DiplomaticStampVariant, "NEUTRAL">,
-  BadgeStyleConfig
-> = {
-  PLAYER: {
-    label: "امپراتوری شما",
-    icon: "👑",
-    bg: "rgba(6, 78, 59, 0.92)",
-    border: "rgba(52, 211, 153, 0.8)",
-    text: "#a7f3d0",
-    approxWidth: 104,
-  },
-  WAR: {
-    label: "جبهه نبرد",
-    icon: "⚔️",
-    bg: "rgba(136, 19, 55, 0.92)",
-    border: "rgba(244, 63, 94, 0.85)",
-    text: "#fecdd3",
-    approxWidth: 88,
-  },
-  STRATEGIC_PARTNERSHIP: {
-    label: "شراکت استراتژیک",
-    icon: "🛡️",
-    bg: "rgba(8, 51, 68, 0.92)",
-    border: "rgba(34, 211, 238, 0.8)",
-    text: "#cffafe",
-    approxWidth: 122,
-  },
-  NON_AGGRESSION_PACT: {
-    label: "عدم تخاصم",
-    icon: "📜",
-    bg: "rgba(69, 26, 3, 0.92)",
-    border: "rgba(245, 158, 11, 0.8)",
-    text: "#fef3c7",
-    approxWidth: 92,
-  },
-  SECURITY_GUARANTEE: {
-    label: "چتر امنیتی",
-    icon: "🌐",
-    bg: "rgba(30, 27, 75, 0.92)",
-    border: "rgba(129, 140, 248, 0.8)",
-    text: "#e0e7ff",
-    approxWidth: 90,
-  },
-};
-
 export function DiplomaticStampsOverlay({
   dimensions,
   positionRef,
@@ -79,6 +38,58 @@ export function DiplomaticStampsOverlay({
   humanNationId,
 }: DiplomaticStampsOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const t = useTranslations("map.stamps");
+  const locale = useLocale();
+  const isRtl = locale === "fa";
+
+  const badgeConfigs: Record<
+    Exclude<DiplomaticStampVariant, "NEUTRAL">,
+    BadgeStyleConfig
+  > = useMemo(
+    () => ({
+      PLAYER: {
+        label: t("player"),
+        icon: "👑",
+        bg: "rgba(6, 78, 59, 0.92)",
+        border: "rgba(52, 211, 153, 0.8)",
+        text: "#a7f3d0",
+        approxWidth: isRtl ? 104 : 110,
+      },
+      WAR: {
+        label: t("war"),
+        icon: "⚔️",
+        bg: "rgba(136, 19, 55, 0.92)",
+        border: "rgba(244, 63, 94, 0.85)",
+        text: "#fecdd3",
+        approxWidth: isRtl ? 88 : 95,
+      },
+      STRATEGIC_PARTNERSHIP: {
+        label: t("partnership"),
+        icon: "🛡️",
+        bg: "rgba(8, 51, 68, 0.92)",
+        border: "rgba(34, 211, 238, 0.8)",
+        text: "#cffafe",
+        approxWidth: isRtl ? 122 : 130,
+      },
+      NON_AGGRESSION_PACT: {
+        label: t("nonAggression"),
+        icon: "📜",
+        bg: "rgba(69, 26, 3, 0.92)",
+        border: "rgba(245, 158, 11, 0.8)",
+        text: "#fef3c7",
+        approxWidth: isRtl ? 92 : 115,
+      },
+      SECURITY_GUARANTEE: {
+        label: t("guarantee"),
+        icon: "🌐",
+        bg: "rgba(30, 27, 75, 0.92)",
+        border: "rgba(129, 140, 248, 0.8)",
+        text: "#e0e7ff",
+        approxWidth: isRtl ? 90 : 125,
+      },
+    }),
+    [t, isRtl],
+  );
 
   const stamps = useMemo(() => {
     const raw = DiplomaticStampBuilderUtility.buildStamps(
@@ -192,6 +203,14 @@ export function DiplomaticStampsOverlay({
           continue;
         }
 
+        const profile = CountryRegistry.getCountry(
+          item.flagCode || item.nationId,
+        );
+        const displayName =
+          locale === "en"
+            ? profile?.nameEn || item.nationName
+            : item.nationName;
+
         const baseSize =
           item.territoryPixels >= 50000
             ? 16
@@ -208,10 +227,10 @@ export function DiplomaticStampsOverlay({
 
         const fontSize = Math.round(baseSize * dynamicFactor);
         const badgeConfig =
-          item.variant !== "NEUTRAL" ? BADGE_CONFIGS[item.variant] : null;
+          item.variant !== "NEUTRAL" ? badgeConfigs[item.variant] : null;
 
         const charWidth = fontSize * 0.58;
-        const textWidth = item.nationName.length * charWidth;
+        const textWidth = displayName.length * charWidth;
         const totalHeight = badgeConfig ? fontSize * 2 + 14 : fontSize + 4;
 
         const box = {
@@ -241,7 +260,8 @@ export function DiplomaticStampsOverlay({
 
         placedBoxes.push(box);
 
-        ctx.font = `bold ${fontSize}px Vazirmatn, system-ui, sans-serif`;
+        const fontFamily = isRtl ? "Vazirmatn" : "system-ui, sans-serif";
+        ctx.font = `bold ${fontSize}px ${fontFamily}`;
 
         const textY = badgeConfig
           ? screenY - Math.round(fontSize * 0.45)
@@ -249,7 +269,7 @@ export function DiplomaticStampsOverlay({
 
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
-        ctx.strokeText(item.nationName, screenX, textY);
+        ctx.strokeText(displayName, screenX, textY);
 
         ctx.fillStyle =
           item.variant !== "NEUTRAL"
@@ -258,7 +278,7 @@ export function DiplomaticStampsOverlay({
               ? "#ffffff"
               : "#f8fafc";
 
-        ctx.fillText(item.nationName, screenX, textY);
+        ctx.fillText(displayName, screenX, textY);
 
         if (badgeConfig) {
           const badgeFontSize = Math.max(9, Math.round(fontSize * 0.65));
@@ -283,14 +303,15 @@ export function DiplomaticStampsOverlay({
           ctx.strokeStyle = badgeConfig.border;
           ctx.stroke();
 
-          ctx.font = `bold ${badgeFontSize}px Vazirmatn, system-ui, sans-serif`;
+          ctx.font = `bold ${badgeFontSize}px ${fontFamily}`;
           const centerY = pillY + pillHeight / 2;
 
-          const iconOffset = pillWidth * 0.35;
+          const iconMultiplier = isRtl ? 1 : -1;
+          const iconOffset = pillWidth * 0.35 * iconMultiplier;
           ctx.fillText(badgeConfig.icon, screenX + iconOffset, centerY);
 
           ctx.fillStyle = badgeConfig.text;
-          const labelOffset = pillWidth * 0.12;
+          const labelOffset = pillWidth * 0.12 * iconMultiplier;
           ctx.fillText(badgeConfig.label, screenX - labelOffset, centerY);
         }
       }
@@ -301,7 +322,7 @@ export function DiplomaticStampsOverlay({
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, [stamps, positionRef, scaleRef, dimensions]);
+  }, [stamps, positionRef, scaleRef, dimensions, badgeConfigs, locale, isRtl]);
 
   return (
     <canvas

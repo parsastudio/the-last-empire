@@ -1,11 +1,12 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Layers, Loader2, Eye, Coins } from "lucide-react";
 
 export type TacticalLayer = "political" | "gdp";
 
 export interface LayerOption {
   id: TacticalLayer;
-  label: string;
+  labelKey: "political" | "gdp";
   icon: React.ComponentType<{ size: number; className?: string }>;
   color: string;
 }
@@ -13,13 +14,13 @@ export interface LayerOption {
 export const LAYER_OPTIONS: LayerOption[] = [
   {
     id: "political",
-    label: "نقشه سیاسی",
+    labelKey: "political",
     icon: Eye,
     color: "text-gdp",
   },
   {
     id: "gdp",
-    label: "پایش اقتصاد GDP",
+    labelKey: "gdp",
     icon: Coins,
     color: "text-treasury",
   },
@@ -36,6 +37,8 @@ export function LayerController({
   isRendering = false,
   onChangeLayer,
 }: LayerControllerProps) {
+  const t = useTranslations("map.layers");
+
   return (
     <div
       onClick={(e) => e.stopPropagation()}
@@ -54,7 +57,7 @@ export function LayerController({
             <Layers size={13} />
           )}
           <span className="text-[9px] md:text-[10px] font-extrabold font-sans hidden sm:inline">
-            {isRendering ? "در حال به‌روزرسانی..." : "لایه‌ها:"}
+            {isRendering ? t("updating") : t("layersLabel")}
           </span>
         </div>
 
@@ -77,7 +80,7 @@ export function LayerController({
                 className={isActive ? opt.color : "text-muted-foreground"}
               />
               <span className="font-sans text-[10px] md:text-[11px]">
-                {opt.label}
+                {t(opt.labelKey)}
               </span>
             </button>
           );
