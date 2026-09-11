@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { GameOverHeroBanner } from "./game-over/components/game-over-hero-banner";
@@ -39,6 +40,8 @@ export function GameOverModal({
   onRestart,
   onHome,
 }: GameOverModalProps) {
+  const t = useTranslations("gameOver");
+
   useEffect(() => {
     if (isOpen) {
       if (isVictory) {
@@ -55,13 +58,9 @@ export function GameOverModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title={
-        isVictory ? "پیروزی مطلق بر جهان!" : "سقوط حاکمیت و شکست در بقای ملی"
-      }
+      title={isVictory ? t("titles.victory") : t("titles.defeat")}
       subtitle={
-        isVictory
-          ? "حاکمیت شما با اقتدار کامل توانست مقدرات سیاسی و اقتصادی جهان را تسخیر کند."
-          : "قلمرو و ساختار حاکمیتی شما در جریان تحولات نظامی و سیاسی از بین رفت."
+        isVictory ? t("titles.subtitleVictory") : t("titles.subtitleDefeat")
       }
       maxWidthClass="max-w-lg"
       onClose={onInspectOrContinue}
@@ -77,7 +76,7 @@ export function GameOverModal({
         <div className="bg-background/60 border border-border/70 p-4 rounded-2xl space-y-1.5 shadow-inner">
           <div className="flex items-center justify-between text-xs font-bold">
             <span className="text-muted-foreground font-sans">
-              شرح رویداد تاریخی:
+              {t("history.title")}
             </span>
             <span
               className={`font-mono text-[11px] ${
@@ -94,7 +93,7 @@ export function GameOverModal({
 
         <div className="space-y-1.5">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 block">
-            کارنامه نهایی امپراتوری شما
+            {t("stats.sectionTitle")}
           </span>
           <VictoryStatsCard
             turnsPlayed={turnsPlayed}

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ShoppingCart, Coins, Award, Globe, TrendingUp } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation, NationGettersUtility } from "@geopolitics/domain";
@@ -20,6 +21,8 @@ export function ExportSalesDetailsModal({
   nationsMap,
   onClose,
 }: ExportSalesDetailsModalProps) {
+  const t = useTranslations("reports.exportSales");
+
   useEffect(() => {
     if (isOpen) {
       TacticalSound.playCoinSound();
@@ -46,8 +49,10 @@ export function ExportSalesDetailsModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="جزئیات درآمد حاصل از صادرات تسلیحات"
-      subtitle={`گزارش تفکیکی خریداران خارجی در نوبت ${PersianNumberFormatter.toPersianDigits(data.turn)}`}
+      title={t("modalTitle")}
+      subtitle={t("modalSubtitle", {
+        turn: PersianNumberFormatter.toPersianDigits(data.turn),
+      })}
       maxWidthClass="max-w-lg"
       onClose={onClose}
     >
@@ -59,10 +64,10 @@ export function ExportSalesDetailsModal({
             </div>
             <div className="space-y-0.5">
               <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase">
-                TOTAL EXPORT REVENUE
+                {t("totalRevenueHeader")}
               </span>
               <h3 className="text-base font-black text-foreground">
-                کل سود واریزی به خزانه
+                {t("totalProfitTitle")}
               </h3>
             </div>
           </div>
@@ -72,8 +77,11 @@ export function ExportSalesDetailsModal({
               +{PersianNumberFormatter.formatCurrency(data.totalProfit, true)}
             </span>
             <span className="text-[10px] text-muted-foreground block font-sans">
-              از {PersianNumberFormatter.toPersianDigits(data.buyers.length)}{" "}
-              کشور
+              {t("fromCountries", {
+                count: PersianNumberFormatter.toPersianDigits(
+                  data.buyers.length,
+                ),
+              })}
             </span>
           </div>
         </div>
@@ -82,10 +90,10 @@ export function ExportSalesDetailsModal({
           <div className="flex items-center justify-between px-1">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
               <ShoppingCart size={13} className="text-primary" />
-              فهرست کشورهای مشتری (به ترتیب بیشترین پرداخت)
+              {t("buyersList")}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">
-              مرتب‌سازی نزولی
+              {t("descendingSort")}
             </span>
           </div>
 
@@ -111,8 +119,11 @@ export function ExportSalesDetailsModal({
                     <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-1">
                       <Award size={10} className="text-amber-500" />
                       <span>
-                        رتبه جهانی #
-                        {PersianNumberFormatter.toPersianDigits(buyer.rank)}
+                        {t("worldRank", {
+                          rank: PersianNumberFormatter.toPersianDigits(
+                            buyer.rank,
+                          ),
+                        })}
                       </span>
                     </span>
                   </div>
@@ -137,10 +148,10 @@ export function ExportSalesDetailsModal({
         <div className="p-3 bg-secondary/40 border border-border/60 rounded-2xl flex items-center justify-between text-[11px] font-mono">
           <span className="text-muted-foreground font-sans flex items-center gap-1.5">
             <Globe size={13} className="text-primary shrink-0" />
-            شاخص اعتبار تجاری:
+            {t("tradeCredibility")}
           </span>
           <span className="font-extrabold text-gdp font-sans">
-            صادرات پایدار • تقویت تراز مالی
+            {t("sustainableExport")}
           </span>
         </div>
       </div>

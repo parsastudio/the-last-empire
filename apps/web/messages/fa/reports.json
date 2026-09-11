@@ -134,5 +134,74 @@
     "provinces": {
       "title": "استان‌های تصرف‌شده:"
     }
+  },
+  "filters": {
+    "national": "گزارش‌های حاکمیتی و داخلی کشور",
+    "nationalDesc": "وقایع نظامی، امنیتی، دیپلماتیک و مالی کشور شما",
+    "global": "دیده‌بان اخبار بین‌الملل و جهان",
+    "globalDesc": "پوشش عمومی جنگ‌ها، معاهدات و سقوط دولت‌ها",
+    "turnLabel": "نوبت:",
+    "currentTurn": "دست جاری (نوبت {turn})",
+    "turnNumber": "نوبت {turn}",
+    "allTurns": "همه نوبت‌ها",
+    "searchPlaceholder": "جستجو در متن وقایع..."
+  },
+  "stats": {
+    "combat": "نبردها ({turn})",
+    "diplomacy": "دیپلماسی ({turn})",
+    "espionage": "عملیات ویژه ({turn})",
+    "critical": "بحران و سقوط ({turn})"
+  },
+  "views": {
+    "loading": "در حال بازیابی گزارش‌ها از پایگاه داده امنیتی...",
+    "empty": "در {turn} هیچ رویدادی برای این بخش ثبت نشده است.",
+    "emptySubtitle": "برای مشاهده سایر وقایع، نوبت دیگری را انتخاب کنید.",
+    "allTurns": "همه نوبت‌ها",
+    "turnPrefix": "نوبت {turn}"
+  },
+  "card": {
+    "hegemonyBadge": "افتخار هژمونی جهانی",
+    "crisisBadge": "بحران بقای ملی",
+    "machineryExportBadge": "صادرات خطوط تولید",
+    "armsExportBadge": "درآمد صادرات تسلیحات",
+    "industrialExport": "صادرات صنعتی",
+    "pendingDecision": "در انتظار تصمیم شما",
+    "viewBuyers": "مشاهده جزئیات و لیست خریداران",
+    "viewVictory": "مشاهده کارنامه و جشن پیروزی",
+    "viewCoalition": "مشاهده بیانیه پیمان ائتلاف جهانی",
+    "viewBattle": "مشاهده جزئیات و جدول ۳ فاز نبرد"
+  },
+  "proposals": {
+    "viewAndSignPeace": "مشاهده و امضای شروط صلح",
+    "reject": "رد",
+    "accept": "تایید"
+  },
+  "coalition": {
+    "containmentHeader": "DEFENSIVE PACT OF CONTAINMENT",
+    "warDeclaredTitle": "اعلان جنگ ائتلاف جهانی قدرت‌ها علیه شما!",
+    "turn": "نوبت {turn}",
+    "alarmTitleHuman": "وحشت جهان از قدرت شما و تشکیل جبهه متحد جنگی",
+    "alarmTitleOther": "اتحاد قدرت‌ها علیه امپراتوری {name}",
+    "alarmDescHuman": "فتوحات برق‌آسا و پیشروی بی‌رحمانه شما زنگ خطر را در پایتخت‌های جهان به صدا درآورد! ۳ قدرت بزرگ دنیا با هم متحد شده و برای نابودی امپراتوری شما رسماً اعلان جنگ کردند. هیچ صلحی پذیرفته نخواهد شد؛ یا نابود می‌شوی یا جهان را یکپارچه می‌کنی!",
+    "alarmDescOther": "قدرت‌های رقیب با تشکیل جبهه‌ای متحد علیه {name}، عملیات مشترک مهار را آغاز کردند.",
+    "coalitionPowers": "قدرت‌های تشکیل‌دهنده جبهه ائتلاف",
+    "hostileStatus": "وضعیت: جنگ متخاصم",
+    "militaryTech": "فناوری نظامی:",
+    "techLevel": "سطح {level}",
+    "diplomaticStatus": "وضعیت دیپلماتیک:",
+    "embargoStatus": "تحریم کامل تجاری • عدم پذیرش معاهدات صلح",
+    "mobilizeBtn": "ابلاغ فرمان آماده‌باش رزمی به ارتش و بررسی جبهه‌ها"
+  },
+  "exportSales": {
+    "modalTitle": "جزئیات درآمد حاصل از صادرات تسلیحات",
+    "modalSubtitle": "گزارش تفکیکی خریداران خارجی در نوبت {turn}",
+    "totalRevenueHeader": "TOTAL EXPORT REVENUE",
+    "totalProfitTitle": "کل سود واریزی به خزانه",
+    "fromCountries": "از {count} کشور",
+    "buyersList": "فهرست کشورهای مشتری (به ترتیب بیشترین پرداخت)",
+    "descendingSort": "مرتب‌سازی نزولی",
+    "worldRank": "رتبه جهانی #{rank}",
+    "tradeCredibility": "شاخص اعتبار تجاری:",
+    "sustainableExport": "صادرات پایدار • تقویت تراز مالی"
   }
 }

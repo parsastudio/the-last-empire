@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Trophy, Skull, Crown } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -15,6 +16,7 @@ export function GameOverHeroBanner({
   winnerCode,
   winnerFlagCode,
 }: GameOverHeroBannerProps) {
+  const t = useTranslations("gameOver.hero");
   const winnerFlag = getFlagEmoji(winnerFlagCode || winnerCode);
 
   return (
@@ -48,7 +50,7 @@ export function GameOverHeroBanner({
               isVictory ? "text-amber-500" : "text-rose-400"
             }`}
           >
-            {isVictory ? "امپراتوری پیروز شما" : "قدرت برتر میدان نبرد"}
+            {isVictory ? t("yourVictoriousEmpire") : t("superiorPower")}
           </span>
         </div>
       </div>

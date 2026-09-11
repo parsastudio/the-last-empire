@@ -1,0 +1,29 @@
+{
+  "titles": {
+    "victory": "Absolute World Domination!",
+    "defeat": "Sovereignty Collapsed & National Ruin",
+    "subtitleVictory": "Your sovereign state has achieved complete hegemony over global politics and economy.",
+    "subtitleDefeat": "Your territory and governance collapsed amid overwhelming military and political pressure."
+  },
+  "hero": {
+    "yourVictoriousEmpire": "Your Victorious Realm",
+    "superiorPower": "Supreme Battlefield Power"
+  },
+  "history": {
+    "title": "Historical Chronicle:"
+  },
+  "stats": {
+    "sectionTitle": "Final Imperial Ledger",
+    "turnsPlayed": "Total Turns Elapsed",
+    "turnUnit": "{count} Turns",
+    "finalGdp": "Gross Domestic Product",
+    "finalPopulation": "Total Sovereign Population",
+    "conqueredTerritory": "Controlled Territorial Extent"
+  },
+  "actions": {
+    "sandbox": "Continue Conquest in Sandbox Freeplay",
+    "spectator": "Spectate Global Map & Ongoing Hostilities",
+    "restart": "Start New Campaign",
+    "home": "Return to Main Menu"
+  }
+}

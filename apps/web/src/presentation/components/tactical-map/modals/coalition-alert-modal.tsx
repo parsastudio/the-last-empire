@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   ShieldAlert,
   Flame,
@@ -26,6 +27,8 @@ export function CoalitionAlertModal({
   nationsMap,
   onClose,
 }: CoalitionAlertModalProps) {
+  const t = useTranslations("reports.coalition");
+
   useEffect(() => {
     if (isOpen) {
       TacticalSound.playCoalitionAlarm();
@@ -64,17 +67,19 @@ export function CoalitionAlertModal({
               </div>
               <div>
                 <span className="text-[10px] font-mono font-black text-rose-400 uppercase tracking-widest block">
-                  DEFENSIVE PACT OF CONTAINMENT
+                  {t("containmentHeader")}
                 </span>
                 <h3 className="text-base font-black text-foreground">
-                  اعلان جنگ ائتلاف جهانی قدرت‌ها علیه شما!
+                  {t("warDeclaredTitle")}
                 </h3>
               </div>
             </div>
 
             <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1">
               <Radio size={12} className="animate-ping" />
-              نوبت {PersianNumberFormatter.toPersianDigits(data.turn)}
+              {t("turn", {
+                turn: PersianNumberFormatter.toPersianDigits(data.turn),
+              })}
             </span>
           </div>
 
@@ -83,14 +88,14 @@ export function CoalitionAlertModal({
               <Flame size={14} />
               <span>
                 {data.isHumanTarget
-                  ? "وحشت جهان از قدرت شما و تشکیل جبهه متحد جنگی"
-                  : `اتحاد قدرت‌ها علیه امپراتوری ${data.targetName}`}
+                  ? t("alarmTitleHuman")
+                  : t("alarmTitleOther", { name: data.targetName })}
               </span>
             </div>
             <p className="text-xs text-foreground/90 leading-relaxed font-sans font-medium">
               {data.isHumanTarget
-                ? "فتوحات برق‌آسا و پیشروی بی‌رحمانه شما زنگ خطر را در پایتخت‌های جهان به صدا درآورد! ۳ قدرت بزرگ دنیا با هم متحد شده و برای نابودی امپراتوری شما رسماً اعلان جنگ کردند. هیچ صلحی پذیرفته نخواهد شد؛ یا نابود می‌شوی یا جهان را یکپارچه می‌کنی!"
-                : `قدرت‌های رقیب با تشکیل جبهه‌ای متحد علیه ${data.targetName}، عملیات مشترک مهار را آغاز کردند.`}
+                ? t("alarmDescHuman")
+                : t("alarmDescOther", { name: data.targetName })}
             </p>
           </div>
         </div>
@@ -99,10 +104,10 @@ export function CoalitionAlertModal({
           <div className="flex items-center justify-between px-1">
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
               <Users size={13} className="text-rose-400" />
-              قدرت‌های تشکیل‌دهنده جبهه ائتلاف
+              {t("coalitionPowers")}
             </span>
             <span className="text-[10px] font-mono text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20">
-              وضعیت: جنگ متخاصم
+              {t("hostileStatus")}
             </span>
           </div>
 
@@ -125,10 +130,13 @@ export function CoalitionAlertModal({
                 </div>
 
                 <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[9px] font-mono text-muted-foreground">
-                  <span>فناوری نظامی:</span>
+                  <span>{t("militaryTech")}</span>
                   <span className="font-bold text-amber-400">
-                    سطح{" "}
-                    {PersianNumberFormatter.toPersianDigits(member.techLevel)}
+                    {t("techLevel", {
+                      level: PersianNumberFormatter.toPersianDigits(
+                        member.techLevel,
+                      ),
+                    })}
                   </span>
                 </div>
               </div>
@@ -139,10 +147,10 @@ export function CoalitionAlertModal({
         <div className="p-3 bg-secondary/40 border border-border/60 rounded-2xl flex items-center justify-between text-[11px] font-mono">
           <span className="text-muted-foreground font-sans flex items-center gap-1.5">
             <AlertTriangle size={13} className="text-amber-400 shrink-0" />
-            وضعیت دیپلماتیک:
+            {t("diplomaticStatus")}
           </span>
           <span className="font-extrabold text-rose-400 font-sans">
-            تحریم کامل تجاری • عدم پذیرش معاهدات صلح
+            {t("embargoStatus")}
           </span>
         </div>
 
@@ -151,7 +159,7 @@ export function CoalitionAlertModal({
           className="w-full py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xl shadow-rose-600/20 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 border border-rose-500/40"
         >
           <Swords size={16} />
-          <span>ابلاغ فرمان آماده‌باش رزمی به ارتش و بررسی جبهه‌ها</span>
+          <span>{t("mobilizeBtn")}</span>
         </button>
       </div>
     </UnifiedModalShell>

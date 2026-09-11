@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   TurnLogEntry,
   Nation,
@@ -28,6 +29,8 @@ export function WideReportsView({
   pendingProposals = [],
   gameId,
 }: WideReportsViewProps) {
+  const t = useTranslations("reports.views");
+
   const {
     selectedScope,
     selectedTurn,
@@ -43,8 +46,10 @@ export function WideReportsView({
 
   const turnLabel =
     selectedTurn === "ALL"
-      ? "همه نوبت‌ها"
-      : `نوبت ${PersianNumberFormatter.toPersianDigits(selectedTurn)}`;
+      ? t("allTurns")
+      : t("turnPrefix", {
+          turn: PersianNumberFormatter.toPersianDigits(selectedTurn),
+        });
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right font-sans pb-6">
@@ -65,17 +70,17 @@ export function WideReportsView({
           <div className="py-20 flex flex-col items-center justify-center gap-3 text-center bg-secondary/15 rounded-3xl border border-border/40">
             <Loader2 size={24} className="animate-spin text-primary" />
             <span className="text-xs font-bold text-muted-foreground">
-              در حال بازیابی گزارش‌ها از پایگاه داده امنیتی...
+              {t("loading")}
             </span>
           </div>
         ) : sortedLogs.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center gap-2.5 text-center bg-secondary/20 rounded-2xl border border-border/40">
             <FileQuestion size={24} className="text-muted-foreground" />
             <span className="text-xs font-bold text-foreground">
-              در {turnLabel} هیچ رویدادی برای این بخش ثبت نشده است.
+              {t("empty", { turn: turnLabel })}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              برای مشاهده سایر وقایع، نوبت دیگری را انتخاب کنید.
+              {t("emptySubtitle")}
             </span>
           </div>
         ) : (

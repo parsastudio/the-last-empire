@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   TurnLogEntry,
   Nation,
@@ -32,6 +33,7 @@ export function ReportCard({
   humanNationId,
   pendingProposals = [],
 }: ReportCardProps) {
+  const t = useTranslations("reports.card");
   const openModal = useUiStore((state) => state.openModal);
 
   const {
@@ -115,14 +117,14 @@ export function ReportCard({
           {isVictoryAchieved && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <Trophy size={12} />
-              افتخار هژمونی جهانی
+              {t("hegemonyBadge")}
             </span>
           )}
 
           {isCoalitionFormed && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <ShieldAlert size={12} />
-              بحران بقای ملی
+              {t("crisisBadge")}
             </span>
           )}
 
@@ -141,8 +143,8 @@ export function ReportCard({
               )}
               <span>
                 {log.eventCode === "MACHINERY_EXPORT_SUMMARY"
-                  ? "صادرات خطوط تولید"
-                  : "درآمد صادرات تسلیحات"}
+                  ? t("machineryExportBadge")
+                  : t("armsExportBadge")}
               </span>
             </span>
           )}
@@ -150,7 +152,7 @@ export function ReportCard({
           {isMachineryTrade && !isExportSummary && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-xl shrink-0">
               <Factory size={12} />
-              صادرات صنعتی
+              {t("industrialExport")}
             </span>
           )}
 
@@ -166,7 +168,7 @@ export function ReportCard({
           {isIncomingInteractiveProposal && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <Sparkles size={12} />
-              در انتظار تصمیم شما
+              {t("pendingDecision")}
             </span>
           )}
         </div>
@@ -213,7 +215,7 @@ export function ReportCard({
               }`}
             >
               <Eye size={14} />
-              <span>مشاهده جزئیات و لیست خریداران</span>
+              <span>{t("viewBuyers")}</span>
             </button>
           )}
 
@@ -223,7 +225,7 @@ export function ReportCard({
               className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 hover:border-amber-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Trophy size={14} />
-              <span>مشاهده کارنامه و جشن پیروزی</span>
+              <span>{t("viewVictory")}</span>
             </button>
           )}
 
@@ -233,7 +235,7 @@ export function ReportCard({
               className="px-3.5 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/50 hover:border-rose-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Eye size={14} />
-              <span>مشاهده بیانیه پیمان ائتلاف جهانی</span>
+              <span>{t("viewCoalition")}</span>
             </button>
           )}
 
@@ -248,7 +250,7 @@ export function ReportCard({
               className="px-3.5 py-1.5 bg-military/15 hover:bg-military/25 text-military border border-military/40 hover:border-military/60 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Eye size={14} />
-              <span>مشاهده جزئیات و جدول ۳ فاز نبرد</span>
+              <span>{t("viewBattle")}</span>
             </button>
           )}
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Swords, Users, Binary, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -16,10 +17,12 @@ export function ReportStatsOverview({
   stats,
   turnLabel,
 }: ReportStatsOverviewProps) {
+  const t = useTranslations("reports.stats");
+
   const cards = [
     {
       id: "combat",
-      label: `نبردها (${turnLabel})`,
+      label: t("combat", { turn: turnLabel }),
       value: stats.combatCount,
       icon: Swords,
       color: "text-military",
@@ -28,7 +31,7 @@ export function ReportStatsOverview({
     },
     {
       id: "diplomacy",
-      label: `دیپلماسی (${turnLabel})`,
+      label: t("diplomacy", { turn: turnLabel }),
       value: stats.diplomacyCount,
       icon: Users,
       color: "text-diplomacy",
@@ -37,7 +40,7 @@ export function ReportStatsOverview({
     },
     {
       id: "espionage",
-      label: `عملیات ویژه (${turnLabel})`,
+      label: t("espionage", { turn: turnLabel }),
       value: stats.espionageCount,
       icon: Binary,
       color: "text-treasury",
@@ -46,7 +49,7 @@ export function ReportStatsOverview({
     },
     {
       id: "critical",
-      label: `بحران و سقوط (${turnLabel})`,
+      label: t("critical", { turn: turnLabel }),
       value: stats.criticalCount,
       icon: ShieldAlert,
       color: "text-rose-500",
