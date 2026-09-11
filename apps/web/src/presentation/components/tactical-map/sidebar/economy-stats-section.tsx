@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Coins,
   Building2,
@@ -26,6 +27,8 @@ export function EconomyStatsSection({
   debtInterestPerTurn,
   totalActiveFactories,
 }: EconomyStatsSectionProps) {
+  const t = useTranslations("overview.economy");
+
   const compactTreasury = PersianNumberFormatter.formatCurrency(treasury, true);
   const formattedGdp = PersianNumberFormatter.formatCurrency(gdp, true);
   const formattedDebt = PersianNumberFormatter.formatCurrency(
@@ -47,7 +50,7 @@ export function EconomyStatsSection({
         <div className="flex items-center gap-2">
           <Coins size={14} className="text-gdp" />
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
-            شاخص‌های کلان مالی، خزانه و اعتبارات
+            {t("title")}
           </span>
         </div>
       </div>
@@ -56,7 +59,7 @@ export function EconomyStatsSection({
         <div className="bg-background/60 border border-border/70 p-4 rounded-3xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground block font-sans font-bold flex items-center gap-1.5">
             <Building2 size={13} className="text-primary shrink-0" />
-            <span>تولید ناخالص ملی (GDP)</span>
+            <span>{t("gdp")}</span>
           </span>
           <span className="text-sm font-black text-foreground block">
             {formattedGdp}
@@ -66,7 +69,7 @@ export function EconomyStatsSection({
         <div className="bg-background/60 border border-border/70 p-4 rounded-3xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground block font-sans font-bold flex items-center gap-1.5">
             <Coins size={13} className="text-gdp shrink-0" />
-            <span>موجودی خزانه در دسترس</span>
+            <span>{t("treasury")}</span>
           </span>
           <span className="text-sm font-black text-gdp block truncate">
             {compactTreasury}
@@ -76,15 +79,15 @@ export function EconomyStatsSection({
         <div className="bg-background/60 border border-border/70 p-4 rounded-3xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground block font-sans font-bold flex items-center gap-1.5">
             <Factory size={13} className="text-gdp shrink-0" />
-            <span>سوله‌های فعال صنعتی</span>
+            <span>{t("factories")}</span>
           </span>
           <span className="text-sm font-black text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              totalActiveFactories,
-            )}{" "}
-            <span className="text-[10px] text-muted-foreground font-normal font-sans">
-              کارخانه
-            </span>
+            {t("factoryUnit", {
+              count:
+                PersianNumberFormatter.formatNumberWithCommas(
+                  totalActiveFactories,
+                ),
+            })}
           </span>
         </div>
       </div>
@@ -97,10 +100,10 @@ export function EconomyStatsSection({
             </div>
             <div>
               <h4 className="text-xs font-black text-foreground">
-                وضعیت بدهی و خط اعتباری بانک جهانی (IMF)
+                {t("imfSectionTitle")}
               </h4>
               <span className="text-[10px] text-muted-foreground font-sans">
-                تسهیلات ارزی و سقف استقراض اضطراری کشور
+                {t("imfSectionSubtitle")}
               </span>
             </div>
           </div>
@@ -112,7 +115,7 @@ export function EconomyStatsSection({
                 : "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
             }`}
           >
-            {nationalDebt > 0 ? "دارای وام معوق" : "بدون بدهی خارجی"}
+            {nationalDebt > 0 ? t("hasDebt") : t("noDebt")}
           </span>
         </div>
 
@@ -120,7 +123,7 @@ export function EconomyStatsSection({
           <div className="bg-background/60 p-3 rounded-2xl border border-border/60 space-y-1">
             <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
               <TrendingDown size={12} className="text-military" />
-              <span>کل بدهی‌های معوق:</span>
+              <span>{t("totalDebt")}</span>
             </span>
             <span
               className={`text-xs font-black ${
@@ -134,7 +137,7 @@ export function EconomyStatsSection({
           <div className="bg-background/60 p-3 rounded-2xl border border-border/60 space-y-1">
             <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
               <ArrowUpRight size={12} className="text-gdp" />
-              <span>سقف اعتبار وام قابل‌دریافت:</span>
+              <span>{t("creditCeiling")}</span>
             </span>
             <span className="text-xs font-black text-gdp">
               {formattedLoanAvailable}
@@ -144,10 +147,10 @@ export function EconomyStatsSection({
           <div className="bg-background/60 p-3 rounded-2xl border border-border/60 space-y-1">
             <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
               <Coins size={12} className="text-amber-400" />
-              <span>هزینه بهره نوبتی (۱۰٪):</span>
+              <span>{t("turnInterest")}</span>
             </span>
             <span className="text-xs font-black text-amber-400">
-              {formattedInterest} / نوبت
+              {formattedInterest} {t("perTurn")}
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Globe, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -9,6 +10,8 @@ interface GlobalReputationCardProps {
 export function GlobalReputationCard({
   reputation,
 }: GlobalReputationCardProps) {
+  const t = useTranslations("overview.reputation");
+
   const reputationStyle =
     reputation > 0
       ? {
@@ -45,16 +48,16 @@ export function GlobalReputationCard({
           ) : (
             <Globe size={15} className="text-gdp shrink-0" />
           )}
-          <span>اعتبار و پرستیژ جهانی</span>
+          <span>{t("title")}</span>
         </div>
         <span
           className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-bold border ${reputationStyle.badgeBg}`}
         >
           {reputation > 0
-            ? "موقعیت مطلوب"
+            ? t("favorable")
             : reputation < 0
-              ? "تحت انزوا"
-              : "بی‌طرف"}
+              ? t("isolated")
+              : t("neutral")}
         </span>
       </div>
 
@@ -66,20 +69,20 @@ export function GlobalReputationCard({
           {PersianNumberFormatter.toPersianDigits(reputation)}
         </span>
         <span className="text-[10px] text-muted-foreground font-sans">
-          امتیاز جایگاه دیپلماتیک بین‌المللی
+          {t("scoreSubtitle")}
         </span>
       </div>
 
       <div className="bg-secondary/50 border border-border/50 p-2 rounded-xl flex items-center justify-between text-[10px] font-mono">
         <span className="text-muted-foreground font-sans">
-          وضعیت جایگاه عمومی:
+          {t("publicStatus")}
         </span>
         <span className={`font-extrabold ${reputationStyle.text}`}>
           {reputation > 20
-            ? "قدرت محبوب"
+            ? t("popularPower")
             : reputation < -20
-              ? "تهدید بین‌المللی"
-              : "موقعیت عادی"}
+              ? t("globalThreat")
+              : t("normalStatus")}
         </span>
       </div>
     </div>

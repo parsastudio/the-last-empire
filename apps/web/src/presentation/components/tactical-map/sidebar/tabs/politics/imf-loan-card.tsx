@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Landmark,
   ArrowUpRight,
@@ -27,6 +28,7 @@ export function ImfLoanCard({
   gdp = 450000000000,
   treasury = 100000,
 }: ImfLoanCardProps) {
+  const t = useTranslations("overview.imf");
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
@@ -69,14 +71,14 @@ export function ImfLoanCard({
         <div className="flex items-center gap-2 px-1">
           <Landmark size={13} className="text-treasury" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            صندوق بین‌المللی پول (IMF) و وام‌ها
+            {t("title")}
           </span>
         </div>
 
         <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="text-muted-foreground font-sans">
-              اعتبار وام آزاد دستی (حداکثر ۳۰٪ GDP):
+              {t("availableCredit")}
             </span>
             <span className="font-bold text-gdp">
               {PersianNumberFormatter.formatCurrency(availableLoan)}
@@ -86,7 +88,7 @@ export function ImfLoanCard({
           <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                کل وام‌های معوق
+                {t("overdueLoans")}
               </span>
               <span className="font-bold text-military block">
                 {PersianNumberFormatter.formatCurrency(nationalDebt)}
@@ -95,7 +97,7 @@ export function ImfLoanCard({
 
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                بهره نوبتی (۱۰٪)
+                {t("turnInterest")}
               </span>
               <span className="font-bold text-treasury block">
                 {PersianNumberFormatter.formatCurrency(
@@ -115,7 +117,7 @@ export function ImfLoanCard({
               className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
             >
               <ArrowUpRight size={13} className="text-gdp" />
-              <span>درخواست وام</span>
+              <span>{t("requestLoan")}</span>
             </button>
 
             {isSmallDebt ? (
@@ -127,8 +129,8 @@ export function ImfLoanCard({
                 <DollarSign size={13} />
                 <span>
                   {canAffordFullRepay
-                    ? "تسویه کامل بدهی"
-                    : "موجودی ناکافی جهت تسویه"}
+                    ? t("repayFull")
+                    : t("insufficientToSettle")}
                 </span>
               </button>
             ) : (
@@ -143,15 +145,16 @@ export function ImfLoanCard({
                 className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
               >
                 <ArrowDownRight size={13} className="text-military" />
-                <span>تسویه بدهی</span>
+                <span>{t("repayDebt")}</span>
               </button>
             )}
           </div>
 
           {isSmallDebt && !canAffordFullRepay && (
             <div className="text-[10px] text-military font-sans bg-military/10 p-2 rounded-xl border border-military/30 text-center">
-              موجودی خزانه کمتر از اصل بدهی معوق (
-              {PersianNumberFormatter.formatCurrency(nationalDebt)}) است.
+              {t("smallDebtWarning", {
+                amount: PersianNumberFormatter.formatCurrency(nationalDebt),
+              })}
             </div>
           )}
         </div>
@@ -159,28 +162,28 @@ export function ImfLoanCard({
 
       <AmountActionDialog
         isOpen={isLoanModalOpen}
-        title="دریافت تسهیلات اضطراری از بانک جهانی"
-        subtitle="پرداخت نوبتی ۱۰٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
-        unitLabel="میلیارد دلار"
+        title={t("loanDialogTitle")}
+        subtitle={t("loanDialogSubtitle")}
+        unitLabel={t("billionDollars")}
         maxAmount={availableLoanBillion}
-        confirmLabel="دریافت وام"
+        confirmLabel={t("requestLoan")}
         colorVariant="gdp"
         icon={ArrowUpRight}
-        emptyStateText="سقف اعتبار ملی (۳۰٪ GDP) تکمیل است."
+        emptyStateText={t("maxCreditFull")}
         onClose={() => setIsLoanModalOpen(false)}
         onConfirm={handleConfirmLoan}
       />
 
       <AmountActionDialog
         isOpen={isRepayModalOpen}
-        title="تسویه بدهی معوق ملی"
-        subtitle="پرداخت بخشی از بدهی به بانک جهانی از محل موجودی خزانه"
-        unitLabel="میلیارد دلار"
+        title={t("repayDialogTitle")}
+        subtitle={t("repayDialogSubtitle")}
+        unitLabel={t("billionDollars")}
         maxAmount={maxRepayBillion}
-        confirmLabel="تسویه بدهی"
+        confirmLabel={t("repayDebt")}
         colorVariant="military"
         icon={ArrowDownRight}
-        emptyStateText="امکان تسویه وجود ندارد."
+        emptyStateText={t("cannotRepay")}
         onClose={() => setIsRepayModalOpen(false)}
         onConfirm={handleConfirmRepay}
       />

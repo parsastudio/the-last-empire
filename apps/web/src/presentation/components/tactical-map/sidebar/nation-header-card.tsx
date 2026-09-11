@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Trophy, Swords, Cpu, Users } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-import { GameDifficulty, DIFFICULTY_CONFIGS } from "@geopolitics/domain";
+import { GameDifficulty } from "@geopolitics/domain";
 import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
 
 interface NationHeaderCardProps {
@@ -28,6 +29,9 @@ export function NationHeaderCard({
   rank = 1,
   difficulty = "NORMAL",
 }: NationHeaderCardProps) {
+  const t = useTranslations("overview.header");
+  const tDiff = useTranslations("selectNation.difficulty");
+
   const formatted = useMemo(() => {
     const summary = NationPresentationMapper.formatNationSummary(
       code,
@@ -62,7 +66,6 @@ export function NationHeaderCard({
     industrialLevel,
   ]);
 
-  const diffConfig = DIFFICULTY_CONFIGS[difficulty];
   const diffVisual =
     DIFFICULTY_VISUAL_CONFIGS[difficulty] ?? DIFFICULTY_VISUAL_CONFIGS.NORMAL;
   const DiffIcon = diffVisual.icon;
@@ -84,10 +87,7 @@ export function NationHeaderCard({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              نوع نظام حاکم:{" "}
-              <span className="text-foreground font-bold font-sans">
-                {formatted.governmentLabel}
-              </span>
+              {t("governmentTypeLabel", { label: formatted.governmentLabel })}
             </p>
           </div>
         </div>
@@ -95,7 +95,9 @@ export function NationHeaderCard({
         <div className="flex items-center gap-2 bg-amber-500/15 border border-amber-500/40 px-3.5 py-1.5 rounded-2xl w-fit shrink-0">
           <Trophy size={16} className="text-amber-500" />
           <span className="text-xs font-black font-mono text-amber-400">
-            رتبه جهانی #{PersianNumberFormatter.toPersianDigits(rank)}
+            {t("worldRank", {
+              rank: PersianNumberFormatter.toPersianDigits(rank),
+            })}
           </span>
         </div>
       </div>
@@ -104,7 +106,7 @@ export function NationHeaderCard({
         <div className="bg-background/60 border border-border/60 p-3 rounded-2xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
             <Users size={13} className="text-primary shrink-0" />
-            <span>جمعیت کل قلمروها</span>
+            <span>{t("populationLabel")}</span>
           </span>
           <span className="text-xs font-extrabold text-foreground block">
             {formatted.formattedPopulation}
@@ -114,36 +116,36 @@ export function NationHeaderCard({
         <div className="bg-background/60 border border-amber-500/30 p-3 rounded-2xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
             <Swords size={13} className="text-amber-400 shrink-0" />
-            <span>سطح فناوری دفاعی</span>
+            <span>{t("militaryTechLabel")}</span>
           </span>
           <span className="text-xs font-black text-amber-400 block">
-            لِوِل {formatted.militaryTechFormatted}
+            {t("levelFormat", { level: formatted.militaryTechFormatted })}
           </span>
         </div>
 
         <div className="bg-background/60 border border-primary/30 p-3 rounded-2xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
             <Cpu size={13} className="text-primary shrink-0" />
-            <span>سطح فناوری صنعتی</span>
+            <span>{t("industrialTechLabel")}</span>
           </span>
           <span className="text-xs font-black text-primary block">
-            لِوِل {formatted.industrialTechFormatted}
+            {t("levelFormat", { level: formatted.industrialTechFormatted })}
           </span>
         </div>
 
         <div
           className={`bg-background/60 border ${diffVisual.borderColor} p-3 rounded-2xl space-y-1 shadow-sm`}
-          title={diffConfig.descriptionFa}
+          title={tDiff(`${difficulty}.tagline`)}
         >
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
             <DiffIcon
               size={13}
               className={`${diffVisual.textColor} shrink-0`}
             />
-            <span>سطح دشواری بازی</span>
+            <span>{t("difficultyLabel")}</span>
           </span>
           <span className={`text-xs font-black ${diffVisual.textColor} block`}>
-            {diffConfig.nameFa}
+            {tDiff(`${difficulty}.name`)}
           </span>
         </div>
       </div>

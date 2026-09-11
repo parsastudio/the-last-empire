@@ -1,0 +1,100 @@
+{
+  "header": {
+    "governmentTypeLabel": "نوع نظام حاکم: {label}",
+    "worldRank": "رتبه جهانی #{rank}",
+    "populationLabel": "جمعیت کل قلمروها",
+    "militaryTechLabel": "سطح فناوری دفاعی",
+    "industrialTechLabel": "سطح فناوری صنعتی",
+    "difficultyLabel": "سطح دشواری بازی",
+    "levelFormat": "لِوِل {level}"
+  },
+  "economy": {
+    "title": "شاخص‌های کلان مالی، خزانه و اعتبارات",
+    "gdp": "تولید ناخالص ملی (GDP)",
+    "treasury": "موجودی خزانه در دسترس",
+    "factories": "سوله‌های فعال صنعتی",
+    "factoryUnit": "{count} کارخانه",
+    "imfSectionTitle": "وضعیت بدهی و خط اعتباری بانک جهانی (IMF)",
+    "imfSectionSubtitle": "تسهیلات ارزی و سقف استقراض اضطراری کشور",
+    "hasDebt": "دارای وام معوق",
+    "noDebt": "بدون بدهی خارجی",
+    "totalDebt": "کل بدهی‌های معوق:",
+    "creditCeiling": "سقف اعتبار وام قابل‌دریافت:",
+    "turnInterest": "هزینه بهره نوبتی (۱۰٪):",
+    "perTurn": "/ نوبت"
+  },
+  "governance": {
+    "title": "وضعیت حکومت، ثبات و اعتبار بین‌المللی"
+  },
+  "stabilityCard": {
+    "title": "ثبات سیاسی داخلی",
+    "fluctuation": "نوسان نوبتی ثبات:",
+    "perTurn": "/ نوبت"
+  },
+  "reputation": {
+    "title": "اعتبار و پرستیژ جهانی",
+    "favorable": "موقعیت مطلوب",
+    "isolated": "تحت انزوا",
+    "neutral": "بی‌طرف",
+    "scoreSubtitle": "امتیاز جایگاه دیپلماتیک بین‌المللی",
+    "publicStatus": "وضعیت جایگاه عمومی:",
+    "popularPower": "قدرت محبوب",
+    "globalThreat": "تهدید بین‌المللی",
+    "normalStatus": "موقعیت عادی"
+  },
+  "victory": {
+    "title": "مسیر پیروزی و سلطه بر جهان",
+    "endConditions": "شروط پایان کمپین",
+    "militaryTitle": "سلطه نظامی و فتح خاک",
+    "militaryTarget": "هدف: ۶۵٪ از جهان",
+    "territoryExtent": "از وسعت کل نقشه",
+    "economicTitle": "تسخیر نبض اقتصاد جهان",
+    "economicTarget": "هدف: ۶۵٪ از جهان",
+    "wealthExtent": "از ثروت کل دنیا"
+  },
+  "militaryValuation": {
+    "title": "ارزش دارایی‌ها و بودجه نگهداری ارتش",
+    "activeUnits": "{count} یگان فعال",
+    "totalValuation": "ارزش کل زرادخانه (سقف ۲۰٪ GDP):",
+    "capacityRatio": "{pct}٪ از سقف مجاز ارتش",
+    "turnPayroll": "هزینه نگهداری هر نوبت (۶٪):",
+    "gdpCapped": "مهارشده در سقف ۶٪ GDP",
+    "valuationInfo": "هزینه نگهداری نوبتی ارتش ۶٪ ارزش کل یگان‌هاست و سقف مجاز ارزش ارتش معادل ۲۰٪ تولید ناخالص (GDP) کشور می‌باشد."
+  },
+  "militaryTechUpgrade": {
+    "title": "تحقیقات و فناوری نظامی",
+    "levelBadge": "سطح {level}",
+    "stepCost": "هزینه گام بعدی (+۰.۱):",
+    "progressToNext": "پیشرفت تا سطح اصلی بعد:",
+    "submitting": "در حال اجرای تحقیقات دفاعی...",
+    "upgradeBtn": "ارتقا به سطح {level}",
+    "insufficientFunds": "موجودی خزانه ناکافی جهت R&D"
+  },
+  "quickRecruit": {
+    "title": "تجهیز ضربتی ارتش و تحویل آنی (سقف ارزش = ۲۰٪ GDP)",
+    "armyCapOccupancy": "اشغال سقف ارتش:",
+    "nationalTreasury": "خزانه ملی:"
+  },
+  "imf": {
+    "title": "صندوق بین‌المللی پول (IMF) و وام‌ها",
+    "availableCredit": "اعتبار وام آزاد دستی (حداکثر ۳۰٪ GDP):",
+    "overdueLoans": "کل وام‌های معوق",
+    "turnInterest": "بهره نوبتی (۱۰٪)",
+    "requestLoan": "درخواست وام",
+    "repayDebt": "تسویه بدهی",
+    "repayFull": "تسویه کامل بدهی",
+    "insufficientToSettle": "موجودی ناکافی جهت تسویه",
+    "smallDebtWarning": "موجودی خزانه کمتر از اصل بدهی معوق ({amount}) است.",
+    "loanDialogTitle": "دریافت تسهیلات اضطراری از بانک جهانی",
+    "loanDialogSubtitle": "پرداخت نوبتی ۱۰٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول",
+    "repayDialogTitle": "تسویه بدهی معوق ملی",
+    "repayDialogSubtitle": "پرداخت بخشی از بدهی به بانک جهانی از محل موجودی خزانه",
+    "billionDollars": "میلیارد دلار",
+    "maxCreditFull": "سقف اعتبار ملی (۳۰٪ GDP) تکمیل است.",
+    "cannotRepay": "امکان تسویه وجود ندارد."
+  },
+  "modifiers": {
+    "title": "تاثیرات و مودیفایرهای فعال",
+    "turnsRemaining": "{count} نوبت"
+  }
+}

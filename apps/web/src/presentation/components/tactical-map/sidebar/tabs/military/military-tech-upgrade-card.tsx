@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Award, Zap, Loader2, Sparkles } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -20,6 +21,7 @@ export function MilitaryTechUpgradeCard({
   techLevel = 1.0,
   governmentType,
 }: MilitaryTechUpgradeCardProps) {
+  const t = useTranslations("overview.militaryTechUpgrade");
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
 
@@ -49,19 +51,21 @@ export function MilitaryTechUpgradeCard({
         <div className="flex items-center gap-2">
           <Award size={14} className="text-amber-500" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            تحقیقات و فناوری نظامی
+            {t("title")}
           </span>
         </div>
         <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1">
           <Sparkles size={10} />
-          سطح {PersianNumberFormatter.toPersianDigits(techLevel.toFixed(1))}
+          {t("levelBadge", {
+            level: PersianNumberFormatter.toPersianDigits(techLevel.toFixed(1)),
+          })}
         </span>
       </div>
 
       <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl space-y-3 shadow-sm">
         <div className="flex items-center justify-between text-xs pb-2.5 border-b border-border/50 font-mono">
           <span className="text-muted-foreground font-sans font-bold text-[11px]">
-            هزینه گام بعدی (+۰.۱):
+            {t("stepCost")}
           </span>
           <span
             className={`font-extrabold text-xs ${
@@ -74,7 +78,7 @@ export function MilitaryTechUpgradeCard({
 
         <div className="space-y-1.5 font-mono text-[10px]">
           <div className="flex items-center justify-between text-muted-foreground font-sans">
-            <span>پیشرفت تا سطح اصلی بعد:</span>
+            <span>{t("progressToNext")}</span>
             <span className="font-bold text-foreground">
               {PersianNumberFormatter.toPersianDigits(subLevelIndex * 10)}٪
             </span>
@@ -105,10 +109,14 @@ export function MilitaryTechUpgradeCard({
           )}
           <span>
             {isSubmittingTech
-              ? "در حال اجرای تحقیقات دفاعی..."
+              ? t("submitting")
               : canAffordTech
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))}`
-                : "موجودی خزانه ناکافی جهت R&D"}
+                ? t("upgradeBtn", {
+                    level: PersianNumberFormatter.toPersianDigits(
+                      nextStepLevel.toFixed(1),
+                    ),
+                  })
+                : t("insufficientFunds")}
           </span>
         </button>
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Zap, Wallet, ShieldAlert } from "lucide-react";
 import { useQuickRecruitBatch } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { QuickUnitRecruitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/quick-unit-recruit-card";
@@ -22,6 +23,8 @@ export function QuickMilitaryRecruitmentGrid({
   currentGdp,
   provincesMap,
 }: QuickMilitaryRecruitmentGridProps) {
+  const t = useTranslations("overview.quickRecruit");
+
   const { batchList, floatingFeedbacks, handleBuyBatch } = useQuickRecruitBatch(
     {
       nationId: nation.id,
@@ -49,7 +52,7 @@ export function QuickMilitaryRecruitmentGrid({
         <div className="flex items-center gap-2">
           <Zap size={15} className="text-gdp animate-pulse" />
           <span className="text-xs font-black text-foreground">
-            تجهیز ضربتی ارتش و تحویل آنی (سقف ارزش = ۲۰٪ GDP)
+            {t("title")}
           </span>
         </div>
 
@@ -57,7 +60,7 @@ export function QuickMilitaryRecruitmentGrid({
           <div className="flex items-center gap-1.5 font-mono text-[11px] bg-secondary/70 border border-border/60 px-3 py-1.5 rounded-xl">
             <ShieldAlert size={13} className="text-amber-400" />
             <span className="text-muted-foreground font-sans">
-              اشغال سقف ارتش:
+              {t("armyCapOccupancy")}
             </span>
             <span
               className={`font-extrabold text-xs ${
@@ -70,7 +73,9 @@ export function QuickMilitaryRecruitmentGrid({
 
           <div className="flex items-center gap-2 font-mono text-[11px] bg-secondary/70 border border-border/60 px-3 py-1.5 rounded-xl">
             <Wallet size={13} className="text-primary" />
-            <span className="text-muted-foreground font-sans">خزانه ملی:</span>
+            <span className="text-muted-foreground font-sans">
+              {t("nationalTreasury")}
+            </span>
             <span className="font-extrabold text-gdp text-xs">
               {PersianNumberFormatter.formatCurrency(nation.treasury)}
             </span>
