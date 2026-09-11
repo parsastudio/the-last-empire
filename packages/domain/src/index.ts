@@ -73,5 +73,6 @@ export * from "./politics/stability-bracket.utility";
 export * from "./politics/victory.config";
 export * from "./province/province.schema";
 export * from "./reports/combat-report.schema";
+export * from "./shared/locale-number-formatter";
 export * from "./shared/persian-number-formatter";
 export * from "./shared/domain-utilities";

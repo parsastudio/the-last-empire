@@ -30,9 +30,6 @@ export const NationalProjectEffectSchema = z.object({
 
 export const NationalProjectConfigSchema = z.object({
   id: z.string(),
-  nameFa: z.string().min(1),
-  taglineFa: z.string().min(1),
-  descriptionFa: z.string().min(1),
   category: ProjectCategorySchema,
   tier: ProjectScopeTierSchema,
   totalStepsRequired: z.number().int().min(10),

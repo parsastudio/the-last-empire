@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Sparkles, Zap, Check } from "lucide-react";
 
 interface ProjectBreakthroughCardOverlayProps {
@@ -12,6 +13,8 @@ export function ProjectBreakthroughCardOverlay({
   projectName,
   onDismiss,
 }: ProjectBreakthroughCardOverlayProps) {
+  const t = useTranslations("projects");
+
   return (
     <div
       onClick={onDismiss}
@@ -27,15 +30,14 @@ export function ProjectBreakthroughCardOverlay({
         <div className="space-y-1 truncate">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono font-black text-intel uppercase tracking-widest bg-intel/15 px-2 py-0.5 rounded-md border border-intel/30">
-              جهش بزرگ علمی ⚡
+              {t("breakthroughBadge")}
             </span>
             <h4 className="text-sm md:text-base font-black text-foreground truncate">
-              شاهکار دانشمندان: جهش علمی پیش از موعد!
+              {t("breakthroughTitle")}
             </h4>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed truncate">
-            پروژه <strong className="text-foreground">«{projectName}»</strong>{" "}
-            پیش از موعد و بدون نیاز به گام‌های بعدی، همین حالا فعال شد.
+            {t("breakthroughDesc", { name: projectName })}
           </p>
         </div>
       </div>
@@ -49,7 +51,7 @@ export function ProjectBreakthroughCardOverlay({
         className="py-2.5 px-5 bg-gradient-to-r from-intel to-primary hover:from-intel/90 hover:to-primary/90 text-white rounded-2xl text-xs font-black transition-all cursor-pointer shadow-lg shadow-intel/25 hover:scale-105 active:scale-95 flex items-center gap-1.5 shrink-0 border border-intel/40"
       >
         <Zap size={14} />
-        <span>عالیه، دریافت دستاورد 🎉</span>
+        <span>{t("breakthroughAction")}</span>
         <Check size={13} strokeWidth={3} className="mr-0.5" />
       </button>
     </div>
