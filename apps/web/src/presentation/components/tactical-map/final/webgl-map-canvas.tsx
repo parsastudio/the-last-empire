@@ -38,6 +38,9 @@ export function WebGLMapCanvas({
   const hudRef = useRef<HTMLDivElement | null>(null);
   const requestRenderRef = useRef<() => void>(() => {});
 
+  const isDraggingRef = useRef<boolean>(false);
+  const hasDraggedRef = useRef<boolean>(false);
+
   const dimensions = useMapDimensions(containerRef);
   const gl = useWebGLContext(canvasRef, dimensions);
 
@@ -67,8 +70,8 @@ export function WebGLMapCanvas({
     hudRef,
     positionRef: externalPositionRef ?? { current: { x: 0, y: 0 } },
     scaleRef: externalScaleRef ?? { current: 1 },
-    isDraggingRef: { current: false },
-    hasDraggedRef: { current: false },
+    isDraggingRef,
+    hasDraggedRef,
     provincesMap,
     nationsMap,
     humanNationId,
@@ -109,6 +112,8 @@ export function WebGLMapCanvas({
     handleDragStart,
     handleTransformChange,
     handleDirectTap,
+    isDraggingRef,
+    hasDraggedRef,
   );
 
   const { requestRender } = useWebGLMapRenderer({

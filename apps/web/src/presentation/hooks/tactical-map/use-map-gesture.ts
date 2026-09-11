@@ -18,6 +18,8 @@ export function useMapGesture(
   onDragStart?: () => void,
   onTransformChange?: () => void,
   onTap?: (clientX: number, clientY: number) => void,
+  externalIsDraggingRef?: RefObject<boolean>,
+  externalHasDraggedRef?: RefObject<boolean>,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
@@ -43,8 +45,12 @@ export function useMapGesture(
   const fallbackScaleRef = useRef<number>(initial.scale);
   const lastDimensionsRef = useRef({ w: containerWidth, h: containerHeight });
 
-  const isDraggingRef = useRef<boolean>(false);
-  const hasDraggedRef = useRef<boolean>(false);
+  const fallbackIsDraggingRef = useRef<boolean>(false);
+  const fallbackHasDraggedRef = useRef<boolean>(false);
+
+  const isDraggingRef = externalIsDraggingRef ?? fallbackIsDraggingRef;
+  const hasDraggedRef = externalHasDraggedRef ?? fallbackHasDraggedRef;
+
   const dragStart = useRef<CameraPosition>({ x: 0, y: 0 });
   const mouseDownPos = useRef<CameraPosition>({ x: 0, y: 0 });
 
@@ -129,7 +135,7 @@ export function useMapGesture(
       isDraggingRef.current = false;
       setTimeout(() => {
         hasDraggedRef.current = false;
-      }, 50);
+      }, 150);
     };
 
     window.addEventListener("mouseup", handleGlobalMouseUp);
@@ -138,7 +144,7 @@ export function useMapGesture(
       window.removeEventListener("mouseup", handleGlobalMouseUp);
       window.removeEventListener("blur", handleGlobalMouseUp);
     };
-  }, []);
+  }, [isDraggingRef, hasDraggedRef]);
 
   const calculateZoom = useCallback(
     (deltaY: number, rect: DOMRect, clientX: number, clientY: number) => {
@@ -324,7 +330,7 @@ export function useMapGesture(
         isDraggingRef.current = false;
         setTimeout(() => {
           hasDraggedRef.current = false;
-        }, 80);
+        }, 150);
       } else if (e.touches.length === 1) {
         const touch = e.touches[0]!;
         touchStateRef.current.mode = "PAN";
@@ -364,6 +370,8 @@ export function useMapGesture(
     containerRef,
     positionRef,
     scaleRef,
+    isDraggingRef,
+    hasDraggedRef,
     onDragStart,
     updatePosition,
     updateScaleAndPosition,
@@ -384,7 +392,7 @@ export function useMapGesture(
         y: e.clientY - currentPos.y,
       };
     },
-    [positionRef],
+    [positionRef, isDraggingRef, hasDraggedRef],
   );
 
   const handleMouseMove = useCallback(
@@ -408,15 +416,15 @@ export function useMapGesture(
 
       updatePosition(nextPos);
     },
-    [onDragStart, updatePosition],
+    [onDragStart, updatePosition, isDraggingRef, hasDraggedRef],
   );
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
     setTimeout(() => {
       hasDraggedRef.current = false;
-    }, 50);
-  }, []);
+    }, 150);
+  }, [isDraggingRef, hasDraggedRef]);
 
   return {
     positionRef,

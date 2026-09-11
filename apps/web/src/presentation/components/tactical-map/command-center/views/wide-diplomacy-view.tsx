@@ -106,7 +106,7 @@ export function WideDiplomacyView({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-6 items-start">
         <div
           className={`md:col-span-5 lg:col-span-4 space-y-2.5 md:space-y-3 bg-background/30 p-3 md:p-4 border border-border/60 rounded-2xl md:rounded-3xl ${
             mobileTab === "list" ? "block" : "hidden md:block"
@@ -126,7 +126,7 @@ export function WideDiplomacyView({
             />
           </div>
 
-          <div className="space-y-1.5 md:space-y-2 max-h-[320px] md:max-h-[460px] lg:max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
+          <div className="space-y-1.5 md:space-y-2 max-h-[420px] md:max-h-[580px] overflow-y-auto pr-1 pb-2 touch-pan-y overscroll-contain scrollbar-thin scrollbar-thumb-border/60">
             {diplomacy.filteredRelations.length === 0 ? (
               <div className="py-12 text-center text-xs text-muted-foreground italic">
                 هیچ کشوری با این عبارت یافت نشد.
@@ -164,7 +164,7 @@ export function WideDiplomacyView({
             }
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 md:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 md:gap-5 items-start">
             <CountryProfileStats
               data={diplomacy.selectedRelation.profileData}
               allies={targetAllies}

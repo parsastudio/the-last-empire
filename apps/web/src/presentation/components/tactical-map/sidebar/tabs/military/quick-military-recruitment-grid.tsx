@@ -90,7 +90,7 @@ export function QuickMilitaryRecruitmentGrid({
           <QuickUnitRecruitCard
             key={item.type}
             info={item}
-            feedbacks={floatingFeedbacks[item.type]}
+            feedbacks={floatingFeedbacks[item.type] || []}
             onBuy={handleBuyBatch}
           />
         ))}

@@ -103,6 +103,7 @@ export function EmergencyProtectorateModal({
       title="پیمان استمداد امنیتی و استقرار ارتش ابرقدرت"
       subtitle={`استقرار ارتش سنگین ${targetName} در سنگرهای شما در ازای خراج نوبتی`}
       maxWidthClass="max-w-xl"
+      zIndexClass="z-[60]"
       onClose={onClose}
     >
       <div className="space-y-4 text-right dir-rtl font-sans pb-1">
@@ -216,11 +217,20 @@ export function EmergencyProtectorateModal({
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2">
           <button
+            type="button"
+            onClick={onClose}
+            className="sm:col-span-4 py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <span>انصراف</span>
+          </button>
+
+          <button
+            type="button"
             onClick={handleSign}
             disabled={!validation.isValid || isSubmitting}
-            className="w-full py-4 bg-rose-600 hover:bg-rose-500 disabled:bg-secondary disabled:text-muted-foreground text-white rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-rose-600/20 hover:scale-[1.005] active:scale-[0.995] border border-rose-500/40"
+            className="sm:col-span-8 py-3.5 bg-rose-600 hover:bg-rose-500 disabled:bg-secondary disabled:text-muted-foreground text-white rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl shadow-rose-600/20 hover:scale-[1.005] active:scale-[0.995] border border-rose-500/40"
           >
             {isSubmitting ? (
               <Loader2 size={16} className="animate-spin" />

@@ -203,13 +203,25 @@ void main() {
     float dipIntensity = dipData.a;
 
     if (dipIntensity > 0.05) {
-      float borderDist = calculateBorderDistance3px(v_texCoord, centerPid, centerCountryId);
+      bool isNearImmediate = (pW != centerPid || pE != centerPid || pN != centerPid || pS != centerPid);
+      bool shouldCalcGlow = isNearImmediate;
+      if (!isNearImmediate) {
+        uint pW2 = texture(u_liveStateTexture, v_texCoord + vec2(-2.0 * o.x, 0.0)).r & 4095u;
+        uint pE2 = texture(u_liveStateTexture, v_texCoord + vec2(2.0 * o.x, 0.0)).r & 4095u;
+        uint pN2 = texture(u_liveStateTexture, v_texCoord + vec2(0.0, -2.0 * o.y)).r & 4095u;
+        uint pS2 = texture(u_liveStateTexture, v_texCoord + vec2(0.0, 2.0 * o.y)).r & 4095u;
+        shouldCalcGlow = (pW2 != centerPid || pE2 != centerPid || pN2 != centerPid || pS2 != centerPid);
+      }
 
-      float innerRim3px = max(0.0, 1.0 - borderDist / 3.0) * dipIntensity;
-      float borderEdgeHighlight = max(0.0, 1.0 - borderDist / 1.5) * dipIntensity;
+      if (shouldCalcGlow) {
+        float borderDist = calculateBorderDistance3px(v_texCoord, centerPid, centerCountryId);
 
-      baseColor = mix(baseColor, dipData.rgb, innerRim3px * 0.75);
-      baseColor = mix(baseColor, dipData.rgb * 1.45 + vec3(0.12), borderEdgeHighlight * 0.55);
+        float innerRim3px = max(0.0, 1.0 - borderDist / 3.0) * dipIntensity;
+        float borderEdgeHighlight = max(0.0, 1.0 - borderDist / 1.5) * dipIntensity;
+
+        baseColor = mix(baseColor, dipData.rgb, innerRim3px * 0.75);
+        baseColor = mix(baseColor, dipData.rgb * 1.45 + vec3(0.12), borderEdgeHighlight * 0.55);
+      }
     }
   }
 

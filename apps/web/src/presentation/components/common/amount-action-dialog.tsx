@@ -48,6 +48,7 @@ export function AmountActionDialog({
       title={title}
       subtitle={subtitle}
       maxWidthClass="max-w-md"
+      zIndexClass="z-[60]"
       onClose={onClose}
     >
       <AmountActionForm

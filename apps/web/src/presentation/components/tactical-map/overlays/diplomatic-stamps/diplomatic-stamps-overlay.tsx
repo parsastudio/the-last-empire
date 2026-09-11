@@ -113,7 +113,7 @@ export function DiplomaticStampsOverlay({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(dimensions.width * dpr);
     canvas.height = Math.round(dimensions.height * dpr);
   }, [dimensions]);
@@ -147,7 +147,7 @@ export function DiplomaticStampsOverlay({
       lastY = posY;
       lastScale = scale;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const width = dimensions.width;
       const height = dimensions.height;
 
@@ -160,6 +160,11 @@ export function DiplomaticStampsOverlay({
       ctx.save();
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
 
       const placedBoxes: {
         minX: number;
@@ -237,8 +242,6 @@ export function DiplomaticStampsOverlay({
         placedBoxes.push(box);
 
         ctx.font = `bold ${fontSize}px Vazirmatn, system-ui, sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
 
         const textY = badgeConfig
           ? screenY - Math.round(fontSize * 0.45)
@@ -282,9 +285,6 @@ export function DiplomaticStampsOverlay({
 
           ctx.font = `bold ${badgeFontSize}px Vazirmatn, system-ui, sans-serif`;
           const centerY = pillY + pillHeight / 2;
-
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
 
           const iconOffset = pillWidth * 0.35;
           ctx.fillText(badgeConfig.icon, screenX + iconOffset, centerY);

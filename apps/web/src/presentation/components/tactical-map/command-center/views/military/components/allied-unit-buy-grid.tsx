@@ -109,7 +109,7 @@ export function AlliedUnitBuyGrid({
           <AlliedUnitBuyCard
             key={item.type}
             info={item}
-            feedbacks={floatingFeedbacks[item.type]}
+            feedbacks={floatingFeedbacks[item.type] || []}
             onBuy={handleBuyAlliedBatch}
           />
         ))}
