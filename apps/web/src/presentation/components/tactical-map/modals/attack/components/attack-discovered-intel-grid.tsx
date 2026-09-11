@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Sparkles,
   Shield,
@@ -30,6 +31,7 @@ export function AttackDiscoveredIntelGrid({
   auxFlag,
   onAutoOptimizeDeploy,
 }: AttackDiscoveredIntelGridProps) {
+  const t = useTranslations("attack.intel");
   const aux = forecast.auxiliaryGuarantor;
 
   return (
@@ -40,7 +42,7 @@ export function AttackDiscoveredIntelGrid({
             <CheckCircle2 size={14} />
           </div>
           <span className="text-xs font-black text-foreground">
-            اشراف اطلاعاتی کامل (زرادخانه کشف‌شده {targetNation.name}):
+            {t("fullIntelTitle", { name: targetNation.name })}
           </span>
         </div>
 
@@ -50,7 +52,7 @@ export function AttackDiscoveredIntelGrid({
           className="py-1.5 px-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 shrink-0"
         >
           <Sparkles size={13} />
-          <span>محاسبه هوشمند کمترین تلفات و پیروزی قطعی</span>
+          <span>{t("autoOptimizeDeploy")}</span>
         </button>
       </div>
 
@@ -59,18 +61,17 @@ export function AttackDiscoveredIntelGrid({
           <div className="flex items-center gap-2">
             <Skull size={16} className="text-rose-400 animate-pulse" />
             <span>
-              هشدار اشراف اطلاعاتی: کشور تحت حمایت استعماری{" "}
-              <strong>{aux.guarantorName}</strong> {auxFlag} قرار دارد.
+              {t("protectorateWarning", { name: aux.guarantorName })} {auxFlag}
             </span>
           </div>
           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
-            +
-            {PersianNumberFormatter.formatCurrency(
-              aux.initialBudgetValuation,
-              true,
-            )}{" "}
-            نیروی ضربت لِوِل{" "}
-            {PersianNumberFormatter.toPersianDigits(aux.techLevel)}
+            {t("strikeForceBudget", {
+              budget: PersianNumberFormatter.formatCurrency(
+                aux.initialBudgetValuation,
+                true,
+              ),
+              level: PersianNumberFormatter.toPersianDigits(aux.techLevel),
+            })}
           </span>
         </div>
       )}
@@ -79,7 +80,7 @@ export function AttackDiscoveredIntelGrid({
         <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
           <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
             <Shield size={10} className="text-primary" />
-            <span>پیاده‌نظام</span>
+            <span>{t("infantry")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
             {PersianNumberFormatter.formatNumberWithCommas(
@@ -91,7 +92,7 @@ export function AttackDiscoveredIntelGrid({
         <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
           <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
             <ShieldAlert size={10} className="text-military" />
-            <span>زرهی</span>
+            <span>{t("armor")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
             {PersianNumberFormatter.formatNumberWithCommas(
@@ -103,7 +104,7 @@ export function AttackDiscoveredIntelGrid({
         <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
           <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
             <Crosshair size={10} className="text-diplomacy" />
-            <span>پدافند</span>
+            <span>{t("airDefense")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
             {PersianNumberFormatter.formatNumberWithCommas(
@@ -115,7 +116,7 @@ export function AttackDiscoveredIntelGrid({
         <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
           <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
             <Plane size={10} className="text-gdp" />
-            <span>جنگنده</span>
+            <span>{t("airForce")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
             {PersianNumberFormatter.formatNumberWithCommas(
@@ -127,7 +128,7 @@ export function AttackDiscoveredIntelGrid({
         <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
           <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
             <Radio size={10} className="text-treasury" />
-            <span>موشک</span>
+            <span>{t("droneMissile")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
             {PersianNumberFormatter.formatNumberWithCommas(
@@ -140,27 +141,27 @@ export function AttackDiscoveredIntelGrid({
       <div className="flex items-center justify-between pt-1 border-t border-border/40 font-mono text-xs">
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-muted-foreground font-sans">
-            برآورد ۳ فاز:
+            {t("threePhaseForecast")}
           </span>
           <span className="text-[10px] text-foreground font-sans bg-secondary/80 px-2 py-0.5 rounded-lg border border-border/50">
             {forecast.isCapitulationPredicted
-              ? "تسلیم کامل و الحاق قطعی"
+              ? t("capitulationPredicted")
               : forecast.isVictoryPredicted
-                ? "پیروزی تاکتیکی و فتح منطقه"
-                : "شکست قطعی خطوط زمینی"}
+                ? t("tacticalVictoryPredicted")
+                : t("groundDefeatPredicted")}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-muted-foreground font-sans">
-            پیش‌بینی نهایی:
+            {t("finalPrediction")}
           </span>
           <span
             className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
           >
             {forecast.winProbability === 100
-              ? "۱۰۰٪ (پیروزی قطعی)"
-              : "۰٪ (شکست قطعی)"}
+              ? t("decisiveWin")
+              : t("decisiveLoss")}
           </span>
         </div>
       </div>

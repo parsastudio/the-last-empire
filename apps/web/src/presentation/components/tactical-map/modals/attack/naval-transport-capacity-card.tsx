@@ -1,5 +1,6 @@
 import React from "react";
-import { Ship, Anchor, AlertTriangle, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Ship, AlertTriangle, ShieldCheck } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 
@@ -14,6 +15,8 @@ export function NavalTransportCapacityCard({
   infantryDeployed,
   armorDeployed,
 }: NavalTransportCapacityCardProps) {
+  const t = useTranslations("attack.naval");
+
   const maxCapacity = NavalDeploymentClamper.calculateMaxCapacity(
     "NAVAL",
     navalFleetCount,
@@ -48,14 +51,12 @@ export function NavalTransportCapacityCard({
             <Ship size={18} />
           </div>
           <div>
-            <h4 className="text-xs font-black">
-              پایش ظرفیت ترابری ناوگان دریایی
-            </h4>
+            <h4 className="text-xs font-black">{t("monitoringTitle")}</h4>
             <span className="text-[10px] text-muted-foreground font-mono">
-              تعداد ناوگان فعال:{" "}
-              {PersianNumberFormatter.toPersianDigits(navalFleetCount)} فروند
-              (سقف حمل: {PersianNumberFormatter.toPersianDigits(maxCapacity)}{" "}
-              واحد)
+              {t("activeFleetSubtitle", {
+                count: PersianNumberFormatter.toPersianDigits(navalFleetCount),
+                max: PersianNumberFormatter.toPersianDigits(maxCapacity),
+              })}
             </span>
           </div>
         </div>
@@ -81,7 +82,7 @@ export function NavalTransportCapacityCard({
 
       <div className="space-y-1 font-mono">
         <div className="flex justify-between items-center text-[10px] text-muted-foreground font-sans">
-          <span>ضریب اشغال عرشه ناوگان:</span>
+          <span>{t("deckOccupancy")}</span>
           <span
             className={
               isOverCapacity
@@ -108,9 +109,7 @@ export function NavalTransportCapacityCard({
         <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-[10px] text-rose-400 flex items-center gap-2">
           <AlertTriangle size={14} className="shrink-0" />
           <span>
-            {maxCapacity === 0
-              ? "شما هیچ ناوگان دریایی برای اجرای تهاجم دریایی ندارید. ابتدا از پنل نظامی ناوگان بخرید."
-              : "نیروهای انتخابی از سقف ترابری ناوگان فراتر رفته است. تعداد پیاده‌نظام یا تانک‌ها را کاهش دهید."}
+            {maxCapacity === 0 ? t("noFleetWarning") : t("overCapacityWarning")}
           </span>
         </div>
       )}

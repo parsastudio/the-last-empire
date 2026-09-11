@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { LucideIcon } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
@@ -23,6 +24,8 @@ export function UnitDeploymentSlider({
   selectedCount,
   onChange,
 }: UnitDeploymentSliderProps) {
+  const t = useTranslations("attack.slider");
+
   const handlePercentageSelect = (pct: number) => {
     if (availableCount <= 0) return;
     TacticalSound.playSliderTick();
@@ -58,11 +61,12 @@ export function UnitDeploymentSlider({
             )}
           </span>
           <span className="text-muted-foreground text-[9px] md:text-[10px]">
-            از{" "}
-            {PersianNumberFormatter.toPersianDigits(
-              availableCount.toLocaleString("en-US"),
-            )}{" "}
-            {unitName}
+            {t("ofTotal", {
+              total: PersianNumberFormatter.toPersianDigits(
+                availableCount.toLocaleString("en-US"),
+              ),
+              unit: unitName,
+            })}
           </span>
         </div>
       </div>

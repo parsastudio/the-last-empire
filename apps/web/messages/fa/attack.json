@@ -1,0 +1,79 @@
+{
+  "modalTitleNaval": "اتاق جنگ: صدور فرمان عملیات آبی‌خاکی (هجوم از دریا)",
+  "modalTitleLand": "اتاق جنگ: صدور فرمان تهاجم سراسری زمینی",
+  "header": {
+    "offensiveCommand": "فرماندهی تهاجم",
+    "navalVector": "NAVAL VECTOR",
+    "landVector": "LAND VECTOR"
+  },
+  "naval": {
+    "monitoringTitle": "پایش ظرفیت ترابری ناوگان دریایی",
+    "activeFleetSubtitle": "تعداد ناوگان فعال: {count} فروند (سقف حمل: {max} واحد)",
+    "deckOccupancy": "ضریب اشغال عرشه ناوگان:",
+    "noFleetWarning": "شما هیچ ناوگان دریایی برای اجرای تهاجم دریایی ندارید. ابتدا از پنل نظامی ناوگان بخرید.",
+    "overCapacityWarning": "نیروهای انتخابی از سقف ترابری ناوگان فراتر رفته است. تعداد پیاده‌نظام یا تانک‌ها را کاهش دهید."
+  },
+  "recon": {
+    "blindTitle": "دید کور اطلاعاتی: مواضع دفاعی دشمن ناشناخته است",
+    "osintSubtitle": "برآورد موازنه قوا بر مبنای داده‌های عمومی بین‌المللی (OSINT)",
+    "scanButton": "اسکن ماهواره‌ای و کشف آرایش ارتش دشمن ({cost})",
+    "balanceEstimate": "تخمین اولیه موازنه قوا:",
+    "likelyWin": "پیروزی محتمل",
+    "likelyLoss": "شکست محتمل"
+  },
+  "intel": {
+    "fullIntelTitle": "اشراف اطلاعاتی کامل (زرادخانه کشف‌شده {name}):",
+    "autoOptimizeDeploy": "محاسبه هوشمند کمترین تلفات و پیروزی قطعی",
+    "protectorateWarning": "هشدار اشراف اطلاعاتی: کشور تحت حمایت استعماری {name} قرار دارد.",
+    "strikeForceBudget": "+{budget} نیروی ضربت لِوِل {level}",
+    "infantry": "پیاده‌نظام",
+    "armor": "زرهی",
+    "airDefense": "پدافند",
+    "airForce": "جنگنده",
+    "droneMissile": "موشک",
+    "threePhaseForecast": "برآورد ۳ فاز:",
+    "capitulationPredicted": "تسلیم کامل و الحاق قطعی",
+    "tacticalVictoryPredicted": "پیروزی تاکتیکی و فتح منطقه",
+    "groundDefeatPredicted": "شکست قطعی خطوط زمینی",
+    "finalPrediction": "پیش‌بینی نهایی:",
+    "decisiveWin": "۱۰۰٪ (پیروزی قطعی)",
+    "decisiveLoss": "۰٪ (شکست قطعی)"
+  },
+  "alerts": {
+    "alreadyAttackedTitle": "سقف عملیات در نوبت جاری تکمیل است",
+    "alreadyAttackedDesc": "شما در این دست قبلاً به مواضع {name} تهاجم نظامی کرده‌اید. در هر نوبت حداکثر ۱ بار امکان صدور فرمان حمله به یک کشور وجود دارد؛ برای تهاجم مجدد نوبت را به پایان برسانید.",
+    "inaccessibleTitle": "مسدود بودن مسیر دسترسی زمینی و دریایی",
+    "inaccessibleDesc": "هیچ مرز زمینی مشترک یا دسترسی به آب‌های آزاد برای اجرای عملیات دریایی به {region} وجود ندارد.",
+    "guarantorWarTitle": "هشدار ورود ضامن به جنگ: {names}",
+    "guarantorWarBadge": "اعلان جنگ قطعی",
+    "guarantorWarDesc": "کشور {name} دارای پیمان دفاع سرزمینی با امپراتوری {guarantors} است. در صورت تهاجم، ارتش این کشورها رسماً و بلافاصله به شما اعلان جنگ داده و جبهه نبرد جدیدی باز خواهند کرد.",
+    "mutualGuarantorTitle": "تضاد منافع حامی مشترک ({names})",
+    "mutualGuarantorDesc": "کشور {names} ضامن دفاعی همزمان شما و کشور هدف است. در صورت تهاجم، پیمان دفاعی هر دو کشور لغو شده و آن کشور اعلام بی‌طرفی می‌کند.",
+    "partnerGuarantorTitle": "پایبندی به شراکت استراتژیک با شما ({names})",
+    "partnerGuarantorDesc": "کشور {names} با شما شراکت استراتژیک اقتصادی دارد؛ لذا در صورت تهاجم به این هدف، علیه شما وارد جنگ نخواهد شد.",
+    "surpriseAttackTitle": "هشدار امنیتی: تهاجم غافلگیرانه بدون اعلان جنگ رسمی",
+    "currentStance": "وضعیت فعلی روابط: {stance}",
+    "reputationPenaltyBadge": "کاهش {points} امتیاز اعتبار",
+    "surpriseAttackDesc": "حمله مستقیم به خاک {name} بدون صدور بیانیه قبلی، نقض معاهدات بین‌المللی تلقی شده و موجب کسر {points} امتیاز از پرستیژ و جایگاه جهانی کشور شما خواهد شد."
+  },
+  "slider": {
+    "sectionTitle": "تخصیص ترکیب یگان‌های رزمی به میدان نبرد",
+    "ofTotal": "از {total} {unit}"
+  },
+  "summary": {
+    "logisticsBilling": "صورت‌حساب لجستیک و پشتیبانی تهاجم",
+    "treasury": "موجودی خزانه:",
+    "navalCostLabel": "مخارج ترابری دریایی و لجستیک:",
+    "landCostLabel": "هزینه اعزام تا مرز (لجستیک زمینی):",
+    "insufficientFundsAlert": "موجودی خزانه برای پوشش کامل مخارج لجستیکی این تهاجم کافی نیست.",
+    "navalCapacityAlert": "تعداد ناوگان فعال شما پاسخگوی ترابری این حجم از ادوات زمینی نیست.",
+    "submitting": "در حال ثبت دستور و گسیل ارتش...",
+    "alreadyAttacked": "تهاجم مجدد در این نوبت مجاز نیست",
+    "inaccessible": "عدم امکان دسترسی به منطقه تهاجم",
+    "insufficientNavalCapacity": "ظرفیت ترابری ناوگان دریایی ناکافی است",
+    "infantryRequired": "حداقل ۱ لشکر پیاده‌نظام الزامی است",
+    "insufficientTreasury": "موجودی خزانه ناکافی است",
+    "executeNaval": "صدور فرمان هجوم دریایی • {cost}",
+    "executeLand": "صدور فرمان تهاجم زمینی • {cost}"
+  }
+}

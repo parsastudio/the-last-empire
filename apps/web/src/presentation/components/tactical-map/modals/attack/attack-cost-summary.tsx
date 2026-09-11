@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Coins, Wallet, Anchor, Swords, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -30,6 +31,7 @@ export function AttackCostSummary({
   attackType = "LAND",
   onExecute,
 }: AttackCostSummaryProps) {
+  const t = useTranslations("attack.summary");
   const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
     !isAccessible ||
@@ -47,11 +49,11 @@ export function AttackCostSummary({
         <div className="flex items-center justify-between pb-2 border-b border-border/50">
           <span className="text-[11px] font-bold text-foreground font-sans flex items-center gap-1.5">
             <Coins size={14} className="text-gdp" />
-            صورت‌حساب لجستیک و پشتیبانی تهاجم
+            {t("logisticsBilling")}
           </span>
           <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-sans">
             <Wallet size={12} className="text-primary" />
-            <span>موجودی خزانه:</span>
+            <span>{t("treasury")}</span>
             <span className="font-mono font-bold text-foreground">
               {PersianNumberFormatter.formatCurrency(currentTreasury)}
             </span>
@@ -65,9 +67,7 @@ export function AttackCostSummary({
             ) : (
               <Coins size={13} className="text-gdp" />
             )}
-            {isNaval
-              ? "مخارج ترابری دریایی و لجستیک:"
-              : "هزینه اعزام تا مرز (لجستیک زمینی):"}
+            {isNaval ? t("navalCostLabel") : t("landCostLabel")}
           </span>
           <span
             className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
@@ -80,18 +80,14 @@ export function AttackCostSummary({
       {!canAfford && (
         <div className="p-3 bg-military/15 border border-military/30 rounded-2xl flex items-center gap-2 text-xs text-military">
           <ShieldAlert size={15} className="shrink-0" />
-          <span>
-            موجودی خزانه برای پوشش کامل مخارج لجستیکی این تهاجم کافی نیست.
-          </span>
+          <span>{t("insufficientFundsAlert")}</span>
         </div>
       )}
 
       {isNaval && !hasNavalCapacity && (
         <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-400">
           <Anchor size={15} className="shrink-0" />
-          <span>
-            تعداد ناوگان فعال شما پاسخگوی ترابری این حجم از ادوات زمینی نیست.
-          </span>
+          <span>{t("navalCapacityAlert")}</span>
         </div>
       )}
 
@@ -103,20 +99,28 @@ export function AttackCostSummary({
         {isNaval ? <Anchor size={16} /> : <Swords size={16} />}
         <span>
           {isSubmitting
-            ? "در حال ثبت دستور و گسیل ارتش..."
+            ? t("submitting")
             : hasAlreadyAttackedThisTurn
-              ? "تهاجم مجدد در این نوبت مجاز نیست"
+              ? t("alreadyAttacked")
               : !isAccessible
-                ? "عدم امکان دسترسی به منطقه تهاجم"
+                ? t("inaccessible")
                 : isNaval && !hasNavalCapacity
-                  ? "ظرفیت ترابری ناوگان دریایی ناکافی است"
+                  ? t("insufficientNavalCapacity")
                   : !hasSelectedInfantry
-                    ? "حداقل ۱ لشکر پیاده‌نظام الزامی است"
+                    ? t("infantryRequired")
                     : !canAfford
-                      ? "موجودی خزانه ناکافی است"
+                      ? t("insufficientTreasury")
                       : isNaval
-                        ? `صدور فرمان هجوم دریایی • ${PersianNumberFormatter.formatCurrency(totalLogisticsCost)}`
-                        : `صدور فرمان تهاجم زمینی • ${PersianNumberFormatter.formatCurrency(totalLogisticsCost)}`}
+                        ? t("executeNaval", {
+                            cost: PersianNumberFormatter.formatCurrency(
+                              totalLogisticsCost,
+                            ),
+                          })
+                        : t("executeLand", {
+                            cost: PersianNumberFormatter.formatCurrency(
+                              totalLogisticsCost,
+                            ),
+                          })}
         </span>
       </button>
     </div>

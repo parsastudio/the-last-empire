@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   ShieldAlert,
@@ -40,6 +41,7 @@ export function AttackStatusAlerts({
   mutualGuarantorNames = [],
   partnerGuarantorNames = [],
 }: AttackStatusAlertsProps) {
+  const t = useTranslations("attack.alerts");
   const isAccessible = isLandNeighbor || isNavalValid;
   const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
 
@@ -50,12 +52,10 @@ export function AttackStatusAlerts({
           <Clock size={20} className="text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-black text-sm block text-amber-400">
-              سقف عملیات در نوبت جاری تکمیل است
+              {t("alreadyAttackedTitle")}
             </span>
             <p className="text-[11px] leading-relaxed text-foreground/90">
-              شما در این دست قبلاً به مواضع {targetNationName} تهاجم نظامی
-              کرده‌اید. در هر نوبت حداکثر ۱ بار امکان صدور فرمان حمله به یک کشور
-              وجود دارد؛ برای تهاجم مجدد نوبت را به پایان برسانید.
+              {t("alreadyAttackedDesc", { name: targetNationName })}
             </p>
           </div>
         </div>
@@ -66,11 +66,10 @@ export function AttackStatusAlerts({
           <ShieldAlert size={20} className="shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-black text-sm block">
-              مسدود بودن مسیر دسترسی زمینی و دریایی
+              {t("inaccessibleTitle")}
             </span>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              هیچ مرز زمینی مشترک یا دسترسی به آب‌های آزاد برای اجرای عملیات
-              دریایی به {formattedRegionName} وجود ندارد.
+              {t("inaccessibleDesc", { region: formattedRegionName })}
             </p>
           </div>
         </div>
@@ -82,20 +81,20 @@ export function AttackStatusAlerts({
             <div className="flex items-center gap-2 text-rose-400">
               <Swords size={18} className="animate-pulse shrink-0" />
               <span className="text-xs font-black">
-                هشدار ورود ضامن به جنگ: {activeGuarantorNames.join(" و ")}
+                {t("guarantorWarTitle", {
+                  names: activeGuarantorNames.join(" - "),
+                })}
               </span>
             </div>
             <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2 py-0.5 rounded-lg">
-              اعلان جنگ قطعی
+              {t("guarantorWarBadge")}
             </span>
           </div>
           <p className="text-[11px] text-foreground/90 leading-relaxed font-medium">
-            کشور {targetNationName} دارای پیمان دفاع سرزمینی با امپراتوری{" "}
-            <strong className="text-rose-400">
-              {activeGuarantorNames.join(" و ")}
-            </strong>{" "}
-            است. در صورت تهاجم، ارتش این کشورها رسماً و بلافاصله به شما اعلان
-            جنگ داده و جبهه نبرد جدیدی باز خواهند کرد.
+            {t("guarantorWarDesc", {
+              name: targetNationName,
+              guarantors: activeGuarantorNames.join(" - "),
+            })}
           </p>
         </div>
       )}
@@ -105,13 +104,15 @@ export function AttackStatusAlerts({
           <div className="flex items-center gap-2 font-black text-amber-400">
             <AlertTriangle size={16} className="shrink-0" />
             <span>
-              تضاد منافع حامی مشترک ({mutualGuarantorNames.join(" و ")})
+              {t("mutualGuarantorTitle", {
+                names: mutualGuarantorNames.join(" - "),
+              })}
             </span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            کشور {mutualGuarantorNames.join(" و ")} ضامن دفاعی همزمان شما و کشور
-            هدف است. در صورت تهاجم، پیمان دفاعی هر دو کشور لغو شده و آن کشور
-            اعلام بی‌طرفی می‌کند.
+            {t("mutualGuarantorDesc", {
+              names: mutualGuarantorNames.join(" - "),
+            })}
           </p>
         </div>
       )}
@@ -121,14 +122,15 @@ export function AttackStatusAlerts({
           <div className="flex items-center gap-2 font-black text-emerald-400">
             <ShieldCheck size={16} className="shrink-0" />
             <span>
-              پایبندی به شراکت استراتژیک با شما (
-              {partnerGuarantorNames.join(" و ")})
+              {t("partnerGuarantorTitle", {
+                names: partnerGuarantorNames.join(" - "),
+              })}
             </span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            کشور {partnerGuarantorNames.join(" و ")} با شما شراکت استراتژیک
-            اقتصادی دارد؛ لذا در صورت تهاجم به این هدف، علیه شما وارد جنگ نخواهد
-            شد.
+            {t("partnerGuarantorDesc", {
+              names: partnerGuarantorNames.join(" - "),
+            })}
           </p>
         </div>
       )}
@@ -144,32 +146,33 @@ export function AttackStatusAlerts({
               </div>
               <div>
                 <span className="text-xs font-black text-amber-400 block">
-                  هشدار امنیتی: تهاجم غافلگیرانه بدون اعلان جنگ رسمی
+                  {t("surpriseAttackTitle")}
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono block">
-                  وضعیت فعلی روابط: {getDiplomaticStanceLabel(currentStance)}
+                  {t("currentStance", {
+                    stance: getDiplomaticStanceLabel(currentStance),
+                  })}
                 </span>
               </div>
             </div>
 
             <span className="text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1 shrink-0 animate-pulse">
               <Radio size={12} className="animate-ping text-amber-400" />
-              کاهش {PersianNumberFormatter.toPersianDigits(
-                reputationPenalty,
-              )}{" "}
-              امتیاز اعتبار
+              {t("reputationPenaltyBadge", {
+                points:
+                  PersianNumberFormatter.toPersianDigits(reputationPenalty),
+              })}
             </span>
           </div>
 
           <div className="bg-background/80 border border-amber-500/30 p-2.5 rounded-xl text-[11px] leading-relaxed text-foreground/90 font-medium flex items-center gap-2 shadow-inner">
             <Flame size={15} className="text-amber-400 shrink-0" />
             <span>
-              حمله مستقیم به خاک {targetNationName} بدون صدور بیانیه قبلی، نقض
-              معاهدات بین‌المللی تلقی شده و موجب کسر{" "}
-              <strong className="text-amber-400 font-black font-mono">
-                {PersianNumberFormatter.toPersianDigits(reputationPenalty)}
-              </strong>{" "}
-              امتیاز از پرستیژ و جایگاه جهانی کشور شما خواهد شد.
+              {t("surpriseAttackDesc", {
+                name: targetNationName,
+                points:
+                  PersianNumberFormatter.toPersianDigits(reputationPenalty),
+              })}
             </span>
           </div>
         </div>

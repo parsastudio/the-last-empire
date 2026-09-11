@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation, GameState } from "@geopolitics/domain";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
@@ -27,6 +28,9 @@ export function DirectAttackModal({
   gameState,
   onClose,
 }: DirectAttackModalProps) {
+  const t = useTranslations("attack");
+  const tMil = useTranslations("military");
+
   const form = useDirectAttackForm({
     targetNationId,
     targetProvinceId,
@@ -39,9 +43,7 @@ export function DirectAttackModal({
   if (!isOpen || !form.targetNation || !humanNation) return null;
 
   const modalTitle =
-    form.attackType === "NAVAL"
-      ? "اتاق جنگ: صدور فرمان عملیات آبی‌خاکی (هجوم از دریا)"
-      : "اتاق جنگ: صدور فرمان تهاجم سراسری زمینی";
+    form.attackType === "NAVAL" ? t("modalTitleNaval") : t("modalTitleLand");
 
   return (
     <UnifiedModalShell
@@ -98,13 +100,13 @@ export function DirectAttackModal({
 
         <div className="space-y-2 md:space-y-2.5">
           <span className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono block px-1">
-            تخصیص ترکیب یگان‌های رزمی به میدان نبرد
+            {t("slider.sectionTitle")}
           </span>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-2.5">
             <UnitDeploymentSlider
-              label={MILITARY_UNIT_VISUALS.INFANTRY.nameFa}
-              unitName={MILITARY_UNIT_VISUALS.INFANTRY.unitLabelFa}
+              label={tMil("INFANTRY.name")}
+              unitName={tMil("INFANTRY.unit")}
               icon={MILITARY_UNIT_VISUALS.INFANTRY.icon}
               iconColorClass={MILITARY_UNIT_VISUALS.INFANTRY.colorClass}
               availableCount={humanNation.military.infantry}
@@ -113,8 +115,8 @@ export function DirectAttackModal({
             />
 
             <UnitDeploymentSlider
-              label={MILITARY_UNIT_VISUALS.ARMOR.nameFa}
-              unitName={MILITARY_UNIT_VISUALS.ARMOR.unitLabelFa}
+              label={tMil("ARMOR.name")}
+              unitName={tMil("ARMOR.unit")}
               icon={MILITARY_UNIT_VISUALS.ARMOR.icon}
               iconColorClass={MILITARY_UNIT_VISUALS.ARMOR.colorClass}
               availableCount={humanNation.military.armor || 0}
@@ -123,8 +125,8 @@ export function DirectAttackModal({
             />
 
             <UnitDeploymentSlider
-              label={MILITARY_UNIT_VISUALS.AIR_FORCE.nameFa}
-              unitName={MILITARY_UNIT_VISUALS.AIR_FORCE.unitLabelFa}
+              label={tMil("AIR_FORCE.name")}
+              unitName={tMil("AIR_FORCE.unit")}
               icon={MILITARY_UNIT_VISUALS.AIR_FORCE.icon}
               iconColorClass={MILITARY_UNIT_VISUALS.AIR_FORCE.colorClass}
               availableCount={humanNation.military.airForce}
@@ -133,8 +135,8 @@ export function DirectAttackModal({
             />
 
             <UnitDeploymentSlider
-              label={MILITARY_UNIT_VISUALS.DRONE_MISSILE.nameFa}
-              unitName={MILITARY_UNIT_VISUALS.DRONE_MISSILE.unitLabelFa}
+              label={tMil("DRONE_MISSILE.name")}
+              unitName={tMil("DRONE_MISSILE.unit")}
               icon={MILITARY_UNIT_VISUALS.DRONE_MISSILE.icon}
               iconColorClass={MILITARY_UNIT_VISUALS.DRONE_MISSILE.colorClass}
               availableCount={humanNation.military.droneMissile}

@@ -30,6 +30,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     .default;
   const gameOver = (await import(`../../messages/${locale}/game-over.json`))
     .default;
+  const attack = (await import(`../../messages/${locale}/attack.json`)).default;
 
   return {
     locale,
@@ -45,6 +46,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       espionage,
       reports,
       gameOver,
+      attack,
     },
   };
 });
