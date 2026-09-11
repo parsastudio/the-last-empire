@@ -11,12 +11,19 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const common = (await import(`../../messages/${locale}/common.json`)).default;
   const projects = (await import(`../../messages/${locale}/projects.json`))
     .default;
+  const governments = (
+    await import(`../../messages/${locale}/governments.json`)
+  ).default;
+  const politics = (await import(`../../messages/${locale}/politics.json`))
+    .default;
 
   return {
     locale,
     messages: {
       common,
       projects,
+      governments,
+      politics,
     },
   };
 });

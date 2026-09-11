@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Coins, Zap, Anchor, Compass, CheckCircle2 } from "lucide-react";
 import { Nation, Province, EconomicDoctrineStance } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -19,6 +20,7 @@ export function EconomicDoctrineControlCard({
   nationsMap,
   provincesMap,
 }: EconomicDoctrineControlCardProps) {
+  const t = useTranslations("politics");
   const currentStance = nation.economicStance || "BALANCED_MIXED";
   const [selectedStance, setSelectedStance] =
     useState<EconomicDoctrineStance>(currentStance);
@@ -50,25 +52,27 @@ export function EconomicDoctrineControlCard({
     await dispatchAction(action);
   };
 
+  const doctrineName = t(`doctrines.${selectedStance}.name`);
+
   return (
     <div className="space-y-3 font-sans dir-rtl text-right">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Coins size={14} className="text-gdp" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            دیوان عواید و دکترین مالی-تجاری
+            {t("title")}
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           {previewModel.hasSeaAccess ? (
             <span className="text-[9px] font-bold font-sans text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
               <Anchor size={10} />
-              <span>شاهراه دریایی (۱۰۰٪ ترانزیت)</span>
+              <span>{t("seaAccess")}</span>
             </span>
           ) : (
             <span className="text-[9px] font-bold font-sans text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
               <Compass size={10} />
-              <span>محصور در خشکی (۵۰٪ ترانزیت)</span>
+              <span>{t("landlocked")}</span>
             </span>
           )}
         </div>
@@ -94,16 +98,16 @@ export function EconomicDoctrineControlCard({
           className="w-full py-3.5 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all shadow-md shadow-gdp/20 cursor-pointer flex items-center justify-center gap-2 border border-gdp/30"
         >
           {isSubmitting ? (
-            <span>در حال ثبت در دیوان عالی...</span>
+            <span>{t("enactingDoctrine")}</span>
           ) : !isChanged ? (
             <>
               <CheckCircle2 size={15} />
-              <span>دکترین فعلی حاکم بر کشور</span>
+              <span>{t("currentDoctrineEnacted")}</span>
             </>
           ) : (
             <>
               <Zap size={15} />
-              <span>تصویب و اجرای دکترین ({activeConfig.nameFa})</span>
+              <span>{t("enactDoctrineAction", { name: doctrineName })}</span>
             </>
           )}
         </button>
