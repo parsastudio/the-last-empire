@@ -6,8 +6,8 @@ import {
   CountryRegistry,
   getNationGdp,
   Province,
-  AppLocale,
 } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 interface UseWideDiplomacyProps {

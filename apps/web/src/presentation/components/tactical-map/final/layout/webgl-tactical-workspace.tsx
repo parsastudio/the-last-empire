@@ -17,6 +17,8 @@ import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dime
 import { CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 
 const WebGLMapCanvas = dynamic(
   () =>
@@ -111,11 +113,8 @@ export function WebGLTacticalWorkspace({
             nextState.nations[targetCanonical] ||
             nextState.nations[nextState.globalCoalition.targetNationId];
 
-          const profile = CountryRegistry.getCountry(targetCanonical);
           const resolvedTargetName = targetNation
-            ? locale === "en"
-              ? profile?.nameEn || targetNation.name
-              : targetNation.name
+            ? NationPresenter.formatName(targetNation, locale as AppLocale)
             : locale === "en"
               ? "Your Realm"
               : "امپراتوری شما";

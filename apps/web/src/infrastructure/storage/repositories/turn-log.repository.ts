@@ -106,9 +106,20 @@ export class TurnLogRepository {
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       records = records.filter((r) => {
-        const msg = r.log.message || "";
-        const event = r.log.eventCode || "";
-        return msg.toLowerCase().includes(q) || event.toLowerCase().includes(q);
+        const event = r.log.eventCode?.toLowerCase() || "";
+        const source = r.log.sourceNationId?.toLowerCase() || "";
+        const target = r.log.targetNationId?.toLowerCase() || "";
+        const msg = r.log.message?.toLowerCase() || "";
+        const paramMatches = Object.values(r.log.params || {}).some((v) =>
+          String(v).toLowerCase().includes(q),
+        );
+        return (
+          event.includes(q) ||
+          source.includes(q) ||
+          target.includes(q) ||
+          msg.includes(q) ||
+          paramMatches
+        );
       });
     }
 

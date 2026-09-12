@@ -1,12 +1,16 @@
 import { TurnLogEntry } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface TurnLogPresenterOptions {
   tEvents: (key: string, values?: Record<string, string | number>) => string;
   tDiplomacy: (key: string, values?: Record<string, string | number>) => string;
+  tDilemmas?: (key: string, values?: Record<string, string | number>) => string;
   formatCurrency: (value: number, compact?: boolean) => string;
   toDigits: (value: number | string) => string;
   sourceName: string;
   targetName: string;
+  locale?: AppLocale;
 }
 
 export class TurnLogPresenterUtility {
@@ -18,24 +22,34 @@ export class TurnLogPresenterUtility {
     const {
       tEvents,
       tDiplomacy,
+      tDilemmas,
       formatCurrency,
       toDigits,
       sourceName,
       targetName,
+      locale = "fa",
     } = options;
 
     switch (log.eventCode) {
-      case "WAR_DECLARED":
+      case "WAR_DECLARED": {
         if (params["isRetaliation"]) {
+          const protectedTarget = params["protectedTargetId"]
+            ? NationPresenter.formatName(
+                String(params["protectedTargetId"]),
+                locale,
+              )
+            : String(params["protectedTargetName"] || targetName);
+
           return tEvents("WAR_DECLARED_RETALIATION", {
             source: sourceName,
-            target: String(params["protectedTargetName"] || targetName),
+            target: protectedTarget,
           });
         }
         return tEvents("WAR_DECLARED", {
           source: sourceName,
           target: targetName,
         });
+      }
 
       case "VICTORY_ACHIEVED":
         if (params["reason"] === "HUMAN_PLAYER_DEFEATED") {
@@ -46,10 +60,8 @@ export class TurnLogPresenterUtility {
       case "COALITION_FORMED":
         return tEvents("COALITION_FORMED", { source: sourceName });
 
-      case "BATTLE_TACTICAL_REPORT": {
-        if (params["humanHeadline"]) {
-          return String(params["humanHeadline"]);
-        }
+      case "BATTLE_TACTICAL_REPORT":
+      case "BATTLE_GLOBAL_NEWS": {
         const outcome = String(params["outcome"] || "VICTORY");
         const ratio = toDigits(String(params["ratio"] || "1"));
         if (outcome === "CAPITULATION") {
@@ -59,20 +71,6 @@ export class TurnLogPresenterUtility {
             ratio,
           });
         }
-        if (outcome === "DEFENDED") {
-          return tEvents("BATTLE_DEFENDED", {
-            source: sourceName,
-            target: targetName,
-          });
-        }
-        return tEvents("BATTLE_VICTORY", {
-          source: sourceName,
-          target: targetName,
-        });
-      }
-
-      case "BATTLE_GLOBAL_NEWS": {
-        const outcome = String(params["outcome"] || "VICTORY");
         if (outcome === "DEFENDED") {
           return tEvents("BATTLE_DEFENDED", {
             source: sourceName,
@@ -221,12 +219,33 @@ export class TurnLogPresenterUtility {
         return tEvents("MACHINERY_EXPORT_SUMMARY", { count, profit });
       }
 
-      case "DILEMMA_RESOLVED":
+      case "DILEMMA_RESOLVED": {
+        const eventId = String(params["eventId"] || "");
+        const choiceId = String(params["choiceId"] || "");
+
+        let resolvedTitle = String(params["eventTitle"] || "");
+        let resolvedChoice = String(params["choiceLabel"] || "");
+
+        if (tDilemmas && eventId) {
+          try {
+            resolvedTitle = tDilemmas(`events.${eventId}.title`);
+          } catch {}
+        }
+
+        if (tDilemmas && eventId && choiceId) {
+          try {
+            resolvedChoice = tDilemmas(
+              `events.${eventId}.choices.${choiceId}.label`,
+            );
+          } catch {}
+        }
+
         return tEvents("DILEMMA_RESOLVED", {
           source: sourceName,
-          title: String(params["eventTitle"] || ""),
-          choice: String(params["choiceLabel"] || ""),
+          title: resolvedTitle,
+          choice: resolvedChoice,
         });
+      }
 
       case "GENERIC_EVENT":
       default:

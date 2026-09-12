@@ -29,6 +29,7 @@ export function useReportCardMeta({
   const { locale, formatCurrency, toDigits } = useLocaleFormatter();
   const tEvents = useTranslations("reports.events");
   const tDiplomacy = useTranslations("diplomacy");
+  const tDilemmas = useTranslations("dilemmas");
 
   const source = useMemo(
     () => NationResolverUtility.resolve(log.sourceNationId, nationsMap, locale),
@@ -48,10 +49,12 @@ export function useReportCardMeta({
     return TurnLogPresenterUtility.format(log, {
       tEvents,
       tDiplomacy,
+      tDilemmas,
       formatCurrency,
       toDigits,
       sourceName: source.name,
       targetName: target?.name || "",
+      locale,
     });
   }, [
     log,
@@ -59,8 +62,10 @@ export function useReportCardMeta({
     target?.name,
     tEvents,
     tDiplomacy,
+    tDilemmas,
     formatCurrency,
     toDigits,
+    locale,
   ]);
 
   const battleReportData = useMemo<BattleFullReportData | null>(() => {

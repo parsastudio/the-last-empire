@@ -14,6 +14,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { CoalitionAlertData } from "@/presentation/stores/use-ui-store";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface CoalitionAlertModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export function CoalitionAlertModal({
   onClose,
 }: CoalitionAlertModalProps) {
   const t = useTranslations("reports.coalition");
-  const { toDigits, formatLevel } = useLocaleFormatter();
+  const { toDigits, formatLevel, locale } = useLocaleFormatter();
 
   useEffect(() => {
     if (isOpen) {
@@ -42,9 +43,10 @@ export function CoalitionAlertModal({
   const memberNations = data.memberIds
     .map((id) => {
       const nation = nationsMap?.[id];
+      const name = NationPresenter.formatName(nation || id, locale);
       return {
         id,
-        name: nation ? nation.name : id,
+        name,
         flag: getFlagEmoji(nation?.flagCode || id),
         techLevel: nation?.military.techLevel ?? 1,
       };

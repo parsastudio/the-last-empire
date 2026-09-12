@@ -1,6 +1,9 @@
-import { LocaleNumberFormatter, AppLocale } from "@geopolitics/domain";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { CountryRegistry } from "@/domain/data/countries";
+import {
+  LocaleNumberFormatter,
+  AppLocale,
+} from "@/presentation/utils/locale-number-formatter";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 export interface FormattedNationSummary {
   id: string;

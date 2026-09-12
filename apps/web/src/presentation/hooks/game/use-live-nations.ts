@@ -5,7 +5,8 @@ import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { NationGettersUtility, AppLocale } from "@geopolitics/domain";
+import { NationGettersUtility } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface LiveNationItem {
