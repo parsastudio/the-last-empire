@@ -29,7 +29,21 @@
   "stabilityCard": {
     "title": "Domestic Political Stability",
     "fluctuation": "Turn Stability Fluctuation:",
-    "perTurn": "/ turn"
+    "perTurn": "/ turn",
+    "brackets": {
+      "GOLDEN_AGE": "Golden Age (Peak Hegemony & Prosperity)",
+      "PROSPERITY": "Economic Boom & Security",
+      "STABLE": "Stable & Calm Governance",
+      "CIVIL_UNREST": "Civil Unrest & Economic Contraction",
+      "SYSTEMIC_CRISIS": "Systemic Crisis & Collapse Risk"
+    },
+    "rateTexts": {
+      "GOLDEN_AGE": "+10% Gross National Revenue",
+      "PROSPERITY": "+5% Gross National Revenue",
+      "STABLE": "0% (Neutral Revenue Impact)",
+      "CIVIL_UNREST": "-12% National Output Penalty",
+      "SYSTEMIC_CRISIS": "-30% Severe Revenue Collapse"
+    }
   },
   "reputation": {
     "title": "Global Standing & Sovereign Prestige",

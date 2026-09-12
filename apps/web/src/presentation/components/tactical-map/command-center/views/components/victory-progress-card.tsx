@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { Swords, Coins, Sparkles, Target } from "lucide-react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface VictoryProgressCardProps {
   nationId: string;
@@ -15,6 +15,7 @@ export function VictoryProgressCard({
   gameState,
 }: VictoryProgressCardProps) {
   const t = useTranslations("overview.victory");
+  const { formatPercent } = useLocaleFormatter();
 
   const metrics = useMemo(() => {
     return VictoryChecker.calculateProgress(gameState || null, nationId);
@@ -31,7 +32,7 @@ export function VictoryProgressCard({
   );
 
   return (
-    <div className="space-y-3 dir-rtl text-right font-sans">
+    <div className="space-y-3 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Target size={14} className="text-amber-500" />
@@ -62,10 +63,7 @@ export function VictoryProgressCard({
           <div className="space-y-1.5 py-1">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl md:text-3xl font-black font-mono text-military tracking-tight">
-                {PersianNumberFormatter.toPersianDigits(
-                  metrics.territorySharePct,
-                )}
-                ٪
+                {formatPercent(metrics.territorySharePct, 1)}
               </span>
               <span className="text-[11px] text-muted-foreground font-sans">
                 {t("territoryExtent")}
@@ -97,7 +95,7 @@ export function VictoryProgressCard({
           <div className="space-y-1.5 py-1">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl md:text-3xl font-black font-mono text-gdp tracking-tight">
-                {PersianNumberFormatter.toPersianDigits(metrics.gdpSharePct)}٪
+                {formatPercent(metrics.gdpSharePct, 1)}
               </span>
               <span className="text-[11px] text-muted-foreground font-sans">
                 {t("wealthExtent")}

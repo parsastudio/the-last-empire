@@ -8,7 +8,7 @@ import {
   ArrowUpRight,
   TrendingDown,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface EconomyStatsSectionProps {
   gdp: number;
@@ -28,24 +28,16 @@ export function EconomyStatsSection({
   totalActiveFactories,
 }: EconomyStatsSectionProps) {
   const t = useTranslations("overview.economy");
+  const { formatCurrency, formatNumber } = useLocaleFormatter();
 
-  const compactTreasury = PersianNumberFormatter.formatCurrency(treasury, true);
-  const formattedGdp = PersianNumberFormatter.formatCurrency(gdp, true);
-  const formattedDebt = PersianNumberFormatter.formatCurrency(
-    Math.round(nationalDebt),
-    true,
-  );
-  const formattedLoanAvailable = PersianNumberFormatter.formatCurrency(
-    availableLoanLimit,
-    true,
-  );
-  const formattedInterest = PersianNumberFormatter.formatCurrency(
-    debtInterestPerTurn,
-    true,
-  );
+  const formattedGdp = formatCurrency(gdp, true);
+  const compactTreasury = formatCurrency(treasury, true);
+  const formattedDebt = formatCurrency(Math.round(nationalDebt), true);
+  const formattedLoanAvailable = formatCurrency(availableLoanLimit, true);
+  const formattedInterest = formatCurrency(debtInterestPerTurn, true);
 
   return (
-    <div className="space-y-3 dir-rtl text-right font-sans">
+    <div className="space-y-3 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Coins size={14} className="text-gdp" />
@@ -83,10 +75,7 @@ export function EconomyStatsSection({
           </span>
           <span className="text-sm font-black text-foreground block">
             {t("factoryUnit", {
-              count:
-                PersianNumberFormatter.formatNumberWithCommas(
-                  totalActiveFactories,
-                ),
+              count: formatNumber(totalActiveFactories),
             })}
           </span>
         </div>

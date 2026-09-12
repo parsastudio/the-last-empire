@@ -1,10 +1,8 @@
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Landmark, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
-import {
-  PersianNumberFormatter,
-  StabilityBracketUtility,
-} from "@geopolitics/domain";
+import { StabilityBracketUtility } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface PoliticalStabilityCardProps {
   stability: number;
@@ -16,20 +14,19 @@ export function PoliticalStabilityCard({
   stabilityDelta,
 }: PoliticalStabilityCardProps) {
   const t = useTranslations("overview.stabilityCard");
+  const { formatPercent, toDigits } = useLocaleFormatter();
 
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(stability),
     [stability],
   );
 
-  const deltaText =
-    stabilityDelta >= 0
-      ? `+${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ ${t("perTurn")}`
-      : `${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ ${t("perTurn")}`;
+  const deltaSign = stabilityDelta >= 0 ? "+" : "";
+  const deltaText = `${deltaSign}${toDigits(stabilityDelta)}% ${t("perTurn")}`;
 
   return (
     <div
-      className={`bg-background/60 border ${bracket.borderColorClass} p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between`}
+      className={`bg-background/60 border ${bracket.borderColorClass} p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between text-start font-sans`}
     >
       <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-primary/60 via-gdp/40 to-transparent" />
       <div className="flex items-center justify-between">
@@ -40,7 +37,7 @@ export function PoliticalStabilityCard({
         <span
           className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-bold border ${bracket.badgeStyleClass}`}
         >
-          {bracket.labelFa}
+          {t(`brackets.${bracket.type}`)}
         </span>
       </div>
 
@@ -48,11 +45,11 @@ export function PoliticalStabilityCard({
         <span
           className={`text-3xl md:text-4xl font-black font-mono ${bracket.textColorClass} tracking-tight drop-shadow-sm`}
         >
-          {PersianNumberFormatter.toPersianDigits(stability)}٪
+          {formatPercent(stability)}
         </span>
         <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
           <Sparkles size={11} className={bracket.textColorClass} />
-          <span>{bracket.rateTextFa}</span>
+          <span>{t(`rateTexts.${bracket.type}`)}</span>
         </span>
       </div>
 
