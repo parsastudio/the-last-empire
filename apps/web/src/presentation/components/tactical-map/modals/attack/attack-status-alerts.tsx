@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   ShieldAlert,
@@ -9,9 +9,8 @@ import {
   ShieldCheck,
   Clock,
 } from "lucide-react";
-import { DiplomaticStance, AppLocale } from "@geopolitics/domain";
+import { DiplomaticStance } from "@geopolitics/domain";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
-import { getDiplomaticStanceLabel } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackStatusAlertsProps {
@@ -42,15 +41,16 @@ export function AttackStatusAlerts({
   partnerGuarantorNames = [],
 }: AttackStatusAlertsProps) {
   const t = useTranslations("attack.alerts");
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
-  const { toDigits } = useLocaleFormatter();
+  const tDiplomacy = useTranslations("diplomacy.stances");
+  const { locale, toDigits } = useLocaleFormatter();
 
   const isAccessible = isLandNeighbor || isNavalValid;
   const formattedRegionName = ProvinceNameFormatter.format(
     targetRegionName,
     locale,
   );
+
+  const stanceLabel = tDiplomacy(currentStance);
 
   return (
     <div className="space-y-3 text-start font-sans">
@@ -157,7 +157,7 @@ export function AttackStatusAlerts({
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono block">
                   {t("currentStance", {
-                    stance: getDiplomaticStanceLabel(currentStance, locale),
+                    stance: stanceLabel,
                   })}
                 </span>
               </div>

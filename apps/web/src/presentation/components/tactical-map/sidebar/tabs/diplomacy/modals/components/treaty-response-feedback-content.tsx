@@ -37,10 +37,7 @@ export function TreatyResponseFeedbackContent({
   const tCommon = useTranslations("common");
 
   const isAccepted = feedback.accepted;
-  let proposalName = feedback.proposalType;
-  try {
-    proposalName = tDiplomacy(`proposalTypes.${feedback.proposalType}`);
-  } catch {}
+  const proposalName = tDiplomacy(`proposalTypes.${feedback.proposalType}`);
 
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
   const isSecurityCancel =
