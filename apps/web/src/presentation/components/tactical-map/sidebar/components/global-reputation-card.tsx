@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Globe, ShieldAlert } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface GlobalReputationCardProps {
   reputation: number;
@@ -11,6 +11,7 @@ export function GlobalReputationCard({
   reputation,
 }: GlobalReputationCardProps) {
   const t = useTranslations("overview.reputation");
+  const { toDigits } = useLocaleFormatter();
 
   const reputationStyle =
     reputation > 0
@@ -36,7 +37,7 @@ export function GlobalReputationCard({
 
   return (
     <div
-      className={`bg-background/60 border ${reputationStyle.border} p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between`}
+      className={`bg-background/60 border ${reputationStyle.border} p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between text-start font-sans`}
     >
       <div
         className={`absolute top-0 right-0 left-0 h-1 bg-gradient-to-r ${reputationStyle.topLine} to-transparent`}
@@ -66,7 +67,7 @@ export function GlobalReputationCard({
           className={`text-3xl md:text-4xl font-black font-mono ${reputationStyle.text} tracking-tight drop-shadow-sm`}
         >
           {reputation > 0 ? "+" : ""}
-          {PersianNumberFormatter.toPersianDigits(reputation)}
+          {toDigits(reputation)}
         </span>
         <span className="text-[10px] text-muted-foreground font-sans">
           {t("scoreSubtitle")}

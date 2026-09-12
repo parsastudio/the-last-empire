@@ -24,7 +24,7 @@ export function GovernmentStatusSection({
     : 0;
 
   return (
-    <div className="space-y-3 dir-rtl text-right font-sans">
+    <div className="space-y-3 text-start font-sans">
       <div className="flex items-center gap-2 px-1">
         <Landmark size={14} className="text-diplomacy" />
         <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">

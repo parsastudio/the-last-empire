@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Trophy, Swords, Cpu, Users } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { GameDifficulty } from "@geopolitics/domain";
 import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface NationHeaderCardProps {
   name: string;
@@ -31,6 +31,7 @@ export function NationHeaderCard({
 }: NationHeaderCardProps) {
   const t = useTranslations("overview.header");
   const tDiff = useTranslations("selectNation.difficulty");
+  const { locale, toDigits, formatLevel } = useLocaleFormatter();
 
   const formatted = useMemo(() => {
     const summary = NationPresentationMapper.formatNationSummary(
@@ -42,18 +43,17 @@ export function NationHeaderCard({
       0,
       population,
       governmentType,
+      0,
+      locale,
     );
 
     return {
       flagEmoji: summary.flagEmoji,
+      displayName: summary.name,
       formattedPopulation: summary.populationText,
       governmentLabel: summary.governmentLabel,
-      militaryTechFormatted: PersianNumberFormatter.toPersianDigits(
-        militaryTechLevel.toFixed(1),
-      ),
-      industrialTechFormatted: PersianNumberFormatter.toPersianDigits(
-        industrialLevel.toFixed(1),
-      ),
+      militaryTechFormatted: formatLevel(militaryTechLevel),
+      industrialTechFormatted: formatLevel(industrialLevel),
     };
   }, [
     code,
@@ -64,6 +64,8 @@ export function NationHeaderCard({
     governmentType,
     militaryTechLevel,
     industrialLevel,
+    locale,
+    formatLevel,
   ]);
 
   const diffVisual =
@@ -71,7 +73,7 @@ export function NationHeaderCard({
   const DiffIcon = diffVisual.icon;
 
   return (
-    <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl dir-rtl text-right font-sans relative overflow-hidden">
+    <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl text-start font-sans relative overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
         <div className="flex items-center gap-3.5">
           <div className="w-14 h-14 rounded-2xl bg-secondary/80 border border-border/80 flex items-center justify-center text-4xl shadow-inner select-none shrink-0 ring-1 ring-primary/20">
@@ -80,7 +82,7 @@ export function NationHeaderCard({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <h2 className="text-base md:text-lg font-black text-foreground tracking-tight">
-                {name}
+                {formatted.displayName}
               </h2>
               <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-md text-muted-foreground border border-border/60">
                 {code}
@@ -96,7 +98,7 @@ export function NationHeaderCard({
           <Trophy size={16} className="text-amber-500" />
           <span className="text-xs font-black font-mono text-amber-400">
             {t("worldRank", {
-              rank: PersianNumberFormatter.toPersianDigits(rank),
+              rank: toDigits(rank),
             })}
           </span>
         </div>
@@ -108,7 +110,7 @@ export function NationHeaderCard({
             <Users size={13} className="text-primary shrink-0" />
             <span>{t("populationLabel")}</span>
           </span>
-          <span className="text-xs font-extrabold text-foreground block">
+          <span className="text-xs font-extrabold text-foreground block font-mono">
             {formatted.formattedPopulation}
           </span>
         </div>
@@ -118,8 +120,8 @@ export function NationHeaderCard({
             <Swords size={13} className="text-amber-400 shrink-0" />
             <span>{t("militaryTechLabel")}</span>
           </span>
-          <span className="text-xs font-black text-amber-400 block">
-            {t("levelFormat", { level: formatted.militaryTechFormatted })}
+          <span className="text-xs font-black text-amber-400 block font-mono">
+            {formatted.militaryTechFormatted}
           </span>
         </div>
 
@@ -128,8 +130,8 @@ export function NationHeaderCard({
             <Cpu size={13} className="text-primary shrink-0" />
             <span>{t("industrialTechLabel")}</span>
           </span>
-          <span className="text-xs font-black text-primary block">
-            {t("levelFormat", { level: formatted.industrialTechFormatted })}
+          <span className="text-xs font-black text-primary block font-mono">
+            {formatted.industrialTechFormatted}
           </span>
         </div>
 
@@ -144,7 +146,9 @@ export function NationHeaderCard({
             />
             <span>{t("difficultyLabel")}</span>
           </span>
-          <span className={`text-xs font-black ${diffVisual.textColor} block`}>
+          <span
+            className={`text-xs font-black ${diffVisual.textColor} block font-sans`}
+          >
             {tDiff(`${difficulty}.name`)}
           </span>
         </div>

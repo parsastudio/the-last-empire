@@ -29,7 +29,21 @@
   "stabilityCard": {
     "title": "ثبات سیاسی داخلی",
     "fluctuation": "نوسان نوبتی ثبات:",
-    "perTurn": "/ نوبت"
+    "perTurn": "/ نوبت",
+    "brackets": {
+      "GOLDEN_AGE": "عصر طلایی (اوج قدرت و شکوفایی)",
+      "PROSPERITY": "امنیت و رونق اقتصادی",
+      "STABLE": "اوضاع آرام و پایدار",
+      "CIVIL_UNREST": "اعتراضات خیابانی و رکود",
+      "SYSTEMIC_CRISIS": "شورش سراسری و خطر سقوط دولت"
+    },
+    "rateTexts": {
+      "GOLDEN_AGE": "+۱۰٪ درآمد ناخالص کل کشور",
+      "PROSPERITY": "+۵٪ درآمد ناخالص کل کشور",
+      "STABLE": "۰٪ (بدون تغییر درآمد)",
+      "CIVIL_UNREST": "-۱۲٪ افت عواید کل کشور",
+      "SYSTEMIC_CRISIS": "-۳۰٪ افت شدید درآمد کشور"
+    }
   },
   "reputation": {
     "title": "اعتبار و پرستیژ جهانی",

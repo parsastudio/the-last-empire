@@ -1,8 +1,8 @@
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CommandCenterTabRouter } from "@/presentation/components/tactical-map/command-center/command-center-tab-router";
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, CountryRegistry } from "@geopolitics/domain";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { CommandBreadcrumb } from "@/presentation/components/tactical-map/navigation/command-breadcrumb";
@@ -31,12 +31,16 @@ export function CommandCenterModal({
   onNavigateTab,
 }: CommandCenterModalProps) {
   const t = useTranslations("hud");
+  const locale = useLocale();
 
   if (!activeTab || !nation) return null;
 
   const tabTitle = t(`rail.tabs.${activeTab}`);
   const warRoomTitle = t("rail.warRoom");
-  const modalSubtitle = `${warRoomTitle} • ${nation.name}`;
+  const profile = CountryRegistry.getCountry(nation.id);
+  const nationDisplayName =
+    locale === "en" ? profile?.nameEn || nation.name : nation.name;
+  const modalSubtitle = `${warRoomTitle} • ${nationDisplayName}`;
 
   return (
     <UnifiedModalShell
@@ -47,7 +51,7 @@ export function CommandCenterModal({
       onClose={onClose}
     >
       <div className="space-y-4">
-        <div className="pb-2 text-right dir-rtl border-b border-border/40">
+        <div className="pb-2 text-start border-b border-border/40">
           <CommandBreadcrumb
             activeTab={activeTab}
             subTabLabel={activeSubTab}
