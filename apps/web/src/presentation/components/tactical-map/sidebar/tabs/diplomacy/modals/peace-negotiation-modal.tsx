@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Coins,
   MapPin,
@@ -22,8 +23,8 @@ import {
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
@@ -44,6 +45,8 @@ export function PeaceNegotiationModal({
   currentTurn,
   onClose,
 }: PeaceNegotiationModalProps) {
+  const t = useTranslations("diplomacy.peaceModal");
+  const { formatCurrency, toDigits } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -100,12 +103,12 @@ export function PeaceNegotiationModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title={`میز مذاکرات آتش‌بس و شروط صلح با ${targetNation.name}`}
-      subtitle="محاسبه زنده موازنه قوا و تعیین شروط تسلیم یا آتش‌بس"
+      title={t("title", { name: targetNation.name })}
+      subtitle={t("subtitle")}
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-md backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-border/70 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
@@ -116,8 +119,7 @@ export function PeaceNegotiationModal({
                 {humanNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
-                ارزش ارتش و خزانه:{" "}
-                {PersianNumberFormatter.formatCurrency(terms.targetTwmi, true)}
+                {t("twmiValuation")} {formatCurrency(terms.targetTwmi, true)}
               </span>
             </div>
           </div>
@@ -127,21 +129,20 @@ export function PeaceNegotiationModal({
               <Scale size={18} />
             </div>
             <span className="text-[9px] font-mono font-black text-muted-foreground">
-              تراز قوا: {PersianNumberFormatter.toPersianDigits(terms.ratio)}x
+              {t("powerRatio", { ratio: toDigits(terms.ratio) })}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-left dir-ltr">
+          <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-border/70 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
               {targetFlag}
             </div>
-            <div className="space-y-0.5 text-right">
+            <div className="space-y-0.5 text-end">
               <span className="text-sm font-black text-foreground block">
                 {targetNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
-                ارزش ارتش و خزانه:{" "}
-                {PersianNumberFormatter.formatCurrency(terms.sourceTwmi, true)}
+                {t("twmiValuation")} {formatCurrency(terms.sourceTwmi, true)}
               </span>
             </div>
           </div>
@@ -198,14 +199,14 @@ export function PeaceNegotiationModal({
               }`}
             >
               {isDominantAi
-                ? "امتناع از صلح به دلیل قدرت بالاتر"
+                ? t("badges.aiRefusal")
                 : isCrushedAi
-                  ? "استیصال و واگذاری حداکثر قلمرو"
+                  ? t("badges.aiDesperation")
                   : isWhitePeace
-                    ? "موازنه برابر"
+                    ? t("badges.whitePeace")
                     : terms.isAiOffering
-                      ? "پیشنهاد پرداخت غرامت توسط دشمن"
-                      : "مطالبه غرامت سنگین از شما"}
+                      ? t("badges.aiOffering")
+                      : t("badges.humanDemanded")}
             </span>
           </div>
 
@@ -220,8 +221,8 @@ export function PeaceNegotiationModal({
                   <Coins size={12} className="text-gdp" />
                   <span>
                     {terms.isAiOffering
-                      ? "غرامت پرداختی به خزانه شما:"
-                      : "غرامت مطالبه‌شده از خزانه شما:"}
+                      ? t("indemnityPayment")
+                      : t("indemnityDemand")}
                   </span>
                 </span>
                 <span
@@ -230,10 +231,7 @@ export function PeaceNegotiationModal({
                   }`}
                 >
                   {terms.isAiOffering ? "+" : "-"}
-                  {PersianNumberFormatter.formatCurrency(
-                    terms.moneyAmount,
-                    true,
-                  )}
+                  {formatCurrency(terms.moneyAmount, true)}
                 </span>
               </div>
             )}
@@ -244,12 +242,12 @@ export function PeaceNegotiationModal({
                   <MapPin size={12} className="text-primary" />
                   <span>
                     {terms.isAiOffering
-                      ? "استان‌های واگذارشده به شما:"
-                      : "استان‌های مورد مطالبه حریف:"}
+                      ? t("cededProvinces")
+                      : t("demandedProvinces")}
                   </span>
                 </span>
                 <span className="font-black text-foreground text-xs block truncate font-sans">
-                  {terms.concededProvincesNames.join("، ")}
+                  {terms.concededProvincesNames.join(", ")}
                 </span>
               </div>
             )}
@@ -263,7 +261,7 @@ export function PeaceNegotiationModal({
             className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <Swords size={15} />
-            <span>رد صلح و ادامه جنگ تا نابودی دشمن</span>
+            <span>{t("rejectAndFight")}</span>
           </button>
 
           <button
@@ -285,10 +283,10 @@ export function PeaceNegotiationModal({
             )}
             <span>
               {isProcessing || isSubmitting
-                ? "در حال پردازش معاهده صلح..."
+                ? t("submitting")
                 : !terms.canAffordTerms
                   ? terms.headline
-                  : "امضا و تصویب معاهده صلح"}
+                  : t("signAndRatify")}
             </span>
           </button>
         </div>

@@ -9,5 +9,28 @@
     "or": " or ",
     "diplomacy": "diplomatic statecraft",
     "suffix": " to conquer the globe."
+  },
+  "console": {
+    "newCampaign": "Forge New Empire",
+    "loadCampaign": "Open Archived Dossier"
+  },
+  "briefing": {
+    "title": "Live Command Feed"
+  },
+  "ticker": {
+    "radar": "Air Defense Radar Online 100%",
+    "satellite": "Satellite Uplink: Connected",
+    "border": "Border Surveillance: Active",
+    "logistics": "Supply Chain: Stable"
+  },
+  "saves": {
+    "modalTitle": "Load Archived Campaigns",
+    "modalSubtitle": "Campaign Dossier Registry & Local State Storage",
+    "loading": "Restoring campaign intelligence...",
+    "searching": "Querying local campaign database...",
+    "empty": "No saved campaign archives found. Found a new empire to begin.",
+    "turnPrefix": "Turn: {turn}",
+    "confirmDelete": "Confirm delete?",
+    "deleteTitle": "Delete Archived Campaign"
   }
 }

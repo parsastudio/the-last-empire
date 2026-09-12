@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { GameDifficulty, DIFFICULTY_CONFIGS } from "@geopolitics/domain";
 import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
@@ -12,17 +13,18 @@ export function GameDifficultySelector({
   selectedDifficulty,
   onSelect,
 }: GameDifficultySelectorProps) {
+  const t = useTranslations("selectNation.difficulty");
+
   return (
-    <div className="space-y-2.5 dir-rtl text-right font-sans">
+    <div className="space-y-2.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <span className="text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
-          سطح دشواری بازی
+          {t("title")}
         </span>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         {(Object.keys(DIFFICULTY_CONFIGS) as GameDifficulty[]).map((key) => {
-          const config = DIFFICULTY_CONFIGS[key];
           const isSelected = selectedDifficulty === key;
           const visual = DIFFICULTY_VISUAL_CONFIGS[key];
           const Icon = visual.icon;
@@ -32,7 +34,7 @@ export function GameDifficultySelector({
               key={key}
               type="button"
               onClick={() => onSelect(key)}
-              className={`p-3.5 rounded-2xl text-right transition-all border flex flex-col justify-between gap-3 cursor-pointer relative overflow-hidden group ${
+              className={`p-3.5 rounded-2xl text-start transition-all border flex flex-col justify-between gap-3 cursor-pointer relative overflow-hidden group ${
                 isSelected
                   ? `${visual.activeBg} ${visual.activeBorder} shadow-lg ring-1 scale-[1.01]`
                   : "bg-background/40 border-border/70 hover:bg-secondary/50 hover:border-border"
@@ -66,10 +68,10 @@ export function GameDifficultySelector({
                     isSelected ? visual.textColor : "text-foreground"
                   }`}
                 >
-                  {config.nameFa}
+                  {t(`${key}.name`)}
                 </span>
                 <span className="text-[10px] text-muted-foreground block truncate font-medium">
-                  {config.taglineFa}
+                  {t(`${key}.tagline`)}
                 </span>
               </div>
             </button>

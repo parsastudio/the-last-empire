@@ -9,5 +9,23 @@
   "warning": "هشدار",
   "turn": "نوبت",
   "language": "تغییر زبان",
-  "tacticalEngineLoading": "در حال بارگذاری موتور تاکتیکی و پرونده استراتژیک..."
+  "tacticalEngineLoading": "در حال بارگذاری موتور تاکتیکی و پرونده استراتژیک...",
+  "understood": "متوجه شدم",
+  "submittingOrder": "در حال ثبت دستور...",
+  "maxLimit": "حداکثر سقف مجاز:",
+  "requestedAmount": "مقدار درخواستی:",
+  "actionUnavailable": "امکان انجام این عملیات با شرایط فعلی وجود ندارد.",
+  "units": {
+    "billion": "میلیارد دلار",
+    "million": "میلیون دلار",
+    "citizens": "نفر",
+    "facilities": "سوله",
+    "level": "سطح {level}"
+  },
+  "errors": {
+    "campaignCreateFailed": "خطا در ایجاد کمپین جدید بازی",
+    "campaignSaveFailed": "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",
+    "actionExecutionFailed": "امکان اجرای این دستور وجود ندارد.",
+    "actionFailedTitle": "خطا در اجرای دستور"
+  }
 }

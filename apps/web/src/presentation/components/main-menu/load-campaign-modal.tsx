@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useSavedCampaigns } from "./hooks/use-saved-campaigns";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { SaveItemCard, SaveItemData } from "./components/save-item-card";
@@ -16,6 +17,7 @@ export function LoadCampaignModal({
   onClose,
   onSelectSave,
 }: LoadCampaignModalProps) {
+  const t = useTranslations("menu.saves");
   const [loadingSaveId, setLoadingSaveId] = useState<string | null>(null);
   const { saves, loading: isDbLoading, deleteSave } = useSavedCampaigns();
 
@@ -33,18 +35,18 @@ export function LoadCampaignModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="بارگذاری بازی‌های ذخیره‌شده"
-      subtitle="پایگاه داده اسناد بازی و ذخیره‌های محلی"
+      title={t("modalTitle")}
+      subtitle={t("modalSubtitle")}
       maxWidthClass="max-w-lg"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans">
+      <div className="space-y-4 text-start font-sans">
         {loadingSaveId ? (
           <div className="py-12 flex flex-col items-center justify-center gap-6 text-center">
             <div className="w-10 h-10 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
             <div className="space-y-1">
               <p className="text-xs font-bold text-foreground">
-                در حال بازخوانی اطلاعات کمپین...
+                {t("loading")}
               </p>
               <p className="text-[10px] text-muted-foreground font-mono">
                 INDEXED_DB: READ_STATE | SYNC_OK
@@ -53,14 +55,14 @@ export function LoadCampaignModal({
           </div>
         ) : isDbLoading ? (
           <div className="py-12 text-center text-xs text-muted-foreground">
-            در حال جستجوی ذخیره‌ها در دیتابیس محلی...
+            {t("searching")}
           </div>
         ) : saves.length === 0 ? (
           <div className="py-12 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
-            هیچ بازی ذخیره‌شده‌ای یافت نشد. یک کمپین جدید شروع کنید.
+            {t("empty")}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto pe-1 space-y-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
             {saves.map((save) => (
               <SaveItemCard
                 key={save.id}

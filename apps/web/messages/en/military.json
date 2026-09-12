@@ -23,6 +23,35 @@
   "perTurn": "/ turn",
   "quickProcurementTitle": "Instant procurement cost {cost}",
   "unitCountBadge": "({count} units)",
+  "subTabs": {
+    "overview": "Overview & Armed Readiness",
+    "domestic": "Indigenous Defense Assembly (Instant)",
+    "domesticBadge": "Sovereign Output",
+    "allies": "Allied Arms Procurement",
+    "alliesBadge": "{count} Exporters"
+  },
+  "domesticTab": {
+    "header": "Sovereign Defense Lines, Heavy Arsenals & Maritime Fleets"
+  },
+  "alliesTab": {
+    "header": "Directory of Allied Powers with Superior Military Tech",
+    "desc": "Select an allied realm to inspect its available arsenal (pricing scales with technology disparity).",
+    "searchPlaceholder": "Search exporter name or ISO code...",
+    "emptyTitle": "No Available Military Exporters",
+    "emptyDesc": "To import arms, the partner nation must maintain superior military technology, be at peace, and sustain security tension below 50%.",
+    "enterArsenal": "Open Arsenal",
+    "rankBadge": "Rank #{rank}",
+    "milTech": "Defense Tech: Level {level}",
+    "tension": "Tension: {tension}%"
+  },
+  "alliesGrid": {
+    "back": "Exporters Directory",
+    "title": "Import Arms & Hardware from {name}",
+    "milTechBadge": "Defense Technology: Level {level}",
+    "treasury": "National Treasury:",
+    "techAdvantageInfo": "Exporter military tech advantage: +{delta} levels (5% surcharge per 0.1 level disparity applied to base rate).",
+    "priceMultiplier": "Pricing Adjustment Multiplier: {mult}x"
+  },
   "INFANTRY": {
     "name": "Combat Infantry Divisions",
     "unit": "Division"
