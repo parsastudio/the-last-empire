@@ -47,7 +47,7 @@ export class ProposalAcceptanceEvaluator {
           score: -1000,
           reasons: [
             {
-              label: "تعهد به پیمان دفاع جمعی ائتلاف مهار هژمونی",
+              label: "COALITION_CONTAINMENT_OBLIGATION",
               value: -1000,
             },
           ],
@@ -69,7 +69,7 @@ export class ProposalAcceptanceEvaluator {
             score: -100,
             reasons: [
               {
-                label: "شرط برقراری پیمان عدم تخاصم پیشین احراز نشده است",
+                label: "NON_AGGRESSION_PACT_REQUIRED",
                 value: -100,
               },
             ],
@@ -77,11 +77,11 @@ export class ProposalAcceptanceEvaluator {
         }
 
         reasons.push({
-          label: "برقراری پیمان عدم تخاصم فعال",
+          label: "ACTIVE_NON_AGGRESSION_PACT",
           value: 50,
         });
         reasons.push({
-          label: "دریافت ۳٪ حق ورودی نقدی و سود نوبتی ۰.۶٪ GDP",
+          label: "PARTNERSHIP_DIVIDEND_GAIN",
           value: 50,
         });
         break;
@@ -101,7 +101,7 @@ export class ProposalAcceptanceEvaluator {
             score: -100,
             reasons: [
               {
-                label: validation.reason || "عدم احراز شرایط پیمان دفاعی",
+                label: validation.reasonCode || "GUARANTEE_CONDITIONS_NOT_MET",
                 value: -100,
               },
             ],
@@ -109,24 +109,24 @@ export class ProposalAcceptanceEvaluator {
         }
 
         reasons.push({
-          label: "احراز نسبت GDP بین ۰.۷ تا ۵ برابر و دسترسی سرزمینی",
+          label: "GDP_RATIO_AND_REACH_VERIFIED",
           value: 60,
         });
         reasons.push({
-          label: "دریافت یک‌باره ۱٪ از کل GDP کشور به عنوان حق تعهد دفاعی",
+          label: "GUARANTEE_RETAINER_FEE_RECEIVED",
           value: 40,
         });
         break;
       }
 
       case "NON_AGGRESSION_PACT": {
-        reasons.push({ label: "تمایل پایه به ثبات", value: -2 });
+        reasons.push({ label: "BASE_STABILITY_DESIRE", value: -2 });
 
         const alignVal = Math.round(vector.alignment * 0.5);
-        reasons.push({ label: "همسویی سیاسی", value: alignVal });
+        reasons.push({ label: "POLITICAL_ALIGNMENT", value: alignVal });
 
         const tensionVal = -Math.round(vector.tension * 0.5);
-        reasons.push({ label: "اصطکاک ژئوپلیتیک", value: tensionVal });
+        reasons.push({ label: "GEOPOLITICAL_TENSION", value: tensionVal });
         break;
       }
 
@@ -145,21 +145,21 @@ export class ProposalAcceptanceEvaluator {
             score: -1000,
             reasons: [
               {
-                label: "ممنوعیت توقف جنگ در نوبت اول آغاز مخاصمه",
+                label: "WAR_FIRST_TURN_COOLDOWN",
                 value: -1000,
               },
             ],
           };
         }
 
-        reasons.push({ label: "مقاومت اولیه در جبهه نبرد", value: -50 });
+        reasons.push({ label: "BASE_FRONTLINE_RESISTANCE", value: -50 });
 
         if (receiver.government.stability < 30) {
           const exhaustion = Math.round(
             (30 - receiver.government.stability) * 1.5,
           );
           reasons.push({
-            label: "خستگی جنگ و افت شدید ثبات",
+            label: "WAR_WEARINESS_LOW_STABILITY",
             value: exhaustion,
           });
         }
@@ -170,7 +170,7 @@ export class ProposalAcceptanceEvaluator {
             Math.round((vector.powerRatio - 1.0) * 35),
           );
           reasons.push({
-            label: "برتری نظامی طرف مقابل در جبهه",
+            label: "ENEMY_FRONTLINE_SUPERIORITY",
             value: powerDiff,
           });
         } else if (vector.powerRatio < 0.9) {
@@ -179,7 +179,7 @@ export class ProposalAcceptanceEvaluator {
             Math.round((1.0 - vector.powerRatio) * 50),
           );
           reasons.push({
-            label: "برتری نظامی ارتش ما و تداوم تهاجم",
+            label: "OUR_MILITARY_ADVANTAGE",
             value: advantagePenalty,
           });
         }
@@ -187,7 +187,7 @@ export class ProposalAcceptanceEvaluator {
         if (vector.reasons.revanchismPenalty > 0) {
           const revVal = -Math.round(vector.reasons.revanchismPenalty * 1.0);
           reasons.push({
-            label: "اشغال خاک مادری و ادعای سرزمینی",
+            label: "TERRITORIAL_REVANCHISM",
             value: revVal,
           });
         }
@@ -196,7 +196,7 @@ export class ProposalAcceptanceEvaluator {
           vector.alignment < 0 ? Math.round(vector.alignment * 0.35) : 0;
         if (animosityVal !== 0) {
           reasons.push({
-            label: "بی‌اعتمادی و تخاصم سیاسی",
+            label: "POLITICAL_HOSTILITY",
             value: animosityVal,
           });
         }
