@@ -30,6 +30,7 @@
     "searching": "Querying local campaign database...",
     "empty": "No saved campaign archives found. Found a new empire to begin.",
     "turnPrefix": "Turn: {turn}",
+    "campaignTitle": "Campaign {gameId} - {nationName}",
     "confirmDelete": "Confirm delete?",
     "deleteTitle": "Delete Archived Campaign"
   }

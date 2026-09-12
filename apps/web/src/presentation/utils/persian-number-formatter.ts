@@ -1,5 +1,8 @@
 import { LocaleNumberFormatter } from "@/presentation/utils/locale-number-formatter";
 
+/**
+ * @deprecated Use LocaleNumberFormatter directly or the useLocaleFormatter hook for i18n-aware formatting.
+ */
 export class PersianNumberFormatter {
   public static toPersianDigits(input: number | string): string {
     return LocaleNumberFormatter.toDigits(input, "fa");
