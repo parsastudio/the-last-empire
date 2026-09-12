@@ -6,6 +6,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { NationGettersUtility, AppLocale } from "@geopolitics/domain";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface LiveNationItem {
   id: string;
@@ -58,18 +59,7 @@ export function useLiveNations({
         return canonical !== canonicalExclude && n.id !== excludeNationId;
       })
       .map((n) => {
-        const canonical = CountryRegistry.resolveCanonicalId(n.id);
-        const profile =
-          CountryRegistry.getCountry(canonical) ||
-          CountryRegistry.getCountry(n.flagCode);
-
-        const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
-        const code = profile ? profile.code : canonical;
-
-        const name =
-          locale === "en"
-            ? profile?.nameEn || n.name
-            : n.name || profile?.nameFa || canonical;
+        const presented = NationPresenter.present(n, nationsMap, locale);
 
         const isReachable = sourceNation
           ? GeopoliticalReachResolver.canInitiateDiplomacy(
@@ -84,13 +74,13 @@ export function useLiveNations({
           n.id,
           provincesMap,
         );
-        const rank = rankLookup.get(canonical) ?? 99;
+        const rank = rankLookup.get(presented.canonicalId) ?? 99;
 
         return {
-          id: canonical,
-          name,
-          code,
-          flagCode,
+          id: presented.canonicalId,
+          name: presented.name,
+          code: presented.canonicalId,
+          flagCode: presented.flagCode,
           rank,
           gdp: getNationGdp(n, provincesMap),
           population,

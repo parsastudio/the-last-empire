@@ -18,6 +18,7 @@ import {
   AppLocale,
 } from "@geopolitics/domain";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, ProvinceDynamicState>;
@@ -46,21 +47,20 @@ export function useHoverNationResolver({
       const province = provincesMap[provinceId.toString()];
       if (!province) return null;
 
-      const canonicalOwnerId = CountryRegistry.resolveCanonicalId(
+      const canonicalOwnerId = NationPresenter.resolveCanonicalId(
         province.ownerNationId,
       );
       const ownerNation = nationsMap
         ? nationsMap[canonicalOwnerId] || nationsMap[province.ownerNationId]
         : null;
 
-      const profile = CountryRegistry.getCountry(canonicalOwnerId);
-      const realName = ownerNation
-        ? locale === "en"
-          ? profile?.nameEn || ownerNation.name
-          : ownerNation.name
-        : t("unknownCountry");
+      const presented = NationPresenter.present(
+        ownerNation || canonicalOwnerId,
+        nationsMap,
+        locale,
+        t("unknownCountry"),
+      );
 
-      const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation
         ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
         : 99;
@@ -161,9 +161,9 @@ export function useHoverNationResolver({
       );
 
       return {
-        name: realName,
-        code: canonicalOwnerId,
-        flagCode,
+        name: presented.name,
+        code: presented.canonicalId,
+        flagCode: presented.flagCode,
         rank: realRank,
         gdpRank: realGdpRank,
         stance: stanceLabel,

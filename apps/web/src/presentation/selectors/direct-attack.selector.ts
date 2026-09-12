@@ -21,6 +21,7 @@ import {
 } from "@geopolitics/game-engine";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
@@ -93,23 +94,8 @@ export class DirectAttackSelector {
       !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
-    const attackerProfile = humanNation
-      ? CountryRegistry.getCountry(humanNation.id)
-      : null;
-    const attackerDisplayName = humanNation
-      ? locale === "en"
-        ? attackerProfile?.nameEn || humanNation.name
-        : humanNation.name
-      : "";
-
-    const targetProfile = targetNation
-      ? CountryRegistry.getCountry(targetNation.id)
-      : null;
-    const targetDisplayName = targetNation
-      ? locale === "en"
-        ? targetProfile?.nameEn || targetNation.name
-        : targetNation.name
-      : "";
+    const attackerDisplayName = NationPresenter.formatName(humanNation, locale);
+    const targetDisplayName = NationPresenter.formatName(targetNation, locale);
 
     const originRegionName = humanNation
       ? locale === "en"
@@ -215,9 +201,7 @@ export class DirectAttackSelector {
 
       if (!gNation || !gNation.isAlive) continue;
 
-      const gProfile = CountryRegistry.getCountry(canonicalG);
-      const gDisplayName =
-        locale === "en" ? gProfile?.nameEn || gNation.name : gNation.name;
+      const gDisplayName = NationPresenter.formatName(gNation, locale);
 
       const isMutual = humanGuarantors.some(
         (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,

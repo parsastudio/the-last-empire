@@ -12,6 +12,7 @@ import {
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 import {
   getPostureBadgeClass,
   getAlignmentColor,
@@ -52,22 +53,12 @@ export function resolveProfileRelation(
     ? NationGettersUtility.getPopulation(liveNation.id, provincesMap)
     : fallback.population;
 
-  const name =
-    locale === "en"
-      ? profile?.nameEn || liveNation?.name || fallback.nameEn
-      : liveNation?.name || profile?.nameFa || fallback.nameFa;
-
-  const displayCode = profile
-    ? profile.code
-    : liveNation
-      ? liveNation.id
-      : fallback.code;
-
-  const flagCode = profile
-    ? profile.flagCode
-    : liveNation
-      ? liveNation.flagCode
-      : fallback.flagCode;
+  const presented = NationPresenter.present(
+    liveNation || code,
+    allNations,
+    locale,
+    fallback.nameFa,
+  );
 
   const techLevel = liveNation
     ? liveNation.military.techLevel
@@ -139,14 +130,8 @@ export function resolveProfileRelation(
           ] || null
         : null;
 
-  const guarantorProfile = guarantorNation
-    ? CountryRegistry.getCountry(guarantorNation.id)
-    : null;
-
   const guarantorName = guarantorNation
-    ? locale === "en"
-      ? guarantorProfile?.nameEn || guarantorNation.name
-      : guarantorNation.name
+    ? NationPresenter.formatName(guarantorNation, locale)
     : undefined;
 
   const humanTech = humanNation?.military.techLevel ?? 1.0;
@@ -154,9 +139,9 @@ export function resolveProfileRelation(
     tension < 50 && stance !== "WAR" && techLevel > humanTech;
 
   return {
-    code: displayCode.toUpperCase(),
-    name,
-    flagCode: flagCode.toUpperCase(),
+    code: presented.canonicalId.toUpperCase(),
+    name: presented.name,
+    flagCode: presented.flagCode.toUpperCase(),
     rank,
     stance,
     alignment,
