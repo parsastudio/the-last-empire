@@ -37,6 +37,8 @@ function composeAllCountryProfiles(): CountryProfile[] {
 
     return {
       code,
+      nameEn: idInfo.nameEn || code,
+      nameFa: idInfo.nameFa || code,
       flagCode: idInfo.flagCode,
       startingGovernment: idInfo.startingGovernment,
       gdp,
@@ -45,8 +47,6 @@ function composeAllCountryProfiles(): CountryProfile[] {
       equipmentTechLevel: milInfo.equipmentTechLevel,
       industrialLevel: indInfo.industrialLevel,
       aiDoctrine,
-      nameEn: idInfo.nameEn,
-      nameFa: idInfo.nameFa,
     };
   });
 }
