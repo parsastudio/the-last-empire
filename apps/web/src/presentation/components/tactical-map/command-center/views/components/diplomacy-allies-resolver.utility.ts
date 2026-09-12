@@ -7,7 +7,7 @@ import {
   LocaleNumberFormatter,
   AppLocale,
 } from "@geopolitics/domain";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface NationAllyDetail {
   id: string;
@@ -32,8 +32,7 @@ export class DiplomacyAlliesResolver {
     provincesMap?: Record<string, Province>,
     locale: AppLocale = "fa",
   ): NationAllyDetail {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-    const profile = CountryRegistry.getCountry(canonicalId);
+    const presented = NationPresenter.present(nation, nationsMap, locale);
     const rank = NationGettersUtility.getRank(
       nation.id,
       nationsMap,
@@ -45,13 +44,6 @@ export class DiplomacyAlliesResolver {
       true,
       locale,
     );
-    const flagCode = nation.flagCode || canonicalId;
-    const flagEmoji = getFlagEmoji(flagCode);
-
-    const name =
-      locale === "en"
-        ? profile?.nameEn || nation.name
-        : nation.name || profile?.nameFa || canonicalId;
 
     const allianceTypeLabel =
       locale === "en"
@@ -59,17 +51,17 @@ export class DiplomacyAlliesResolver {
         : "حامی دفاعی متعهد (ورود قطعی به جنگ)";
 
     return {
-      id: canonicalId,
-      code: canonicalId,
-      name,
-      flagCode,
-      flagEmoji,
+      id: presented.canonicalId,
+      code: presented.canonicalId,
+      name: presented.name,
+      flagCode: presented.flagCode,
+      flagEmoji: presented.flagEmoji,
       rank,
       gdpFormatted,
       militaryTech: Number(nation.military.techLevel.toFixed(1)),
       industrialTech: Number(nation.industrialLevel.toFixed(1)),
       allianceTypeLabel,
-      isHuman: canonicalId === canonicalHuman,
+      isHuman: presented.canonicalId === canonicalHuman,
       role: "GUARANTOR",
     };
   }
