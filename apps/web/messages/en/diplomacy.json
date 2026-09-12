@@ -11,6 +11,32 @@
     "WARY_BUFFER": "Wary Buffer State",
     "NEUTRAL_COEXISTENCE": "Neutral Coexistence"
   },
+  "proposalTypes": {
+    "STRATEGIC_PARTNERSHIP": "Strategic & Economic Partnership",
+    "SECURITY_GUARANTEE": "Mutual Defense & Territorial Security Pact",
+    "EMERGENCY_PROTECTORATE": "Emergency Protectorate Treaty",
+    "CANCEL_SECURITY_GUARANTEE": "Revoke Defense Pact",
+    "CANCEL_EMERGENCY_PROTECTORATE": "Terminate Protectorate Treaty",
+    "NON_AGGRESSION_PACT": "Non-Aggression Pact",
+    "PEACE_TREATY": "Peace Treaty",
+    "SEND_FOREIGN_AID": "Diplomatic & Foreign Aid",
+    "DECLARE_WAR": "Official Declaration of War",
+    "CANCEL_TREATY": "Downgrade Relations & Cancel Treaty"
+  },
+  "validationErrors": {
+    "CANNOT_GUARANTEE_SELF": "Cannot select your own nation as defense guarantor.",
+    "AI_SUPERPOWER_RESTRICTION": "Top 20% AI superpowers cannot enter subordinate defense pacts.",
+    "DIRECT_WAR_ACTIVE": "Cannot ratify a defense pact with an active enemy.",
+    "ALREADY_UNDER_PROTECTORATE": "Your realm is currently under another protectorate; revoke it first.",
+    "TENSION_TOO_HIGH": "Bilateral tension with guarantor must remain below 50%.",
+    "GDP_BELOW_MINIMUM": "Guarantor GDP must be at least 0.7x of your national output.",
+    "GDP_ABOVE_MAXIMUM": "Guarantor GDP cannot exceed 5.0x of your national output.",
+    "TECH_NOT_SUPERIOR": "Guarantor military tech level must strictly exceed your level.",
+    "ALREADY_ACTIVE_GUARANTOR": "Defense pact with this nation is already active.",
+    "MAX_PACTS_EXHAUSTED": "Defense pact quota exhausted (max 2 concurrent pacts).",
+    "GEOGRAPHIC_REACH_DENIED": "No geographic or maritime connectivity to reach this realm.",
+    "INSUFFICIENT_FUNDS": "Insufficient treasury reserves to cover the 1% GDP retainer fee."
+  },
   "badges": {
     "yourEmpire": "Your Empire",
     "underProtectorate": "Superpower Protectorate",
@@ -147,12 +173,31 @@
     "indemnityDemand": "War Indemnity Demanded from Treasury:",
     "cededProvinces": "Territorial Provinces Ceded to Your Realm:",
     "demandedProvinces": "Territorial Provinces Demanded by Adversary:",
-    "badges": {
-      "aiRefusal": "Peace Rejected (Adversary Holds Dominant Power)",
-      "aiDesperation": "Total Desperation (Maximum Territorial Concession)",
-      "whitePeace": "Equilibrium (White Peace)",
-      "aiOffering": "Adversary Offering War Indemnity",
-      "humanDemanded": "Severe Indemnity Demanded from Your Realm"
+    "statusTerms": {
+      "WAR_FIRST_TURN_COOLDOWN": {
+        "headline": "Ceasefire Prohibited in First Turn",
+        "description": "Hostilities commenced this turn; peace negotiations unlock after at least 1 turn elapses."
+      },
+      "AI_DOMINANT_REFUSAL": {
+        "headline": "Peace Negotiations Refused (Adversary Holds Decisive Power)",
+        "description": "{name} refuses all ceasefire proposals due to unquestioned frontline superiority."
+      },
+      "AI_DESPERATE_CAPITULATION": {
+        "headline": "Proposal: Cede Outer Provinces & Empty Sovereign Treasury",
+        "description": "{name}, facing total collapse, offers provinces and full treasury reserves to survive."
+      },
+      "WHITE_PEACE_EQUILIBRIUM": {
+        "headline": "White Peace Accord & Mutual Ceasefire",
+        "description": "Due to power equilibrium and mutual fatigue, both nations conclude peace without indemnity or territorial concessions."
+      },
+      "HUMAN_MODERATE_ADVANTAGE": {
+        "headline": "Proposal: Compromise Terms & War Indemnity",
+        "description": "{name} prepared a compromise terms settlement to halt your military advance."
+      },
+      "AI_MODERATE_DEMAND": {
+        "headline": "Demanded: Border Province Concessions & War Indemnity",
+        "description": "{name} leverages frontline power advantages, setting indemnity as condition for ceasefire."
+      }
     }
   },
   "stats": {
