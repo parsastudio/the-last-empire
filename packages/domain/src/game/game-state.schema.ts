@@ -71,7 +71,7 @@ export const TurnLogEntrySchema = z.object({
   scope: TurnLogScopeSchema.default("NATIONAL"),
   category: TurnLogCategorySchema.default("DOMESTIC"),
   level: TurnLogLevelSchema,
-  message: z.string().default(""),
+  message: z.string().default("").optional(),
   params: z.record(z.string(), TurnLogParamValueSchema).default({}),
 });
 

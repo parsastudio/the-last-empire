@@ -5,6 +5,7 @@ import { Nation, IndustryCalculator } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { FactoryTiersGrid } from "./factory-tiers-grid";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface MachineryImportCountryViewProps {
   buyerNation: Nation;
@@ -20,8 +21,10 @@ export function MachineryImportCountryView({
   onBack,
 }: MachineryImportCountryViewProps) {
   const t = useTranslations("industry.imports");
-  const { formatCurrency, formatLevel, toDigits } = useLocaleFormatter();
+  const { formatCurrency, formatLevel, toDigits, locale } =
+    useLocaleFormatter();
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
+  const sellerName = NationPresenter.formatName(sellerNation, locale);
   const techDelta = Number(
     Math.max(
       0,
@@ -49,7 +52,7 @@ export function MachineryImportCountryView({
             <span className="text-2xl select-none">{sellerFlag}</span>
             <div className="flex items-center gap-2">
               <h4 className="text-xs font-black text-foreground">
-                {t("countryViewTitle", { name: sellerNation.name })}
+                {t("countryViewTitle", { name: sellerName })}
               </h4>
               <span className="text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                 <Cpu size={11} />

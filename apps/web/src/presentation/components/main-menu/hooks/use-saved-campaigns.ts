@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useLocale } from "next-intl";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
-import { CountryRegistry, AppLocale } from "@geopolitics/domain";
+import { CountryRegistry } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface SavedCampaignMeta {
   id: string;
@@ -32,13 +34,11 @@ export function useSavedCampaigns() {
         );
         const humanNation =
           state.nations[canonicalHuman] || state.nations[state.humanNationId];
-        const profile = CountryRegistry.getCountry(canonicalHuman);
 
-        const nationName = humanNation
-          ? locale === "en"
-            ? profile?.nameEn || humanNation.name
-            : humanNation.name
-          : canonicalHuman;
+        const nationName = NationPresenter.formatName(
+          humanNation || canonicalHuman,
+          locale,
+        );
 
         const saveDate = new Date(rec.timestamp);
         const dateLocale = locale === "en" ? "en-US" : "fa-IR";

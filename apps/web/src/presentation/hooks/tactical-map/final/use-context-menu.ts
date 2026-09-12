@@ -4,9 +4,10 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { AppLocale } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -53,14 +54,10 @@ export function useContextMenu() {
           ? nationsMap[canonicalOwnerId] || nationsMap[ownerNationId]
           : null;
 
-      const profile = CountryRegistry.getCountry(canonicalOwnerId);
-      const countryName = ownerNation
-        ? locale === "en"
-          ? profile?.nameEn || ownerNation.name
-          : ownerNation.name
-        : locale === "en"
-          ? "Unknown"
-          : "نامشخص";
+      const countryName = NationPresenter.formatName(
+        ownerNation || canonicalOwnerId,
+        locale,
+      );
 
       const countryCode = ownerNation
         ? ownerNation.id

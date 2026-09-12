@@ -1,9 +1,5 @@
-import {
-  Nation,
-  CountryRegistry,
-  CountryProfile,
-  AppLocale,
-} from "@geopolitics/domain";
+import { Nation, CountryRegistry, CountryProfile } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 export interface PresentedNation {
@@ -39,21 +35,12 @@ export class NationPresenter {
     const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
     const canonicalId = this.resolveCanonicalId(rawId);
     const profile = CountryRegistry.getCountry(canonicalId);
-    const nation = typeof nationOrId === "object" ? nationOrId : null;
 
     if (locale === "en") {
-      return (
-        profile?.nameEn ||
-        nation?.name ||
-        (rawId ? fallback || canonicalId : fallback || "Unknown")
-      );
+      return profile?.nameEn || fallback || canonicalId || "Unknown";
     }
 
-    return (
-      nation?.name ||
-      profile?.nameFa ||
-      (rawId ? fallback || canonicalId : fallback || "نامشخص")
-    );
+    return profile?.nameFa || fallback || canonicalId || "نامشخص";
   }
 
   public static resolveFlagCode(

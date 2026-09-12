@@ -12,12 +12,10 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
-import {
-  NationGettersUtility,
-  NationTurnActivity,
-  AppLocale,
-} from "@geopolitics/domain";
+import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface UseWideEspionageFormProps {
   nation: Nation;
@@ -55,11 +53,7 @@ export function useWideEspionageForm({
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const rank = rankLookup.get(canonical) ?? 99;
-        const profile = CountryRegistry.getCountry(canonical);
-        const name =
-          locale === "en"
-            ? profile?.nameEn || n.name
-            : n.name || profile?.nameFa || canonical;
+        const name = NationPresenter.formatName(n, locale);
 
         return {
           id: canonical,

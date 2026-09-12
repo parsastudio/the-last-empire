@@ -15,8 +15,8 @@ import {
   ClientMapPathResolver,
   GameDifficulty,
   MapTopologyRegistry,
-  AppLocale,
 } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 

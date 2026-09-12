@@ -4,9 +4,11 @@ import {
   CountryRegistry,
   NationGettersUtility,
   getNationGdp,
+} from "@geopolitics/domain";
+import {
   LocaleNumberFormatter,
   AppLocale,
-} from "@geopolitics/domain";
+} from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface NationAllyDetail {

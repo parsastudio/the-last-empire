@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation, GameState, CountryRegistry } from "@geopolitics/domain";
+import { Nation, GameState } from "@geopolitics/domain";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 import { AttackHeader } from "@/presentation/components/tactical-map/modals/attack/attack-header";
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
@@ -11,6 +11,7 @@ import { NavalTransportCapacityCard } from "@/presentation/components/tactical-m
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -47,17 +48,11 @@ export function DirectAttackModal({
   const modalTitle =
     form.attackType === "NAVAL" ? t("modalTitleNaval") : t("modalTitleLand");
 
-  const attackerProfile = CountryRegistry.getCountry(humanNation.id);
-  const attackerDisplayName =
-    locale === "en"
-      ? attackerProfile?.nameEn || humanNation.name
-      : humanNation.name;
-
-  const defenderProfile = CountryRegistry.getCountry(form.targetNation.id);
-  const defenderDisplayName =
-    locale === "en"
-      ? defenderProfile?.nameEn || form.targetNation.name
-      : form.targetNation.name;
+  const attackerDisplayName = NationPresenter.formatName(humanNation, locale);
+  const defenderDisplayName = NationPresenter.formatName(
+    form.targetNation,
+    locale,
+  );
 
   return (
     <UnifiedModalShell

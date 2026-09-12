@@ -7,9 +7,11 @@ import {
   CountryDefaultsUtility,
   getNationGdp,
   NationGettersUtility,
+} from "@geopolitics/domain";
+import {
   LocaleNumberFormatter,
   AppLocale,
-} from "@geopolitics/domain";
+} from "@/presentation/utils/locale-number-formatter";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";

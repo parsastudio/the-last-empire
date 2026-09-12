@@ -10,9 +10,10 @@ import {
   CheckCircle2,
   Skull,
 } from "lucide-react";
-import { Nation, CountryRegistry } from "@geopolitics/domain";
+import { Nation } from "@geopolitics/domain";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface AttackDiscoveredIntelGridProps {
   targetNation: Nation;
@@ -35,12 +36,7 @@ export function AttackDiscoveredIntelGrid({
   const { formatNumber, formatCurrency, formatLevel, locale } =
     useLocaleFormatter();
   const aux = forecast.auxiliaryGuarantor;
-
-  const targetProfile = CountryRegistry.getCountry(targetNation.id);
-  const targetDisplayName =
-    locale === "en"
-      ? targetProfile?.nameEn || targetNation.name
-      : targetNation.name;
+  const targetDisplayName = NationPresenter.formatName(targetNation, locale);
 
   return (
     <div className="bg-gradient-to-r from-emerald-950/25 via-card to-cyan-950/20 border border-emerald-500/40 p-3.5 rounded-3xl space-y-3 shadow-lg backdrop-blur-xl text-start font-sans">

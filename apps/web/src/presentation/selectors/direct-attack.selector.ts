@@ -11,7 +11,6 @@ import {
   MILITARY_UNIT_STATS,
   NationTurnActivity,
   MapTopologyRegistry,
-  AppLocale,
 } from "@geopolitics/domain";
 import {
   BattleCalculator,
@@ -19,6 +18,7 @@ import {
   NavalDeploymentClamper,
   EspionageCalculator,
 } from "@geopolitics/game-engine";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";

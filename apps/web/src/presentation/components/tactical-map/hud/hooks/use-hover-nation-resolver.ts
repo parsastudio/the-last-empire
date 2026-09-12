@@ -13,9 +13,11 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   DiplomaticStance,
+} from "@geopolitics/domain";
+import {
   LocaleNumberFormatter,
   AppLocale,
-} from "@geopolitics/domain";
+} from "@/presentation/utils/locale-number-formatter";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 

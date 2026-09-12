@@ -1,9 +1,8 @@
+import { CountryRegistry, MapTopologyRegistry } from "@geopolitics/domain";
 import {
   LocaleNumberFormatter,
   AppLocale,
-  CountryRegistry,
-  MapTopologyRegistry,
-} from "@geopolitics/domain";
+} from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export class ProvinceNameFormatter {

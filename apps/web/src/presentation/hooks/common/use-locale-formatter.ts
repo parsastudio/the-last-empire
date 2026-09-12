@@ -2,7 +2,10 @@
 
 import { useMemo } from "react";
 import { useLocale } from "next-intl";
-import { LocaleNumberFormatter, AppLocale } from "@geopolitics/domain";
+import {
+  LocaleNumberFormatter,
+  AppLocale,
+} from "@/presentation/utils/locale-number-formatter";
 
 export function useLocaleFormatter() {
   const currentLocale = useLocale() as AppLocale;
