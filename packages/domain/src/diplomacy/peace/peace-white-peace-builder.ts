@@ -1,6 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
-import { AppLocale } from "@/domain/shared/locale-number-formatter";
 
 export class PeaceWhitePeaceBuilder {
   public static build(
@@ -9,7 +8,6 @@ export class PeaceWhitePeaceBuilder {
     ratio: number,
     aiTwmi: number,
     humanTwmi: number,
-    locale: AppLocale = "fa",
   ): PeaceTermsPackage {
     return {
       sourceNationId: aiNation.id,
@@ -21,15 +19,7 @@ export class PeaceWhitePeaceBuilder {
       isAiOffering: true,
       moneyAmount: 0,
       concededProvinceIds: [],
-      concededProvincesNames: [],
-      headline:
-        locale === "en"
-          ? "White Peace Accord & Mutual Ceasefire"
-          : "معاهده صلح سفید و ترک فوری مخاصمه",
-      description:
-        locale === "en"
-          ? "Due to power equilibrium and mutual fatigue, both nations conclude peace without indemnity or territorial concessions."
-          : "به دلیل موازنه نزدیک قدرت و فرسودگی جنگی، دو کشور بدون هیچ باج مالی یا تغییر مرزی به جنگ پایان می‌دهند.",
+      statusCode: "WHITE_PEACE_EQUILIBRIUM",
       canAffordTerms: true,
     };
   }

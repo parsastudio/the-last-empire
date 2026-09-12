@@ -6,11 +6,24 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { SecurityFeeCalculatorUtility } from "@/domain/diplomacy/security-fee-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
-import { AppLocale } from "@/domain/shared/locale-number-formatter";
+
+export type SecurityGuaranteeRejectReasonCode =
+  | "CANNOT_GUARANTEE_SELF"
+  | "AI_SUPERPOWER_RESTRICTION"
+  | "DIRECT_WAR_ACTIVE"
+  | "ALREADY_UNDER_PROTECTORATE"
+  | "TENSION_TOO_HIGH"
+  | "GDP_BELOW_MINIMUM"
+  | "GDP_ABOVE_MAXIMUM"
+  | "TECH_NOT_SUPERIOR"
+  | "ALREADY_ACTIVE_GUARANTOR"
+  | "MAX_PACTS_EXHAUSTED"
+  | "GEOGRAPHIC_REACH_DENIED"
+  | "INSUFFICIENT_FUNDS";
 
 export interface SecurityGuaranteeValidationResult {
   isValid: boolean;
-  reason?: string;
+  reasonCode?: SecurityGuaranteeRejectReasonCode;
   gdpRatio: number;
   techDiff: number;
   tension: number;
@@ -35,7 +48,6 @@ export class SecurityGuaranteeValidator {
     isEmergency = false,
     allNations?: Record<string, Nation>,
     rankMap?: Map<string, number>,
-    locale: AppLocale = "fa",
   ): SecurityGuaranteeValidationResult {
     const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
     const canonicalGuarantor = CountryRegistry.resolveCanonicalId(guarantor.id);
@@ -43,10 +55,7 @@ export class SecurityGuaranteeValidator {
     if (canonicalClient === canonicalGuarantor) {
       return {
         isValid: false,
-        reason:
-          locale === "en"
-            ? "Cannot select your own nation as defense guarantor."
-            : "امکان انتخاب کشور خود به عنوان ضامن وجود ندارد.",
+        reasonCode: "CANNOT_GUARANTEE_SELF",
         gdpRatio: 1,
         techDiff: 0,
         tension: 0,
@@ -85,10 +94,7 @@ export class SecurityGuaranteeValidator {
       if (clientRank <= top20Threshold) {
         return {
           isValid: false,
-          reason:
-            locale === "en"
-              ? "Top 20% AI superpowers cannot enter subordinate defense pacts."
-              : "کشورهای هوش مصنوعی در ۲۰٪ برتر مجاز به انعقاد پیمان دفاعی نیستند.",
+          reasonCode: "AI_SUPERPOWER_RESTRICTION",
           gdpRatio,
           techDiff: 0,
           tension,
@@ -118,32 +124,17 @@ export class SecurityGuaranteeValidator {
       const isTechValid = techDiff > 0;
       const isTensionValid = tension < 50;
 
-      let reason: string | undefined = undefined;
+      let reasonCode: SecurityGuaranteeRejectReasonCode | undefined = undefined;
       if (!isNotWar) {
-        reason =
-          locale === "en"
-            ? "Cannot request a protectorate from an active wartime adversary."
-            : "نمی‌توان از کشوری که با آن در حال جنگ هستید درخواست تحت‌الحمایگی کرد.";
+        reasonCode = "DIRECT_WAR_ACTIVE";
       } else if (isAlreadyUnderOtherProtectorate) {
-        reason =
-          locale === "en"
-            ? "Your realm is currently under another protectorate; revoke it first."
-            : "کشور شما در حال حاضر تحت‌الحمایه کشور دیگری است. ابتدا باید معاهده قبلی را لغو کنید.";
+        reasonCode = "ALREADY_UNDER_PROTECTORATE";
       } else if (!isTensionValid) {
-        reason =
-          locale === "en"
-            ? "Bilateral tension with guarantor must remain below 50%."
-            : "تنش با ابرقدرت حامی باید کمتر از ۵۰٪ باشد.";
+        reasonCode = "TENSION_TOO_HIGH";
       } else if (!isGdpValid) {
-        reason =
-          locale === "en"
-            ? "Guarantor GDP must be at least equal to your national output."
-            : "GDP ابرقدرت حامی باید حداقل برابر با کشور شما باشد.";
+        reasonCode = "GDP_BELOW_MINIMUM";
       } else if (!isTechValid) {
-        reason =
-          locale === "en"
-            ? "Guarantor military tech level must strictly exceed your level."
-            : "سطح فناوری نظامی ابرقدرت حامی باید بالاتر از شما باشد.";
+        reasonCode = "TECH_NOT_SUPERIOR";
       }
 
       const isValid =
@@ -155,7 +146,7 @@ export class SecurityGuaranteeValidator {
 
       return {
         isValid,
-        reason,
+        reasonCode,
         gdpRatio,
         techDiff,
         tension,
@@ -189,44 +180,22 @@ export class SecurityGuaranteeValidator {
     );
     const isReachable = proximity !== "NONE";
 
-    let reason: string | undefined = undefined;
+    let reasonCode: SecurityGuaranteeRejectReasonCode | undefined = undefined;
     if (isAlreadyGuarantor) {
-      reason =
-        locale === "en"
-          ? `Defense pact with ${guarantor.name} is already active.`
-          : `پیمان دفاعی با کشور ${guarantor.name} در حال حاضر فعال است.`;
+      reasonCode = "ALREADY_ACTIVE_GUARANTOR";
     } else if (!hasSlotAvailable) {
-      reason =
-        locale === "en"
-          ? `Defense pact quota exhausted (max ${this.MAX_DEFENSE_PACTS}).`
-          : `سقف مجاز پیمان دفاعی تکمیل است (حداکثر ${this.MAX_DEFENSE_PACTS} کشور).`;
+      reasonCode = "MAX_PACTS_EXHAUSTED";
     } else if (!isNotWar) {
-      reason =
-        locale === "en"
-          ? "Cannot ratify a defense pact with an active enemy."
-          : "امکان انعقاد پیمان دفاعی با کشور متخاصم در حال نبرد وجود ندارد.";
+      reasonCode = "DIRECT_WAR_ACTIVE";
     } else if (!isGdpValid) {
-      if (gdpRatio < this.MIN_DEFENSE_GDP_RATIO) {
-        reason =
-          locale === "en"
-            ? "Guarantor GDP must be at least 0.7x of your national output."
-            : "تولید ناخالص (GDP) کشور ضامن باید حداقل ۰.۷ برابر کشور شما باشد.";
-      } else {
-        reason =
-          locale === "en"
-            ? "Guarantor GDP cannot exceed 5.0x of your national output."
-            : "تولید ناخالص (GDP) کشور ضامن نمی‌تواند بیش از ۵ برابر کشور شما باشد.";
-      }
+      reasonCode =
+        gdpRatio < this.MIN_DEFENSE_GDP_RATIO
+          ? "GDP_BELOW_MINIMUM"
+          : "GDP_ABOVE_MAXIMUM";
     } else if (!isReachable) {
-      reason =
-        locale === "en"
-          ? "No geographic or maritime connectivity to reach this realm."
-          : "عدم دسترسی جغرافیایی یا دریایی برای برقراری ارتباط با این کشور.";
+      reasonCode = "GEOGRAPHIC_REACH_DENIED";
     } else if (!canAffordCost) {
-      reason =
-        locale === "en"
-          ? "Insufficient treasury reserves to cover the 1% GDP retainer fee."
-          : "موجودی خزانه برای پرداخت هزینه ۱٪ از GDP کشور حامی کافی نیست.";
+      reasonCode = "INSUFFICIENT_FUNDS";
     }
 
     const isValid =
@@ -238,7 +207,7 @@ export class SecurityGuaranteeValidator {
 
     return {
       isValid,
-      reason,
+      reasonCode,
       gdpRatio,
       techDiff: 0,
       tension,
