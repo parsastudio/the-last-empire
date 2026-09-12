@@ -130,6 +130,7 @@ export class StrategicManifestBuilder {
 
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
+          provinceIndex: pIndex + 1,
           nameFa: `استان ${profile.nameFa} (${pIndex + 1})`,
           countryId,
           originalCountryId: countryId,

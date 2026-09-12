@@ -16,6 +16,12 @@
     "info": "اطلاعات",
     "attack": "تهاجم سرزمینی"
   },
+  "province": {
+    "single": "استان {country}",
+    "indexed": "استان {country} ({index})",
+    "fallback": "استان #{id}",
+    "unknown": "استان نامشخص"
+  },
   "hud": {
     "worldRank": "رتبه جهانی: #{rank}",
     "provinceEconomy": "اقتصاد این استان:",

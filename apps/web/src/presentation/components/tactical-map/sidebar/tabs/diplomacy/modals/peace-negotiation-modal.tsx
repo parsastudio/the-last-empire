@@ -246,7 +246,7 @@ export function PeaceNegotiationModal({
                 </span>
                 <span className="font-black text-foreground text-xs block truncate font-sans">
                   {terms.concededProvinceIds
-                    .map((id) => ProvinceNameFormatter.format(null, locale, id))
+                    .map((id) => ProvinceNameFormatter.format(id, locale))
                     .join(", ")}
                 </span>
               </div>

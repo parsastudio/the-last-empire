@@ -3,12 +3,14 @@ import {
   FinalMapManifest,
   FinalManifestProvince,
 } from "@/domain/map/manifest.type";
+import { CountryRegistry } from "@/domain/data/countries/country-registry";
 
 export class MapTopologyRegistry {
   private static readonly topologyMap = new Map<
     number,
     ProvinceStaticTopology
   >();
+  private static readonly countryProvinceCountMap = new Map<string, number>();
   private static isLoaded = false;
 
   public static initializeFromManifest(
@@ -19,10 +21,16 @@ export class MapTopologyRegistry {
     }
 
     this.topologyMap.clear();
+    this.countryProvinceCountMap.clear();
 
     for (let i = 0; i < manifest.provinces.length; i++) {
       const p = manifest.provinces[i]!;
       this.registerManifestProvince(p);
+      const canonicalCountry = CountryRegistry.resolveCanonicalId(p.countryId);
+      if (canonicalCountry) {
+        const count = this.countryProvinceCountMap.get(canonicalCountry) ?? 0;
+        this.countryProvinceCountMap.set(canonicalCountry, count + 1);
+      }
     }
 
     this.isLoaded = true;
@@ -31,7 +39,10 @@ export class MapTopologyRegistry {
   public static registerManifestProvince(p: FinalManifestProvince): void {
     const topology: ProvinceStaticTopology = {
       provinceId: p.provinceId,
+      provinceIndex: p.provinceIndex ?? 1,
       nameFa: p.nameFa,
+      countryId: p.countryId,
+      originalCountryId: p.originalCountryId ?? p.countryId,
       pixelCount: p.pixelCount,
       hasSeaAccess: p.hasSeaAccess,
       landNeighbors: p.landNeighbors || [],
@@ -53,6 +64,19 @@ export class MapTopologyRegistry {
 
   public static getNameFa(provinceId: number, fallback = ""): string {
     return this.topologyMap.get(provinceId)?.nameFa ?? fallback;
+  }
+
+  public static getCountryId(provinceId: number, fallback = ""): string {
+    return this.topologyMap.get(provinceId)?.countryId ?? fallback;
+  }
+
+  public static getProvinceIndex(provinceId: number, fallback = 1): number {
+    return this.topologyMap.get(provinceId)?.provinceIndex ?? fallback;
+  }
+
+  public static getCountryProvinceCount(countryId: string): number {
+    const canonical = CountryRegistry.resolveCanonicalId(countryId);
+    return this.countryProvinceCountMap.get(canonical) ?? 1;
   }
 
   public static getPixelCount(provinceId: number, fallback = 0): number {

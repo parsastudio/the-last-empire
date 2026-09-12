@@ -108,9 +108,8 @@ export class DirectAttackSelector {
     let targetRegionName = "";
     if (targetProvince) {
       targetRegionName = ProvinceNameFormatter.format(
-        MapTopologyRegistry.getNameFa(targetProvince.provinceId, ""),
-        locale,
         targetProvince.provinceId,
+        locale,
       );
     } else if (targetNation) {
       targetRegionName =

@@ -4,6 +4,7 @@ import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 
 export const FinalManifestProvinceSchema = z.object({
   provinceId: z.number().positive(),
+  provinceIndex: z.number().int().positive().optional().default(1),
   nameFa: z.string().min(1),
   countryId: z.string().min(1),
   originalCountryId: z.string().optional(),

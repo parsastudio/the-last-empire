@@ -16,6 +16,12 @@
     "info": "Dossier",
     "attack": "Territorial Strike"
   },
+  "province": {
+    "single": "{country} Province",
+    "indexed": "{country} Province ({index})",
+    "fallback": "Province #{id}",
+    "unknown": "Unknown Province"
+  },
   "hud": {
     "worldRank": "World Rank: #{rank}",
     "provinceEconomy": "Province GDP:",
