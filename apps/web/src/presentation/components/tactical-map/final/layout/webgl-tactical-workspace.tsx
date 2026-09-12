@@ -43,6 +43,7 @@ export function WebGLTacticalWorkspace({
   gameId = "default_game",
 }: WebGLTacticalWorkspaceProps) {
   const t = useTranslations("common");
+  const tHud = useTranslations("map.hud");
   const locale = useLocale();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
@@ -113,11 +114,14 @@ export function WebGLTacticalWorkspace({
             nextState.nations[targetCanonical] ||
             nextState.nations[nextState.globalCoalition.targetNationId];
 
+          const fallbackName = tHud("stances.yourEmpire");
           const resolvedTargetName = targetNation
-            ? NationPresenter.formatName(targetNation, locale as AppLocale)
-            : locale === "en"
-              ? "Your Realm"
-              : "امپراتوری شما";
+            ? NationPresenter.formatName(
+                targetNation,
+                locale as AppLocale,
+                fallbackName,
+              )
+            : fallbackName;
 
           openModal({
             type: "COALITION_ALERT",
@@ -135,7 +139,14 @@ export function WebGLTacticalWorkspace({
     } finally {
       setIsProcessingTurn(false);
     }
-  }, [advanceNextTurn, isProcessingTurn, openCommandCenter, openModal, locale]);
+  }, [
+    advanceNextTurn,
+    isProcessingTurn,
+    openCommandCenter,
+    openModal,
+    locale,
+    tHud,
+  ]);
 
   const activeRailTab =
     activeModal?.type === "COMMAND_CENTER" ? activeModal.activeTab : null;

@@ -98,6 +98,7 @@
     "warningTitle": "Defense Guarantors Alert (Direct Belligerents if Invaded)",
     "warningDesc": "If you launch an offensive against this realm, the armed forces of these guarantor states will immediately enter combat against you:",
     "committedAlliesCount": "{count} Committed Guarantors",
+    "committedAllyLabel": "Committed Defense Guarantor (Direct War Intervention)",
     "level": "Level {level}"
   },
   "allyPopover": {

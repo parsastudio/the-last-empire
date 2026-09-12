@@ -30,6 +30,7 @@
     "searching": "در حال جستجوی ذخیره‌ها در دیتابیس محلی...",
     "empty": "هیچ بازی ذخیره‌شده‌ای یافت نشد. یک کمپین جدید شروع کنید.",
     "turnPrefix": "نوبت: {turn}",
+    "campaignTitle": "کمپین {gameId} - {nationName}",
     "confirmDelete": "تایید حذف؟",
     "deleteTitle": "حذف پرونده ذخیره‌شده"
   }

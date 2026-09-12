@@ -8,6 +8,7 @@ import {
   VICTORY_CONFIG,
 } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface GameOverMetricsResult {
   isVictory: boolean;
@@ -85,21 +86,11 @@ export function useGameOverMetrics(
       CountryRegistry.resolveCanonicalId(effectiveWinnerNation.id) ===
         humanCanonical;
 
-    const winnerProfile = effectiveWinnerNation
-      ? CountryRegistry.getCountry(effectiveWinnerNation.id)
-      : null;
-
     const winnerDisplayName = effectiveWinnerNation
-      ? locale === "en"
-        ? winnerProfile?.nameEn || effectiveWinnerNation.name
-        : effectiveWinnerNation.name
+      ? NationPresenter.formatName(effectiveWinnerNation, locale)
       : isPlayerDefeated
-        ? locale === "en"
-          ? "Rival Superpowers"
-          : "قدرت‌های رقیب"
-        : locale === "en"
-          ? "Supreme Global Power"
-          : "قدرت برتر جهانی";
+        ? t("reasons.fallbacks.rivalSuperpowers")
+        : t("reasons.fallbacks.supremeGlobalPower");
 
     const winnerCode = effectiveWinnerNation
       ? effectiveWinnerNation.id
@@ -117,100 +108,76 @@ export function useGameOverMetrics(
       ? NationGettersUtility.getPopulation(humanNation.id, gameState.provinces)
       : 0;
     const finalPopulation = formatPopulation(popCount);
-    const conqueredPixels = `${formatNumber(pixelCount)} ${locale === "en" ? "pixels" : "پیکسل"}`;
+    const conqueredPixels = t("stats.pixelsUnit", {
+      count: formatNumber(pixelCount),
+    });
 
     const targetPctText = toDigits(
       VICTORY_CONFIG.TERRITORIAL_DOMINANCE_TARGET_PCT,
     );
 
-    let reasonTitle =
-      locale === "en"
-        ? "Game Conclusion & World Order"
-        : "پایان بازی و سرنوشت جهان";
+    let reasonTitle = t("reasons.defaultTitle");
     let reasonDescription = "";
 
     if (isVictory) {
       if (rawReason === "ECONOMIC_DOMINANCE") {
-        reasonTitle =
-          locale === "en"
-            ? "Absolute Victory: Global Economic Dominance"
-            : "پیروزی مطلق: تسخیر نبض اقتصاد جهان";
-        reasonDescription =
-          locale === "en"
-            ? `The ${winnerDisplayName} realm captured over ${targetPctText}% of global economic wealth, establishing unquestioned hegemony.`
-            : `امپراتوری ${winnerDisplayName} با تصاحب بیش از ${targetPctText}٪ کل ثروت و اقتصاد دنیا، ابرقدرت بلامنازع زمین شد و تمام رقبا را به زانو درآورد.`;
+        reasonTitle = t("reasons.victory.ECONOMIC_DOMINANCE.title");
+        reasonDescription = t(
+          "reasons.victory.ECONOMIC_DOMINANCE.description",
+          {
+            name: winnerDisplayName,
+            targetPct: targetPctText,
+          },
+        );
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
-        reasonTitle =
-          locale === "en"
-            ? "Military Victory: Territorial Unification"
-            : "پیروزی نظامی: یکپارچه‌سازی کره زمین با شمشیر و آتش";
-        reasonDescription =
-          locale === "en"
-            ? `Armed forces of ${winnerDisplayName} captured over ${targetPctText}% of global sovereign territory, winning absolute supremacy.`
-            : `ارتش ${winnerDisplayName} با فتح بیش از ${targetPctText}٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
+        reasonTitle = t("reasons.victory.TERRITORIAL_DOMINANCE.title");
+        reasonDescription = t(
+          "reasons.victory.TERRITORIAL_DOMINANCE.description",
+          {
+            name: winnerDisplayName,
+            targetPct: targetPctText,
+          },
+        );
       } else if (rawReason === "WORLD_CONQUEST") {
-        reasonTitle =
-          locale === "en"
-            ? "Total Conquest & Complete Capitulation"
-            : "فتح کامل و تسلیم تمام کشورها";
-        reasonDescription =
-          locale === "en"
-            ? `The ${winnerDisplayName} empire eliminated all rival powers, becoming the sole sovereign ruler of Earth.`
-            : `امپراتوری ${winnerDisplayName} تمامی کشورهای رقیب را مغلوب ساخت و تنها حاکمیت باقی‌مانده بر کره زمین شد.`;
+        reasonTitle = t("reasons.victory.WORLD_CONQUEST.title");
+        reasonDescription = t("reasons.victory.WORLD_CONQUEST.description", {
+          name: winnerDisplayName,
+        });
       } else {
-        reasonTitle =
-          locale === "en"
-            ? "Strategic Triumph over the World"
-            : "پیروزی استراتژیک بر جهان";
-        reasonDescription =
-          locale === "en"
-            ? `The realm of ${winnerDisplayName} achieved all international hegemony benchmarks.`
-            : `امپراتوری ${winnerDisplayName} تمامی شروط غلبه بر رقبای بین‌المللی را به انجام رساند.`;
+        reasonTitle = t("reasons.victory.GENERIC.title");
+        reasonDescription = t("reasons.victory.GENERIC.description", {
+          name: winnerDisplayName,
+        });
       }
     } else {
       if (isPlayerDefeated) {
-        reasonTitle =
-          locale === "en"
-            ? "Total State Collapse & Loss of Sovereignty"
-            : "فروپاشی کامل دولت و شکست حاکمیت";
-        reasonDescription =
-          locale === "en"
-            ? "Your realm lost all provinces, military garrisons, and governance authority, falling from the geopolitical map."
-            : "کشور شما در جریان نبردها تمامی استان‌ها، قلمرو و پایداری حاکمیتی خود را از دست داد و از جغرافیای سیاسی جهان حذف گردید.";
+        reasonTitle = t("reasons.defeat.PLAYER_DEFEATED.title");
+        reasonDescription = t("reasons.defeat.PLAYER_DEFEATED.description");
       } else if (rawReason === "ECONOMIC_DOMINANCE") {
-        reasonTitle =
-          locale === "en"
-            ? "Rival Victory in Economic Marathon"
-            : "پیروزی رقیب در ماراتن اقتصادی";
-        reasonDescription =
-          locale === "en"
-            ? `${winnerDisplayName} reached over ${targetPctText}% of global GDP output first, claiming world economic hegemony.`
-            : `کشور ${winnerDisplayName} توانست زودتر از سایر قدرت‌ها به بیش از ${targetPctText}٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
+        reasonTitle = t("reasons.defeat.ECONOMIC_DOMINANCE.title");
+        reasonDescription = t("reasons.defeat.ECONOMIC_DOMINANCE.description", {
+          name: winnerDisplayName,
+          targetPct: targetPctText,
+        });
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
-        reasonTitle =
-          locale === "en"
-            ? "Rival Territorial Conquest Victory"
-            : "پیروزی رقیب در فتوحات سرزمینی";
-        reasonDescription =
-          locale === "en"
-            ? `${winnerDisplayName} conquered over ${targetPctText}% of global territory, establishing the supreme imperial realm.`
-            : `کشور ${winnerDisplayName} با پیشروی مداوم توانست بیش از ${targetPctText}٪ خاک جهان را تصرف کند و به عنوان امپراتوری برتر برگزیده شود.`;
+        reasonTitle = t("reasons.defeat.TERRITORIAL_DOMINANCE.title");
+        reasonDescription = t(
+          "reasons.defeat.TERRITORIAL_DOMINANCE.description",
+          {
+            name: winnerDisplayName,
+            targetPct: targetPctText,
+          },
+        );
       } else if (rawReason === "WORLD_CONQUEST") {
-        reasonTitle =
-          locale === "en"
-            ? "Decisive Superpower Conquest"
-            : "پیروزی قاطع قدرت رقیب";
-        reasonDescription =
-          locale === "en"
-            ? `${winnerDisplayName} eliminated all opposition and unified the world order.`
-            : `کشور ${winnerDisplayName} موفق به برچیدن تمامی رقبا و یکپارچه‌سازی جهان شد.`;
+        reasonTitle = t("reasons.defeat.WORLD_CONQUEST.title");
+        reasonDescription = t("reasons.defeat.WORLD_CONQUEST.description", {
+          name: winnerDisplayName,
+        });
       } else {
-        reasonTitle =
-          locale === "en" ? "Rival Imperial Triumph" : "پیروزی امپراتوری رقیب";
-        reasonDescription =
-          locale === "en"
-            ? `${winnerDisplayName} fulfilled all conditions for world dominion first.`
-            : `کشور ${winnerDisplayName} توانست امتیازات لازم برای سلطه بر نظم نوین جهانی را زودتر تکمیل نماید.`;
+        reasonTitle = t("reasons.defeat.GENERIC.title");
+        reasonDescription = t("reasons.defeat.GENERIC.description", {
+          name: winnerDisplayName,
+        });
       }
     }
 

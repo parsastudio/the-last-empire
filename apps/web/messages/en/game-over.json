@@ -18,12 +18,60 @@
     "turnUnit": "{count} Turns",
     "finalGdp": "Gross Domestic Product",
     "finalPopulation": "Total Sovereign Population",
-    "conqueredTerritory": "Controlled Territorial Extent"
+    "conqueredTerritory": "Controlled Territorial Extent",
+    "pixelsUnit": "{count} pixels"
   },
   "actions": {
     "sandbox": "Continue Conquest in Sandbox Freeplay",
     "spectator": "Spectate Global Map & Ongoing Hostilities",
     "restart": "Start New Campaign",
     "home": "Return to Main Menu"
+  },
+  "reasons": {
+    "defaultTitle": "Game Conclusion & World Order",
+    "fallbacks": {
+      "rivalSuperpowers": "Rival Superpowers",
+      "supremeGlobalPower": "Supreme Global Power"
+    },
+    "victory": {
+      "ECONOMIC_DOMINANCE": {
+        "title": "Absolute Victory: Global Economic Dominance",
+        "description": "The {name} realm captured over {targetPct}% of global economic wealth, establishing unquestioned hegemony."
+      },
+      "TERRITORIAL_DOMINANCE": {
+        "title": "Military Victory: Territorial Unification",
+        "description": "Armed forces of {name} captured over {targetPct}% of global sovereign territory, winning absolute supremacy."
+      },
+      "WORLD_CONQUEST": {
+        "title": "Total Conquest & Complete Capitulation",
+        "description": "The {name} empire eliminated all rival powers, becoming the sole sovereign ruler of Earth."
+      },
+      "GENERIC": {
+        "title": "Strategic Triumph over the World",
+        "description": "The realm of {name} achieved all international hegemony benchmarks."
+      }
+    },
+    "defeat": {
+      "PLAYER_DEFEATED": {
+        "title": "Total State Collapse & Loss of Sovereignty",
+        "description": "Your realm lost all provinces, military garrisons, and governance authority, falling from the geopolitical map."
+      },
+      "ECONOMIC_DOMINANCE": {
+        "title": "Rival Victory in Economic Marathon",
+        "description": "{name} reached over {targetPct}% of global GDP output first, claiming world economic hegemony."
+      },
+      "TERRITORIAL_DOMINANCE": {
+        "title": "Rival Territorial Conquest Victory",
+        "description": "{name} conquered over {targetPct}% of global territory, establishing the supreme imperial realm."
+      },
+      "WORLD_CONQUEST": {
+        "title": "Decisive Superpower Conquest",
+        "description": "{name} eliminated all opposition and unified the world order."
+      },
+      "GENERIC": {
+        "title": "Rival Imperial Triumph",
+        "description": "{name} fulfilled all conditions for world dominion first."
+      }
+    }
   }
 }
