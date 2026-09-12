@@ -25,6 +25,7 @@ import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
+  targetProvinceId: number | null;
   isLandNeighbor: boolean;
   isNavalValid: boolean;
   attackType: "LAND" | "NAVAL";
@@ -106,11 +107,8 @@ export class DirectAttackSelector {
         : "خاک اصلی کشور";
 
     let targetRegionName = "";
-    if (targetProvince) {
-      targetRegionName = ProvinceNameFormatter.format(
-        targetProvince.provinceId,
-        locale,
-      );
+    if (targetProvinceId) {
+      targetRegionName = ProvinceNameFormatter.format(targetProvinceId, locale);
     } else if (targetNation) {
       targetRegionName =
         locale === "en"
@@ -120,6 +118,7 @@ export class DirectAttackSelector {
 
     return {
       targetProvince,
+      targetProvinceId,
       isLandNeighbor,
       isNavalValid,
       attackType,

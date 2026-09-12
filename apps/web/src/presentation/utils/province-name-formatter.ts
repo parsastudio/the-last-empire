@@ -29,38 +29,18 @@ export class ProvinceNameFormatter {
           locale,
         );
       }
+      return locale === "en"
+        ? `Province #${resolvedId}`
+        : `استان #${LocaleNumberFormatter.toDigits(resolvedId, "fa")}`;
     }
 
     if (typeof target === "string" && target.trim().length > 0) {
       const trimmed = target.trim();
-      const matchFa = trimmed.match(/^(?:استان\s+)?(.+?)(?:\s*\((\d+)\))?$/);
-
-      if (matchFa) {
-        const countryRaw = matchFa[1]?.trim();
-        const num = matchFa[2] ? Number(matchFa[2]) : undefined;
-
-        if (countryRaw) {
-          const profile =
-            CountryRegistry.getCountry(countryRaw) ||
-            CountryRegistry.getAllProfiles().find(
-              (p) =>
-                p.nameFa === countryRaw ||
-                p.nameEn.toLowerCase() === countryRaw.toLowerCase() ||
-                p.code === countryRaw.toUpperCase(),
-            );
-
-          const countryCode = profile ? profile.code : countryRaw;
-          return this.formatByParts(countryCode, num, locale);
-        }
+      const canonical = CountryRegistry.resolveCanonicalId(trimmed);
+      if (canonical) {
+        return this.formatByParts(canonical, undefined, locale);
       }
-
       return trimmed;
-    }
-
-    if (resolvedId && resolvedId > 0) {
-      return locale === "en"
-        ? `Province #${resolvedId}`
-        : `استان #${LocaleNumberFormatter.toDigits(resolvedId, "fa")}`;
     }
 
     return locale === "en" ? "Unknown Territory" : "استان نامشخص";

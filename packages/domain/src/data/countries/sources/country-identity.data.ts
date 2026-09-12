@@ -6,10 +6,10 @@ import { AMERICAS_IDENTITY_MAP } from "@/domain/data/countries/sources/identity/
 import { AFRICA_IDENTITY_MAP } from "@/domain/data/countries/sources/identity/africa-identity.data";
 
 export interface CountryIdentityInfo {
-  nameEn: string;
-  nameFa: string;
   flagCode: string;
   startingGovernment: GovernmentType;
+  nameEn?: string;
+  nameFa?: string;
 }
 
 export const COUNTRY_IDENTITY_MAP: Record<string, CountryIdentityInfo> = {
