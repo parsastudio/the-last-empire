@@ -44,7 +44,7 @@ export function WideMilitaryView({
   }, [nationsMap, nation]);
 
   return (
-    <div className="space-y-5 animate-fade-smooth dir-rtl text-right font-sans">
+    <div className="space-y-5 animate-fade-smooth text-start font-sans">
       <MilitarySubTabsHeader
         activeSubTab={activeSubTab}
         alliesCount={eligibleAlliesCount}

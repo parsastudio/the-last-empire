@@ -62,13 +62,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       }
 
       set({
-        error: "اطلاعات پرونده بازی یافت نشد.",
+        error: "Campaign record not found.",
         loading: false,
       });
       return false;
     } catch {
       set({
-        error: "خطا در بارگذاری اطلاعات از حافظه محلی.",
+        error: "Failed to load state from storage.",
         loading: false,
       });
       return false;
@@ -107,7 +107,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       return true;
     } catch {
       set({
-        error: "خطا در ساخت کمپین جدید.",
+        error: "Failed to initialize new campaign.",
         loading: false,
       });
       return false;
@@ -119,7 +119,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     if (!gameState) {
       return {
         success: false,
-        message: "اطلاعات پرونده بازی یافت نشد.",
+        message: "Campaign record not found.",
       };
     }
 
@@ -144,7 +144,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
     return {
       success: false,
-      message: result.message || "امکان اجرای این دستور وجود ندارد.",
+      message: result.message || "Action cannot be executed.",
     };
   },
 

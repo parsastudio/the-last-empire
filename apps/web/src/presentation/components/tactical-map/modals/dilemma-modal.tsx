@@ -78,6 +78,20 @@ export function DilemmaModal({
     ? t(`events.${dilemma.id}.choices.${selectedChoiceId}.label`)
     : "";
 
+  const buttonIcon = isSubmitting ? (
+    <Loader2 size={16} className="animate-spin" />
+  ) : selectedChoiceId ? (
+    <Zap size={16} />
+  ) : (
+    <CheckCircle2 size={16} />
+  );
+
+  const buttonText = isSubmitting
+    ? t("modal.submitting")
+    : selectedChoiceId
+      ? t("modal.actionConfirm", { label: activeChoiceLabel })
+      : t("modal.actionSelectPrompt");
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
@@ -85,7 +99,7 @@ export function DilemmaModal({
       maxWidthClass="max-w-xl"
       onClose={() => {}}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div
           className={`relative overflow-hidden bg-gradient-to-r ${categoryVisual.glowGradient} border ${categoryVisual.borderColor} p-5 rounded-3xl shadow-xl space-y-3 backdrop-blur-2xl`}
         >
@@ -137,20 +151,8 @@ export function DilemmaModal({
             disabled={!selectedChoiceId || isSubmitting}
             className="w-full py-4 px-6 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all shadow-xl shadow-gdp/20 disabled:shadow-none flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-gdp/30"
           >
-            {isSubmitting ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : selectedChoiceId ? (
-              <Zap size={16} />
-            ) : (
-              <CheckCircle2 size={16} />
-            )}
-            <span>
-              {isSubmitting
-                ? t("modal.submitting")
-                : selectedChoiceId
-                  ? t("modal.actionConfirm", { label: activeChoiceLabel })
-                  : t("modal.actionSelectPrompt")}
-            </span>
+            {buttonIcon}
+            <span>{buttonText}</span>
           </button>
         </div>
       </div>

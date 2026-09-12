@@ -31,7 +31,7 @@ export function IndustrySubTabsHeader({
   ];
 
   return (
-    <div className="flex items-center gap-2 p-1 bg-secondary/50 border border-border/80 rounded-2xl w-fit dir-rtl font-sans">
+    <div className="flex items-center gap-2 p-1 bg-secondary/50 border border-border/80 rounded-2xl w-fit font-sans">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;

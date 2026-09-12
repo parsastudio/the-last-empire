@@ -168,7 +168,40 @@
     "noTechSup": "No Tech Disparity",
     "governmentType": "Governance Regime",
     "internalStability": "Domestic Political Stability:",
+    "tensionLabel": "Tension:",
     "level": "Level {level}"
+  },
+  "view": {
+    "dossierTab": "Dossier: {name}",
+    "rosterTab": "Sovereign Roster ({count})",
+    "searchPlaceholder": "Search nation name or ISO...",
+    "noResults": "No sovereign state matched this query."
+  },
+  "warFeedback": {
+    "activeWarStatus": "Active War State • Code Red",
+    "title": "Declaration of War Dispatched to {name}",
+    "desc": "All international treaties dissolved, embassies evacuated, and nationwide fire orders issued to the General Staff.",
+    "guarantorsActive": "Defense Pact Triggered: Guarantors Enter War!",
+    "newBelligerentsBadge": "New Belligerents",
+    "guarantorsDesc": "Pursuant to mutual territorial defense commitments, the armed forces of the following nations entered combat against you:",
+    "enterWarBadge": "Enters Combat",
+    "defenseReportTitle": "Intel Report: Emergency Weapon Purchases by Target!",
+    "defensePurchasedDesc": "Alarmed by the military disparity, {target} obtained emergency credit ({cost}) and imported {quantity} {unit} from {seller}.",
+    "defenseMaxDebtDesc": "The state of {name} reached maximum permitted debt capacity and cannot obtain credit for emergency arms.",
+    "confirmButton": "Acknowledge & Deploy to War Front"
+  },
+  "treatyFeedback": {
+    "protectorateAccepted": "Security protectorate treaty with {name} was successfully enacted.",
+    "protectorateGarrisonBadge": "Advanced Strike Force Stationed (50% of your GDP)",
+    "protectorateCostBadge": "5% Turn Tribute • -30 Prestige • -15% Stability",
+    "securityCancelled": "Mutual defense accord with {name} was formally terminated.",
+    "treatyCancelled": "Prior bilateral accord with {name} was revoked, successfully downgrading relations.",
+    "downgradePenaltyBadge": "-2 Global Prestige Points (Treaty Downgrade)",
+    "accepted": "The government of {name} accepted your {proposal} proposal.",
+    "securityGuaranteeAcceptedBadge": "Mutual Defense Pact Enacted (Direct military intervention if invaded)",
+    "partnershipAcceptedBadge": "Bilateral 0.6% GDP turn dividend continuously deposited into each treasury",
+    "reputationGainBadge": "+1 International Reputation Point",
+    "rejected": "The government of {name} rejected your {proposal} proposal."
   },
   "betrayal": {
     "title": "Surprise Attack & Treaty Violation Warning",

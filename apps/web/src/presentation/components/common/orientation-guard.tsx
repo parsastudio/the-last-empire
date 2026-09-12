@@ -35,10 +35,7 @@ export function OrientationGuard() {
   };
 
   return (
-    <aside
-      className="fixed inset-0 z-[9999] bg-background/98 backdrop-blur-3xl text-foreground flex-col items-center justify-center p-6 text-center select-none hidden portrait:max-lg:flex dir-rtl font-sans"
-      dir="rtl"
-    >
+    <aside className="fixed inset-0 z-[9999] bg-background/98 backdrop-blur-3xl text-foreground flex-col items-center justify-center p-6 text-center select-none hidden portrait:max-lg:flex font-sans">
       <div className="relative flex items-center justify-center w-20 h-20 mb-6">
         <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
         <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary/80 border border-border/80 shadow-inner">

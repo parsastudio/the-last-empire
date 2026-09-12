@@ -25,7 +25,7 @@ export function MilitaryForcesSection({
   );
 
   return (
-    <div className="space-y-3 dir-rtl text-right">
+    <div className="space-y-3 text-start font-sans">
       <div className="flex items-center gap-2 px-1">
         <Swords size={14} className="text-military" />
         <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">

@@ -26,7 +26,7 @@ export function CampaignNotFoundModal({
       maxWidthClass="max-w-md"
       onClose={() => router.push("/")}
     >
-      <div className="space-y-5 text-right dir-rtl font-sans">
+      <div className="space-y-5 text-start font-sans">
         <div className="flex flex-col items-center justify-center gap-3 text-center">
           <div className="w-14 h-14 rounded-2xl bg-military/15 border border-military/30 text-military flex items-center justify-center shadow-lg">
             <FolderX size={28} />

@@ -44,7 +44,7 @@ export function AttackIntelPanel({
   );
 
   return (
-    <div className="space-y-3 font-sans dir-rtl text-right">
+    <div className="space-y-3 font-sans text-start">
       {!isReconActive ? (
         <AttackFogReconCard
           reconCost={reconCost}

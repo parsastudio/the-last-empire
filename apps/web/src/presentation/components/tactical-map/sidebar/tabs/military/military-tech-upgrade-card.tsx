@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { Award, Zap, Loader2, Sparkles } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ResearchManager } from "@/engine/politics/research-manager";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface MilitaryTechUpgradeCardProps {
   nationId: string;
@@ -22,6 +22,7 @@ export function MilitaryTechUpgradeCard({
   governmentType,
 }: MilitaryTechUpgradeCardProps) {
   const t = useTranslations("overview.militaryTechUpgrade");
+  const { formatCurrency, formatLevel, formatPercent } = useLocaleFormatter();
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
 
@@ -46,7 +47,7 @@ export function MilitaryTechUpgradeCard({
   };
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right font-sans">
+    <div className="space-y-2.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Award size={14} className="text-amber-500" />
@@ -57,7 +58,7 @@ export function MilitaryTechUpgradeCard({
         <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1">
           <Sparkles size={10} />
           {t("levelBadge", {
-            level: PersianNumberFormatter.toPersianDigits(techLevel.toFixed(1)),
+            level: formatLevel(techLevel),
           })}
         </span>
       </div>
@@ -72,7 +73,7 @@ export function MilitaryTechUpgradeCard({
               canAffordTech ? "text-amber-500" : "text-military"
             }`}
           >
-            {PersianNumberFormatter.formatCurrency(stepResearchCost, true)}
+            {formatCurrency(stepResearchCost, true)}
           </span>
         </div>
 
@@ -80,7 +81,7 @@ export function MilitaryTechUpgradeCard({
           <div className="flex items-center justify-between text-muted-foreground font-sans">
             <span>{t("progressToNext")}</span>
             <span className="font-bold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(subLevelIndex * 10)}٪
+              {formatPercent(subLevelIndex * 10)}
             </span>
           </div>
           <div className="grid grid-cols-10 gap-1">
@@ -112,9 +113,7 @@ export function MilitaryTechUpgradeCard({
               ? t("submitting")
               : canAffordTech
                 ? t("upgradeBtn", {
-                    level: PersianNumberFormatter.toPersianDigits(
-                      nextStepLevel.toFixed(1),
-                    ),
+                    level: formatLevel(nextStepLevel),
                   })
                 : t("insufficientFunds")}
           </span>

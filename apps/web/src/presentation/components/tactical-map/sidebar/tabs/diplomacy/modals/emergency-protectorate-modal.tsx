@@ -40,6 +40,7 @@ export function EmergencyProtectorateModal({
   onClose,
 }: EmergencyProtectorateModalProps) {
   const t = useTranslations("diplomacy.protectorateModal");
+  const tCommon = useTranslations("common");
   const { formatCurrency, toDigits } = useLocaleFormatter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -212,7 +213,7 @@ export function EmergencyProtectorateModal({
             onClick={onClose}
             className="sm:col-span-4 py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <span>انصراف</span>
+            <span>{tCommon("cancel")}</span>
           </button>
 
           <button

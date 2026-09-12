@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUpCircle, Handshake, Coins, Clock } from "lucide-react";
-import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
+import { DiplomaticStance } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DiplomacyStepUpActionsProps {
   currentStance: DiplomaticStance | string;
@@ -25,12 +26,13 @@ export function DiplomacyStepUpActions({
   onStrategicPartnership,
 }: DiplomacyStepUpActionsProps) {
   const t = useTranslations("diplomacy");
+  const { formatCurrency } = useLocaleFormatter();
 
   if (currentStance === "WAR") {
     return (
       <button
         onClick={onPeaceTreaty}
-        className={`w-full p-3.5 rounded-2xl border text-right transition-all space-y-1 shadow-sm ${
+        className={`w-full p-3.5 rounded-2xl border text-start transition-all space-y-1 shadow-sm ${
           isPeaceCooldownActive
             ? "bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-pointer"
             : "bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/40 text-emerald-400 cursor-pointer"
@@ -65,7 +67,7 @@ export function DiplomacyStepUpActions({
     return (
       <button
         onClick={onNonAggression}
-        className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-right transition-all cursor-pointer space-y-1 shadow-sm"
+        className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-start transition-all cursor-pointer space-y-1 shadow-sm"
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black">
@@ -85,7 +87,7 @@ export function DiplomacyStepUpActions({
       <button
         onClick={onStrategicPartnership}
         disabled={!canAffordPartnership}
-        className="w-full p-3.5 rounded-2xl bg-gdp/15 hover:bg-gdp/25 disabled:bg-secondary/40 disabled:opacity-60 border border-gdp/40 text-gdp text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3.5 rounded-2xl bg-gdp/15 hover:bg-gdp/25 disabled:bg-secondary/40 disabled:opacity-60 border border-gdp/40 text-gdp text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-1.5">
@@ -93,18 +95,12 @@ export function DiplomacyStepUpActions({
             <span>{t("actions.signStrategicPartnership")}</span>
           </span>
           <span className="text-[10px] font-mono font-bold bg-gdp/20 px-2 py-0.5 rounded-md text-gdp border border-gdp/30">
-            {PersianNumberFormatter.formatCurrency(
-              strategicPartnershipCost,
-              true,
-            )}
+            {formatCurrency(strategicPartnershipCost, true)}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
           {t("actions.signStrategicPartnershipDesc", {
-            amount: PersianNumberFormatter.formatCurrency(
-              strategicPartnershipDividend,
-              true,
-            ),
+            amount: formatCurrency(strategicPartnershipDividend, true),
           })}
         </p>
       </button>

@@ -9,10 +9,11 @@ import {
   Radio,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation, PersianNumberFormatter } from "@geopolitics/domain";
+import { Nation } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { CoalitionAlertData } from "@/presentation/stores/use-ui-store";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface CoalitionAlertModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function CoalitionAlertModal({
   onClose,
 }: CoalitionAlertModalProps) {
   const t = useTranslations("reports.coalition");
+  const { toDigits, formatLevel } = useLocaleFormatter();
 
   useEffect(() => {
     if (isOpen) {
@@ -56,7 +58,7 @@ export function CoalitionAlertModal({
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div className="relative overflow-hidden bg-gradient-to-b from-rose-950/70 via-card to-secondary/80 border border-rose-500/60 p-5 rounded-3xl shadow-2xl space-y-3">
           <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent animate-pulse" />
 
@@ -78,7 +80,7 @@ export function CoalitionAlertModal({
             <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1">
               <Radio size={12} className="animate-ping" />
               {t("turn", {
-                turn: PersianNumberFormatter.toPersianDigits(data.turn),
+                turn: toDigits(data.turn),
               })}
             </span>
           </div>
@@ -133,9 +135,7 @@ export function CoalitionAlertModal({
                   <span>{t("militaryTech")}</span>
                   <span className="font-bold text-amber-400">
                     {t("techLevel", {
-                      level: PersianNumberFormatter.toPersianDigits(
-                        member.techLevel,
-                      ),
+                      level: formatLevel(member.techLevel),
                     })}
                   </span>
                 </div>

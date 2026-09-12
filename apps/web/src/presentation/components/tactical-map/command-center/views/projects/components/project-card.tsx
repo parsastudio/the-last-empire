@@ -11,10 +11,8 @@ import {
   Check,
   ChevronDown,
 } from "lucide-react";
-import {
-  NationalProjectConfig,
-  PersianNumberFormatter,
-} from "@geopolitics/domain";
+import { NationalProjectConfig } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { ProjectBreakthroughCardOverlay } from "./project-breakthrough-card-overlay";
 
 interface ProjectCardProps {
@@ -47,6 +45,7 @@ export function ProjectCard({
   onDismissBreakthrough,
 }: ProjectCardProps) {
   const t = useTranslations("projects");
+  const { formatCurrency, toDigits } = useLocaleFormatter();
 
   const projectName = t(`${project.id}.name`);
   const projectTagline = t(`${project.id}.tagline`);
@@ -90,7 +89,7 @@ export function ProjectCard({
 
   return (
     <div
-      className={`rounded-3xl border transition-all duration-300 font-sans dir-rtl text-right overflow-hidden shadow-md backdrop-blur-xl relative ${
+      className={`rounded-3xl border transition-all duration-300 font-sans text-start overflow-hidden shadow-md backdrop-blur-xl relative ${
         isCompleted
           ? "bg-emerald-950/20 border-emerald-500/40 ring-1 ring-emerald-500/20 shadow-emerald-950/30"
           : isBoostedThisTurn
@@ -121,8 +120,7 @@ export function ProjectCard({
             </span>
 
             <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border bg-secondary/80 text-gdp border-gdp/30 shrink-0 shadow-inner">
-              {PersianNumberFormatter.formatCurrency(project.costPerStep, true)}{" "}
-              / {t("stepCost")}
+              {formatCurrency(project.costPerStep, true)} / {t("stepCost")}
             </span>
           </div>
         </div>
@@ -131,10 +129,8 @@ export function ProjectCard({
           <div className="hidden md:flex flex-col items-end gap-1.5 w-40 font-mono">
             <span className="text-xs text-muted-foreground font-bold">
               {t("stepCounter", {
-                current: PersianNumberFormatter.toPersianDigits(clampedSteps),
-                total: PersianNumberFormatter.toPersianDigits(
-                  project.totalStepsRequired,
-                ),
+                current: toDigits(clampedSteps),
+                total: toDigits(project.totalStepsRequired),
               })}
             </span>
 

@@ -112,7 +112,7 @@ export function BattleDebriefModal({
       maxWidthClass="max-w-3xl"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-4 rounded-2xl flex items-center justify-between gap-3 shadow-md">
           <div className="flex items-center gap-3">
             <span className="text-3xl select-none">{attackerFlag}</span>
@@ -137,9 +137,9 @@ export function BattleDebriefModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-left dir-ltr">
+          <div className="flex items-center gap-3 text-end">
             <span className="text-3xl select-none">{defenderFlag}</span>
-            <div className="space-y-0.5 text-right">
+            <div className="space-y-0.5 text-end">
               <span className="text-sm font-black text-foreground block">
                 {defenderName}
               </span>

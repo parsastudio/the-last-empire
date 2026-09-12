@@ -65,7 +65,7 @@ export function GameOverModal({
       maxWidthClass="max-w-lg"
       onClose={onInspectOrContinue}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans">
+      <div className="space-y-4 text-start font-sans">
         <GameOverHeroBanner
           isVictory={isVictory}
           winnerName={winnerName}

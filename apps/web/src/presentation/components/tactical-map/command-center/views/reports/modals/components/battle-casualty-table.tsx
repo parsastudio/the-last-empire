@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Trophy, Skull } from "lucide-react";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface BattleCasualtyTableProps {
   reportData: BattleFullReportData;
@@ -22,6 +22,7 @@ export function BattleCasualtyTable({
   humanNationId,
 }: BattleCasualtyTableProps) {
   const t = useTranslations("reports.casualties");
+  const { formatNumber, toDigits } = useLocaleFormatter();
   const isAttackerWin = reportData.isAttackerVictory;
   const isHumanWinner =
     (humanNationId === reportData.attackerId && isAttackerWin) ||
@@ -59,7 +60,7 @@ export function BattleCasualtyTable({
   ];
 
   return (
-    <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+    <div className="space-y-4 font-sans text-start animate-fade-smooth">
       <div
         className={`p-5 rounded-3xl border flex items-center justify-between shadow-xl ${
           isHumanWinner
@@ -81,13 +82,12 @@ export function BattleCasualtyTable({
           </span>
         </div>
 
-        <div className="text-left font-mono space-y-0.5 dir-ltr">
+        <div className="text-end font-mono space-y-0.5">
           <span className="text-[10px] text-muted-foreground block uppercase">
             {t("powerRatio")}
           </span>
           <span className="text-xl font-black text-amber-400">
-            {PersianNumberFormatter.toPersianDigits(reportData.valuationRatio)}
-            :۱
+            {toDigits(reportData.valuationRatio)}:{toDigits(1)}
           </span>
         </div>
       </div>
@@ -103,10 +103,10 @@ export function BattleCasualtyTable({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-xs">
+          <table className="w-full text-start text-xs">
             <thead>
               <tr className="border-b border-border/60 bg-secondary/50 font-bold text-muted-foreground text-[11px]">
-                <th className="p-3.5">{t("hardwareColumn")}</th>
+                <th className="p-3.5 text-start">{t("hardwareColumn")}</th>
                 <th className="p-3.5 text-center text-rose-400 font-black">
                   {t("attLossColumn", { name: attackerName })}
                 </th>
@@ -121,18 +121,18 @@ export function BattleCasualtyTable({
                   key={idx}
                   className="hover:bg-secondary/30 transition-colors"
                 >
-                  <td className="p-3.5 font-bold text-foreground font-sans">
+                  <td className="p-3.5 font-bold text-foreground font-sans text-start">
                     {r.unit}
                   </td>
                   <td className="p-3.5 text-center font-extrabold text-rose-400 text-sm">
                     {r.attLost > 0
-                      ? `-${PersianNumberFormatter.toPersianDigits(r.attLost)}`
-                      : "۰"}
+                      ? `-${formatNumber(r.attLost)}`
+                      : toDigits(0)}
                   </td>
                   <td className="p-3.5 text-center font-extrabold text-rose-400 text-sm">
                     {r.defLost > 0
-                      ? `-${PersianNumberFormatter.toPersianDigits(r.defLost)}`
-                      : "۰"}
+                      ? `-${formatNumber(r.defLost)}`
+                      : toDigits(0)}
                   </td>
                 </tr>
               ))}

@@ -54,7 +54,9 @@
     "surpriseAttackTitle": "Security Breach: Surprise Assault Without War Declaration",
     "currentStance": "Current Bilateral Stance: {stance}",
     "reputationPenaltyBadge": "Lose {points} Global Prestige Points",
-    "surpriseAttackDesc": "Launching a direct strike against {name} without prior formal war declaration breaches international protocols, penalizing your standing by {points} prestige points."
+    "surpriseAttackDesc": "Launching a direct strike against {name} without prior formal war declaration breaches international protocols, penalizing your standing by {points} prestige points.",
+    "impossibleVictoryTitle": "Victory is Impossible",
+    "impossibleVictoryDesc": "Even with full troop mobilization, defeat is certain. Weaken enemy air defense or reinforce armed forces first."
   },
   "slider": {
     "sectionTitle": "Combat Asset Deployment Allocation to Battlefield",

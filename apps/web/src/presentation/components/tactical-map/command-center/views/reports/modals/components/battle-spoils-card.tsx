@@ -33,7 +33,7 @@ export function BattleSpoilsCard({
     (humanNationId === reportData.defenderId && !isAttackerWin);
 
   return (
-    <div className="space-y-3.5 font-sans text-right dir-rtl animate-fade-smooth w-full overflow-x-hidden">
+    <div className="space-y-3.5 font-sans text-start animate-fade-smooth w-full overflow-x-hidden">
       <div
         className={`p-4 rounded-2xl border flex items-center justify-between shadow-lg w-full ${
           isHumanWinner

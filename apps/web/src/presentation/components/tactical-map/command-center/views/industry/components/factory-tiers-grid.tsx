@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Layers, Factory } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { FactoryBatch } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { FactoryTierCard } from "./factory-tier-card";
 import { useFactoryTierProcurement } from "../hooks/use-factory-tier-procurement";
 
@@ -30,6 +30,7 @@ export function FactoryTiersGrid({
   actionLabel,
 }: FactoryTiersGridProps) {
   const t = useTranslations("industry.tiers");
+  const { toDigits } = useLocaleFormatter();
 
   const { tierUpgradeItems, feedbacks, isSubmitting, handleUpgradeTier } =
     useFactoryTierProcurement({
@@ -50,7 +51,7 @@ export function FactoryTiersGrid({
       : t("domesticActionDefault"));
 
   return (
-    <div className="space-y-3.5 dir-rtl text-right font-sans">
+    <div className="space-y-3.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-xl bg-gdp/15 border border-gdp/30 text-gdp">
@@ -72,9 +73,7 @@ export function FactoryTiersGrid({
           <Factory size={12} className="text-gdp" />
           <span>
             {t("activeTiersCount", {
-              count: PersianNumberFormatter.toPersianDigits(
-                tierUpgradeItems.length,
-              ),
+              count: toDigits(tierUpgradeItems.length),
             })}
           </span>
         </span>

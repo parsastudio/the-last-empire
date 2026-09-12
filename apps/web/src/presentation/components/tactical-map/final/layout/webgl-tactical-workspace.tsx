@@ -111,11 +111,20 @@ export function WebGLTacticalWorkspace({
             nextState.nations[targetCanonical] ||
             nextState.nations[nextState.globalCoalition.targetNationId];
 
+          const profile = CountryRegistry.getCountry(targetCanonical);
+          const resolvedTargetName = targetNation
+            ? locale === "en"
+              ? profile?.nameEn || targetNation.name
+              : targetNation.name
+            : locale === "en"
+              ? "Your Realm"
+              : "امپراتوری شما";
+
           openModal({
             type: "COALITION_ALERT",
             data: {
               targetNationId: nextState.globalCoalition.targetNationId,
-              targetName: targetNation ? targetNation.name : "امپراتوری شما",
+              targetName: resolvedTargetName,
               targetFlagCode: targetNation?.flagCode || "IR",
               isHumanTarget: targetCanonical === humanCanonical,
               memberIds: nextState.globalCoalition.memberNationIds,
@@ -127,7 +136,7 @@ export function WebGLTacticalWorkspace({
     } finally {
       setIsProcessingTurn(false);
     }
-  }, [advanceNextTurn, isProcessingTurn, openCommandCenter, openModal]);
+  }, [advanceNextTurn, isProcessingTurn, openCommandCenter, openModal, locale]);
 
   const activeRailTab =
     activeModal?.type === "COMMAND_CENTER" ? activeModal.activeTab : null;

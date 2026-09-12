@@ -22,7 +22,7 @@ import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 const DEFAULT_INVALID_GUARANTEE: SecurityGuaranteeValidationResult = {
   isValid: false,
-  reason: "اطلاعات کشور در دسترس نیست.",
+  reason: "",
   gdpRatio: 1,
   techDiff: 0,
   tension: 0,

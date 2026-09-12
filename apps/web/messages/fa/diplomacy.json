@@ -168,7 +168,40 @@
     "noTechSup": "عدم برتری فناوری",
     "governmentType": "نظام سیاسی",
     "internalStability": "ثبات سیاسی داخلی:",
+    "tensionLabel": "تنش:",
     "level": "سطح {level}"
+  },
+  "view": {
+    "dossierTab": "پرونده {name}",
+    "rosterTab": "فهرست کشورها ({count})",
+    "searchPlaceholder": "جستجوی نام یا نماد کشور...",
+    "noResults": "هیچ کشوری با این عبارت یافت نشد."
+  },
+  "warFeedback": {
+    "activeWarStatus": "وضعیت جنگی فعال • وضعیت قرمز",
+    "title": "ابلاغ بیانیه رسمی اعلان جنگ به {name}",
+    "desc": "تمامی معاهدات بین‌المللی لغو گردید، سفارتخانه‌ها تعطیل و فرمان آتش سراسری به ستاد کل ارتش صادر شد.",
+    "guarantorsActive": "پیمان دفاعی فعال شد: ورود حامیان به جنگ!",
+    "newBelligerentsBadge": "طرفین متخاصم جدید",
+    "guarantorsDesc": "با توجه به تعهد دفاع سرزمینی متقابل، ارتش کشورهای زیر فوراً و رسماً علیه شما وارد جنگ شدند:",
+    "enterWarBadge": "ورود به نبرد",
+    "defenseReportTitle": "گزارش اطلاعات: خرید ضربتی تسلیحات توسط حریف!",
+    "defensePurchasedDesc": "دولت {target} به دلیل احساس خطر از شکاف قدرت نظامی، با دریافت تسهیلات اضطراری ({cost}) اقدام به واردات فوری {quantity} {unit} از کشور {seller} نمود.",
+    "defenseMaxDebtDesc": "دولت {name} به سقف بدهی مجاز رسیده و توان دریافت وام اضطراری جهت تسلیح بیشتر را ندارد.",
+    "confirmButton": "تایید و ورود به جبهه نبرد"
+  },
+  "treatyFeedback": {
+    "protectorateAccepted": "پیمان استمداد امنیتی با امپراتوری {name} منعقد گردید.",
+    "protectorateGarrisonBadge": "استقرار نیروی ضربت فوق‌پیشرفته (معادل ۵۰٪ GDP شما)",
+    "protectorateCostBadge": "پرداخت نوبتی ۵٪ خراج • ۳۰- پرستیژ • ۱۵-٪ ثبات",
+    "securityCancelled": "پیمان دفاعی با دولت {name} فسخ گردید.",
+    "treatyCancelled": "معاهده پیشین با دولت {name} لغو گردید و سطح روابط با موفقیت تنزل یافت.",
+    "downgradePenaltyBadge": "۲- امتیاز اعتبار جهانی (تنزل معاهده)",
+    "accepted": "دولت {name} درخواست {proposal} شما را پذیرفت.",
+    "securityGuaranteeAcceptedBadge": "انعقاد پیمان دفاعی (ورود مستقیم ارتش حامی به جنگ در صورت تهاجم دشمن)",
+    "partnershipAcceptedBadge": "واریز دائمی ۰.۶٪ از GDP هر دو کشور به خزانه یکدیگر در هر نوبت",
+    "reputationGainBadge": "۱+ امتیاز اعتبار جهانی",
+    "rejected": "دولت {name} درخواست {proposal} شما را رد کرد."
   },
   "betrayal": {
     "title": "هشدار حمله غافلگیرانه و نقض پیمان",

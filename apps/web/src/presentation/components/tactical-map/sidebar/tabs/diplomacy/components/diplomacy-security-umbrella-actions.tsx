@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ShieldCheck, ShieldX, Skull } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { SecurityGuaranteeModal } from "../modals/security-guarantee-modal";
 import { EmergencyProtectorateModal } from "../modals/emergency-protectorate-modal";
 
@@ -40,12 +40,13 @@ export function DiplomacySecurityUmbrellaActions({
   onCancelEmergencyProtectorate,
 }: DiplomacySecurityUmbrellaActionsProps) {
   const t = useTranslations("diplomacy");
+  const { formatCurrency } = useLocaleFormatter();
   const [isGuaranteeModalOpen, setIsGuaranteeModalOpen] = useState(false);
   const [isProtectorateModalOpen, setIsProtectorateModalOpen] = useState(false);
 
   if (isEmergencyProtectorate) {
     return (
-      <div className="p-3.5 bg-rose-950/40 border border-rose-500/60 rounded-2xl space-y-2 font-sans">
+      <div className="p-3.5 bg-rose-950/40 border border-rose-500/60 rounded-2xl space-y-2 font-sans text-start">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
             <Skull size={16} className="text-rose-400 animate-pulse" />
@@ -53,10 +54,7 @@ export function DiplomacySecurityUmbrellaActions({
           </div>
           <span className="text-[10px] font-mono text-rose-400 font-bold">
             {t("umbrella.protectorateTribute", {
-              cost: PersianNumberFormatter.formatCurrency(
-                emergencyProtectorateCost,
-                true,
-              ),
+              cost: formatCurrency(emergencyProtectorateCost, true),
             })}
           </span>
         </div>
@@ -76,7 +74,7 @@ export function DiplomacySecurityUmbrellaActions({
 
   if (hasSecurityGuarantee) {
     return (
-      <div className="p-3.5 bg-cyan-950/30 border border-cyan-500/40 rounded-2xl space-y-2 font-sans">
+      <div className="p-3.5 bg-cyan-950/30 border border-cyan-500/40 rounded-2xl space-y-2 font-sans text-start">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-cyan-300 text-xs font-black">
             <ShieldCheck size={16} />
@@ -121,10 +119,10 @@ export function DiplomacySecurityUmbrellaActions({
   const safeEmergencyVal = emergencyValidation || defaultValidation;
 
   return (
-    <div className="space-y-2 font-sans">
+    <div className="space-y-2 font-sans text-start">
       <button
         onClick={() => setIsGuaranteeModalOpen(true)}
-        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
@@ -142,7 +140,7 @@ export function DiplomacySecurityUmbrellaActions({
 
       <button
         onClick={() => setIsProtectorateModalOpen(true)}
-        className="w-full p-3.5 rounded-2xl bg-rose-950/25 hover:bg-rose-950/45 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3.5 rounded-2xl bg-rose-950/25 hover:bg-rose-950/45 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">

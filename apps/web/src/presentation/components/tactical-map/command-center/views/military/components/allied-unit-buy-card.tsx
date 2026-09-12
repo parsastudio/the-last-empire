@@ -1,10 +1,10 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Coins, Zap, ShieldCheck, TrendingUp } from "lucide-react";
-import { PersianNumberFormatter } from "@geopolitics/domain";
 import { AlliedUnitProcurementInfo } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
 import { FloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AlliedUnitBuyCardProps {
   info: AlliedUnitProcurementInfo;
@@ -18,13 +18,14 @@ export function AlliedUnitBuyCard({
   onBuy,
 }: AlliedUnitBuyCardProps) {
   const t = useTranslations("military");
+  const { formatCurrency, formatPercent, formatNumber } = useLocaleFormatter();
   const visual = MILITARY_UNIT_VISUALS[info.type];
   const Icon = visual.icon;
   const surchargeRate = Math.round((info.techMultiplier - 1.0) * 100);
 
   return (
     <div
-      className={`relative p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 font-sans dir-rtl select-none ${
+      className={`relative p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 font-sans text-start select-none ${
         info.isCapReached
           ? "bg-secondary/30 border-border/60 opacity-60"
           : info.canAfford
@@ -39,7 +40,7 @@ export function AlliedUnitBuyCard({
           <Icon size={18} />
         </div>
 
-        <div className="space-y-0.5 text-right">
+        <div className="space-y-0.5 text-start">
           <div className="flex items-center gap-2">
             <span className="text-xs font-black text-foreground">
               {t(`${info.type}.name`)}
@@ -48,7 +49,7 @@ export function AlliedUnitBuyCard({
               <span className="text-[9px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded-md flex items-center gap-0.5">
                 <TrendingUp size={9} />
                 {t("techDisparity", {
-                  pct: PersianNumberFormatter.toPersianDigits(surchargeRate),
+                  pct: formatPercent(surchargeRate),
                 })}
               </span>
             )}
@@ -57,14 +58,12 @@ export function AlliedUnitBuyCard({
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
               {t("unitPrice", {
-                price: PersianNumberFormatter.formatCurrency(info.unitPrice),
+                price: formatCurrency(info.unitPrice),
               })}
             </span>
             <span className="text-[9px] text-foreground font-sans">
               {t("remainingRoom", {
-                count: PersianNumberFormatter.formatNumberWithCommas(
-                  info.remainingRoom,
-                ),
+                count: formatNumber(info.remainingRoom),
               })}
             </span>
             <span className="flex items-center gap-0.5 text-emerald-400 font-sans">
@@ -99,19 +98,17 @@ export function AlliedUnitBuyCard({
             disabled={!info.canAfford}
             className="py-2.5 px-4 bg-amber-500 hover:bg-amber-500/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-amber-500/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-amber-400/30"
             title={t("quickProcurementTitle", {
-              cost: PersianNumberFormatter.formatCurrency(info.batchCost),
+              cost: formatCurrency(info.batchCost),
             })}
           >
             <Plus size={14} strokeWidth={3} />
             <Coins size={12} className="opacity-90 shrink-0" />
             <span className="font-extrabold text-xs">
-              {PersianNumberFormatter.formatCurrency(info.batchCost)}
+              {formatCurrency(info.batchCost)}
             </span>
-            <span className="text-[10px] font-medium opacity-85 mr-0.5">
+            <span className="text-[10px] font-medium opacity-85 ms-0.5">
               {t("unitCountBadge", {
-                count: PersianNumberFormatter.formatNumberWithCommas(
-                  info.batchQuantity,
-                ),
+                count: formatNumber(info.batchQuantity),
               })}
             </span>
           </button>

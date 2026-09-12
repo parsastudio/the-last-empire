@@ -103,7 +103,7 @@ export function IndustryDomesticTab({
   ]);
 
   return (
-    <div className="space-y-6 dir-rtl text-right font-sans animate-in fade-in duration-200">
+    <div className="space-y-6 text-start font-sans animate-in fade-in duration-200">
       <IndustryStatsOverview
         totalActiveFactories={capacity.totalActiveFactories}
         totalMaxSlots={capacity.totalMaxSlots}
@@ -120,7 +120,6 @@ export function IndustryDomesticTab({
         totalFactories={safeTotalFactories}
         targetTechLevel={nation.industrialLevel}
         actionType="DOMESTIC"
-        actionLabel="ارتقای بومی"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">

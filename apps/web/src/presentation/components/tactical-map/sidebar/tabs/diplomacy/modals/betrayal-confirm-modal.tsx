@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { ShieldAlert, AlertTriangle } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface BetrayalConfirmModalProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ export function BetrayalConfirmModal({
   onConfirm,
 }: BetrayalConfirmModalProps) {
   const t = useTranslations("diplomacy.betrayal");
+  const { toDigits } = useLocaleFormatter();
 
   if (!isOpen) return null;
 
@@ -34,13 +35,13 @@ export function BetrayalConfirmModal({
       zIndexClass="z-[60]"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans">
+      <div className="space-y-4 text-start font-sans">
         <div className="p-3.5 bg-military/15 border border-military/40 rounded-2xl flex items-start gap-3">
           <ShieldAlert size={20} className="text-military shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="text-xs font-extrabold text-military block">
               {t("penaltySteps", {
-                steps: PersianNumberFormatter.toPersianDigits(skippedSteps),
+                steps: toDigits(skippedSteps),
               })}
             </span>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -56,7 +57,7 @@ export function BetrayalConfirmModal({
             </span>
             <span className="font-bold text-military text-sm">
               {t("points", {
-                points: PersianNumberFormatter.toPersianDigits(penalty),
+                points: toDigits(penalty),
               })}
             </span>
           </div>

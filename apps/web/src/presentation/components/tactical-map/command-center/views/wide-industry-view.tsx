@@ -28,7 +28,7 @@ export function WideIndustryView({
   );
 
   return (
-    <div className="space-y-6 dir-rtl text-right font-sans">
+    <div className="space-y-6 text-start font-sans">
       <div className="flex items-center justify-between">
         <IndustrySubTabsHeader
           activeTab={activeTab}

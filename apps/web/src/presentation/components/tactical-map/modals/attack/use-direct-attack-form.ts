@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   Nation,
   GameState,
@@ -15,6 +16,7 @@ import { useToast } from "@/presentation/context/toast-context";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { DirectAttackSelector } from "@/presentation/selectors/direct-attack.selector";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -33,6 +35,8 @@ export function useDirectAttackForm({
   isOpen,
   onClose,
 }: UseDirectAttackFormProps) {
+  const tAlerts = useTranslations("attack.alerts");
+  const { locale } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const { showToast } = useToast();
   const openModal = useUiStore((state) => state.openModal);
@@ -81,8 +85,9 @@ export function useDirectAttackForm({
       targetNation,
       targetProvinceId,
       gameState,
+      locale,
     );
-  }, [humanNation, targetNation, targetProvinceId, gameState]);
+  }, [humanNation, targetNation, targetProvinceId, gameState, locale]);
 
   useEffect(() => {
     if (isOpen && humanNation) {
@@ -212,8 +217,8 @@ export function useDirectAttackForm({
 
     if (!result.isPossible) {
       showToast(
-        "پیروزی غیرممکن است",
-        "حتی با اعزام تمامی نیروها، شکست قطعی است. ابتدا پدافند را تضعیف کنید یا ارتش را توسعه دهید.",
+        tAlerts("impossibleVictoryTitle"),
+        tAlerts("impossibleVictoryDesc"),
         "warning",
       );
     }
@@ -225,6 +230,7 @@ export function useDirectAttackForm({
     reach.attackType,
     logistics.navalFleetCount,
     showToast,
+    tAlerts,
   ]);
 
   const handleExecuteAttack = useCallback(async () => {

@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Award, Coins, Users, Globe2 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface VictoryStatsCardProps {
   turnsPlayed: number;
@@ -17,9 +17,10 @@ export function VictoryStatsCard({
   conqueredPixels,
 }: VictoryStatsCardProps) {
   const t = useTranslations("gameOver.stats");
+  const { toDigits } = useLocaleFormatter();
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 font-mono text-xs dir-rtl">
+    <div className="grid grid-cols-2 gap-2.5 font-mono text-xs text-start font-sans">
       <div className="bg-secondary/50 p-3.5 rounded-2xl space-y-1 border border-border/60">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-sans font-bold">
           <Award size={13} className="text-amber-500" />
@@ -27,7 +28,7 @@ export function VictoryStatsCard({
         </div>
         <span className="font-bold text-foreground block">
           {t("turnUnit", {
-            count: PersianNumberFormatter.toPersianDigits(turnsPlayed),
+            count: toDigits(turnsPlayed),
           })}
         </span>
       </div>

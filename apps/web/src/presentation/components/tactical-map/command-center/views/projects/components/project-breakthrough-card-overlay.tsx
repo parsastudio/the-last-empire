@@ -18,9 +18,9 @@ export function ProjectBreakthroughCardOverlay({
   return (
     <div
       onClick={onDismiss}
-      className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-intel/20 via-card to-gdp/20 border-2 border-intel shadow-xl shadow-intel/25 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-smooth relative overflow-hidden ring-2 ring-intel/40 cursor-pointer font-sans dir-rtl text-right select-none"
+      className="p-4 md:p-5 rounded-3xl bg-gradient-to-r from-intel/20 via-card to-gdp/20 border-2 border-intel shadow-xl shadow-intel/25 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-smooth relative overflow-hidden ring-2 ring-intel/40 cursor-pointer font-sans text-start select-none"
     >
-      <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-intel via-primary to-gdp animate-pulse" />
+      <div className="absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-intel via-primary to-gdp animate-pulse" />
 
       <div className="flex items-center gap-3.5 flex-1 min-w-0">
         <div className="w-12 h-12 rounded-2xl bg-intel/25 border border-intel/50 text-intel flex items-center justify-center shadow-lg shadow-intel/30 shrink-0">
@@ -52,7 +52,7 @@ export function ProjectBreakthroughCardOverlay({
       >
         <Zap size={14} />
         <span>{t("breakthroughAction")}</span>
-        <Check size={13} strokeWidth={3} className="mr-0.5" />
+        <Check size={13} strokeWidth={3} className="ms-0.5" />
       </button>
     </div>
   );

@@ -40,6 +40,7 @@ export function CountryProfileStats({
   onSelectAlly,
 }: CountryProfileStatsProps) {
   const t = useTranslations("diplomacy.stats");
+  const tOverview = useTranslations("overview.stabilityCard.brackets");
   const { isRtl, formatLevel, formatPercent } = useLocaleFormatter();
   const isArmsEligible = data.isArmsEligible ?? data.tension < 50;
 
@@ -155,7 +156,7 @@ export function CountryProfileStats({
             <span
               className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border ${bracket.badgeStyleClass}`}
             >
-              {isRtl ? bracket.labelFa : bracket.type}
+              {isRtl ? bracket.labelFa : tOverview(bracket.type)}
             </span>
             <span className={`font-bold ${bracket.textColorClass}`}>
               {formatPercent(data.stability)}

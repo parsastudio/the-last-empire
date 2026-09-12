@@ -62,7 +62,9 @@ export function DiplomacyListItem({
           </span>
         </div>
         <div className="flex items-center gap-1 justify-end">
-          <span className="text-muted-foreground text-[9px]">تنش:</span>
+          <span className="text-muted-foreground text-[9px]">
+            {t("tensionLabel")}
+          </span>
           <span className={`font-bold font-mono ${tensionColor}`}>
             {formatPercent(relation.tension)}
           </span>

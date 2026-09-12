@@ -16,7 +16,7 @@ export function EspionageResultBanner({
 
   return (
     <div
-      className={`p-4 rounded-3xl border space-y-3.5 animate-in fade-in duration-200 dir-rtl text-right ${
+      className={`p-4 rounded-3xl border space-y-3.5 animate-in fade-in duration-200 text-start font-sans ${
         isSuccess
           ? "bg-emerald-500/10 border-emerald-500/40 text-foreground"
           : "bg-rose-500/10 border-rose-500/40 text-foreground"

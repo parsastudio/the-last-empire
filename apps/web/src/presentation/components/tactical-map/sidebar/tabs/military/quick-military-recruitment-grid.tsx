@@ -4,13 +4,13 @@ import { Zap, Wallet, ShieldAlert } from "lucide-react";
 import { useQuickRecruitBatch } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { QuickUnitRecruitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/quick-unit-recruit-card";
 import { NavalFleetProcurementCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/naval-fleet-procurement-card";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   Nation,
   MilitaryPricingCalculator,
   Province,
   NationGettersUtility,
 } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface QuickMilitaryRecruitmentGridProps {
   nation: Nation;
@@ -24,6 +24,7 @@ export function QuickMilitaryRecruitmentGrid({
   provincesMap,
 }: QuickMilitaryRecruitmentGridProps) {
   const t = useTranslations("overview.quickRecruit");
+  const { formatCurrency, formatPercent } = useLocaleFormatter();
 
   const { batchList, floatingFeedbacks, handleBuyBatch } = useQuickRecruitBatch(
     {
@@ -47,7 +48,7 @@ export function QuickMilitaryRecruitmentGrid({
   );
 
   return (
-    <div className="space-y-4 font-sans dir-rtl text-right">
+    <div className="space-y-4 font-sans text-start">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">
           <Zap size={15} className="text-gdp animate-pulse" />
@@ -67,7 +68,7 @@ export function QuickMilitaryRecruitmentGrid({
                 capacityRatio >= 95 ? "text-military" : "text-gdp"
               }`}
             >
-              {PersianNumberFormatter.toPersianDigits(capacityRatio)}٪
+              {formatPercent(capacityRatio)}
             </span>
           </div>
 
@@ -77,7 +78,7 @@ export function QuickMilitaryRecruitmentGrid({
               {t("nationalTreasury")}
             </span>
             <span className="font-extrabold text-gdp text-xs">
-              {PersianNumberFormatter.formatCurrency(nation.treasury)}
+              {formatCurrency(nation.treasury)}
             </span>
           </div>
         </div>

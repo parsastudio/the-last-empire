@@ -52,7 +52,7 @@ export function DirectAttackModal({
       maxWidthClass="max-w-2xl"
       onClose={onClose}
     >
-      <div className="space-y-2.5 md:space-y-4 text-right dir-rtl font-sans">
+      <div className="space-y-2.5 md:space-y-4 text-start font-sans">
         <AttackHeader
           attackerName={humanNation.name}
           attackerCode={humanNation.id}

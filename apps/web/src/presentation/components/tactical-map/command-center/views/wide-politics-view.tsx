@@ -22,7 +22,7 @@ export function WidePoliticsView({
   const gdp = getNationGdp(nation, provincesMap);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right font-sans">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 text-start font-sans">
       <div className="space-y-5">
         <EconomicDoctrineControlCard
           nation={nation}

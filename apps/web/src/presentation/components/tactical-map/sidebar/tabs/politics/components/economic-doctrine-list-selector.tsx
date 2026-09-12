@@ -19,7 +19,7 @@ export function EconomicDoctrineListSelector({
   const t = useTranslations("politics");
 
   return (
-    <div className="grid grid-cols-1 gap-2">
+    <div className="grid grid-cols-1 gap-2 text-start font-sans">
       {ALL_ECONOMIC_DOCTRINES.map((stance) => {
         const isSelected = selectedStance === stance;
         const isEnacted = currentStance === stance;
@@ -32,7 +32,7 @@ export function EconomicDoctrineListSelector({
             key={stance}
             type="button"
             onClick={() => onSelectStance(stance)}
-            className={`w-full p-3 rounded-2xl border text-right transition-all cursor-pointer flex flex-col gap-1.5 ${
+            className={`w-full p-3 rounded-2xl border text-start transition-all cursor-pointer flex flex-col gap-1.5 ${
               isSelected
                 ? "bg-secondary/90 border-primary shadow-md shadow-primary/10 ring-1 ring-primary/40"
                 : "bg-secondary/30 border-border/60 hover:bg-secondary/60 hover:border-border"

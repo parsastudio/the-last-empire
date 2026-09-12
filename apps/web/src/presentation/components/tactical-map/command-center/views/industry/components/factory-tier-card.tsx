@@ -7,11 +7,12 @@ import {
   Plus,
   CheckCircle2,
   Sparkles,
+  ArrowRight,
   ArrowLeft,
   Building2,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { IndustryCalculator } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { FactoryTierUpgradeItem } from "../hooks/use-factory-tier-procurement";
 
 interface FactoryTierCardProps {
@@ -32,6 +33,8 @@ export function FactoryTierCard({
   onUpgrade,
 }: FactoryTierCardProps) {
   const t = useTranslations("industry.tiers");
+  const { isRtl, formatCurrency, formatPercent, formatNumber, toDigits } =
+    useLocaleFormatter();
 
   const {
     batch,
@@ -52,14 +55,14 @@ export function FactoryTierCard({
 
   return (
     <div
-      className={`relative p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-4 font-sans dir-rtl text-right shadow-2xl backdrop-blur-2xl overflow-hidden group hover:scale-[1.01] ring-1 ring-white/5 ${
+      className={`relative p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-4 font-sans text-start shadow-2xl backdrop-blur-2xl overflow-hidden group hover:scale-[1.01] ring-1 ring-white/5 ${
         isMaxedOut
           ? "bg-gradient-to-b from-card via-secondary/70 to-card/95 border-border/80 hover:border-gdp/40 shadow-black/50"
           : "bg-gradient-to-b from-card via-secondary/80 to-card border-border/90 hover:border-gdp/50 shadow-gdp/10"
       }`}
     >
       <div
-        className={`absolute top-0 right-0 left-0 h-1 bg-gradient-to-r ${
+        className={`absolute top-0 start-0 end-0 h-1 bg-gradient-to-r ${
           isMaxedOut
             ? "from-transparent via-gdp/60 to-transparent"
             : "from-transparent via-primary/60 to-transparent"
@@ -81,16 +84,14 @@ export function FactoryTierCard({
             <div className="space-y-0.5">
               <h4 className="text-xs font-black text-foreground">
                 {t("lineTier", {
-                  rank: PersianNumberFormatter.toPersianDigits(rankIndex + 1),
+                  rank: toDigits(rankIndex + 1),
                 })}
               </h4>
               <span className="text-[10px] font-mono text-muted-foreground block">
                 {isMaxedOut
                   ? t("maxEfficiency")
                   : t("upgradeTarget", {
-                      level: PersianNumberFormatter.toPersianDigits(
-                        targetTech.toFixed(1),
-                      ),
+                      level: toDigits(targetTech.toFixed(1)),
                     })}
               </span>
             </div>
@@ -101,9 +102,7 @@ export function FactoryTierCard({
               <Sparkles size={11} />
               <span>
                 {t("levelLabel", {
-                  level: PersianNumberFormatter.toPersianDigits(
-                    batch.techLevel.toFixed(1),
-                  ),
+                  level: toDigits(batch.techLevel.toFixed(1)),
                 })}
               </span>
             </div>
@@ -111,20 +110,23 @@ export function FactoryTierCard({
             <div className="flex items-center gap-1.5 font-mono text-[11px] font-black shrink-0">
               <span className="text-muted-foreground bg-secondary/80 border border-border/60 px-2 py-0.5 rounded-lg">
                 {t("levelPrefix", {
-                  level: PersianNumberFormatter.toPersianDigits(
-                    batch.techLevel.toFixed(1),
-                  ),
+                  level: toDigits(batch.techLevel.toFixed(1)),
                 })}
               </span>
-              <ArrowLeft
-                size={13}
-                className="text-gdp shrink-0 animate-pulse"
-              />
+              {isRtl ? (
+                <ArrowLeft
+                  size={13}
+                  className="text-gdp shrink-0 animate-pulse"
+                />
+              ) : (
+                <ArrowRight
+                  size={13}
+                  className="text-gdp shrink-0 animate-pulse"
+                />
+              )}
               <span className="text-gdp bg-gdp/15 border border-gdp/30 px-2 py-0.5 rounded-lg">
                 {t("levelPrefix", {
-                  level: PersianNumberFormatter.toPersianDigits(
-                    targetTech.toFixed(1),
-                  ),
+                  level: toDigits(targetTech.toFixed(1)),
                 })}
               </span>
             </div>
@@ -139,7 +141,7 @@ export function FactoryTierCard({
             </span>
             <span className="font-mono font-bold text-gdp bg-gdp/10 border border-gdp/25 px-2 py-0.5 rounded-md text-[10px]">
               {t("shareOfTotal", {
-                pct: PersianNumberFormatter.toPersianDigits(percentage),
+                pct: toDigits(percentage),
               })}
             </span>
           </div>
@@ -147,9 +149,7 @@ export function FactoryTierCard({
           <div className="flex items-baseline justify-between pt-0.5">
             <div className="text-xl font-black font-mono text-foreground tracking-tight">
               {t("activeSheds", {
-                count: PersianNumberFormatter.formatNumberWithCommas(
-                  batch.count,
-                ),
+                count: formatNumber(batch.count),
               })}
             </div>
           </div>
@@ -171,7 +171,7 @@ export function FactoryTierCard({
               <span>{t("totalValue")}</span>
             </span>
             <span className="font-black text-emerald-400 text-xs">
-              {PersianNumberFormatter.formatCurrency(totalTierYield, true)}
+              {formatCurrency(totalTierYield, true)}
             </span>
           </div>
         </div>
@@ -194,9 +194,7 @@ export function FactoryTierCard({
             <CheckCircle2 size={14} className="text-gdp" />
             <span>
               {t("maxTechEquipped", {
-                level: PersianNumberFormatter.toPersianDigits(
-                  batch.techLevel.toFixed(1),
-                ),
+                level: toDigits(batch.techLevel.toFixed(1)),
               })}
             </span>
           </div>
@@ -208,7 +206,7 @@ export function FactoryTierCard({
                 <span>{t("investPackage")}</span>
               </span>
               <span className="font-extrabold text-foreground text-xs">
-                {PersianNumberFormatter.formatCurrency(batchCost, true)}
+                {formatCurrency(batchCost, true)}
               </span>
             </div>
 
@@ -223,10 +221,7 @@ export function FactoryTierCard({
               <span>
                 {t("upgradeAction", {
                   label: effectiveActionLabel,
-                  count:
-                    PersianNumberFormatter.formatNumberWithCommas(
-                      batchQuantity,
-                    ),
+                  count: formatNumber(batchQuantity),
                 })}
               </span>
             </button>

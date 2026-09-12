@@ -1,12 +1,16 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { ArrowRight, Wallet, Cpu, TrendingUp, Info } from "lucide-react";
 import {
-  Nation,
-  PersianNumberFormatter,
-  IndustryCalculator,
-} from "@geopolitics/domain";
+  ArrowRight,
+  ArrowLeft,
+  Wallet,
+  Cpu,
+  TrendingUp,
+  Info,
+} from "lucide-react";
+import { Nation, IndustryCalculator } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { FactoryTiersGrid } from "./factory-tiers-grid";
 
 interface MachineryImportCountryViewProps {
@@ -23,6 +27,7 @@ export function MachineryImportCountryView({
   onBack,
 }: MachineryImportCountryViewProps) {
   const t = useTranslations("industry.imports");
+  const { isRtl, formatCurrency, formatLevel, toDigits } = useLocaleFormatter();
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
   const techDelta = Number(
     Math.max(
@@ -36,7 +41,7 @@ export function MachineryImportCountryView({
   );
 
   return (
-    <div className="space-y-4 font-sans dir-rtl text-right animate-in fade-in duration-200">
+    <div className="space-y-4 font-sans text-start animate-in fade-in duration-200">
       <div className="flex items-center justify-between bg-secondary/40 border border-border/70 p-3.5 rounded-2xl flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <button
@@ -44,7 +49,7 @@ export function MachineryImportCountryView({
             onClick={onBack}
             className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
           >
-            <ArrowRight size={14} />
+            {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
             <span>{t("countryViewBack")}</span>
           </button>
           <div className="flex items-center gap-2.5">
@@ -55,11 +60,7 @@ export function MachineryImportCountryView({
               </h4>
               <span className="text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                 <Cpu size={11} />
-                <span>
-                  {PersianNumberFormatter.toPersianDigits(
-                    sellerNation.industrialLevel.toFixed(1),
-                  )}
-                </span>
+                <span>{formatLevel(sellerNation.industrialLevel)}</span>
               </span>
             </div>
           </div>
@@ -71,7 +72,7 @@ export function MachineryImportCountryView({
             {t("treasury")}
           </span>
           <span className="font-extrabold text-gdp text-xs">
-            {PersianNumberFormatter.formatCurrency(buyerNation.treasury)}
+            {formatCurrency(buyerNation.treasury)}
           </span>
         </div>
       </div>
@@ -82,7 +83,7 @@ export function MachineryImportCountryView({
           <span>
             {techDelta > 0
               ? t("techGapInfo", {
-                  delta: PersianNumberFormatter.toPersianDigits(techDelta),
+                  delta: toDigits(techDelta),
                 })
               : t("techEqualInfo")}
           </span>
@@ -93,9 +94,7 @@ export function MachineryImportCountryView({
             <TrendingUp size={12} />
             <span>
               {t("importMultiplier", {
-                mult: PersianNumberFormatter.toPersianDigits(
-                  multiplier.toFixed(2),
-                ),
+                mult: toDigits(multiplier.toFixed(2)),
               })}
             </span>
           </div>
