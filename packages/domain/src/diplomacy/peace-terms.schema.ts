@@ -17,9 +17,7 @@ export const PeaceTermsPackageSchema = z.object({
   isAiOffering: z.boolean(),
   moneyAmount: z.number().nonnegative().default(0),
   concededProvinceIds: z.array(z.number()).default([]),
-  concededProvincesNames: z.array(z.string()).default([]),
-  headline: z.string(),
-  description: z.string(),
+  statusCode: z.string(),
   canAffordTerms: z.boolean().default(true),
 });
 
