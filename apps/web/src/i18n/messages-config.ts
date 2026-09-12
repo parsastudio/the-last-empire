@@ -1,0 +1,22 @@
+export const ROUTE_MESSAGE_NAMESPACES = {
+  root: ["common", "hud"] as const,
+  menu: ["common", "hud", "menu"] as const,
+  selectNation: ["common", "hud", "selectNation", "governments"] as const,
+  gameplay: [
+    "common",
+    "hud",
+    "overview",
+    "map",
+    "military",
+    "industry",
+    "projects",
+    "politics",
+    "diplomacy",
+    "espionage",
+    "reports",
+    "attack",
+    "dilemmas",
+    "gameOver",
+    "governments",
+  ] as const,
+} as const;
