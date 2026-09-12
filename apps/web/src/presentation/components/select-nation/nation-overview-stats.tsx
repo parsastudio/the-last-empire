@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Award, Coins, Users, Landmark } from "lucide-react";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 
@@ -7,31 +8,33 @@ interface NationOverviewStatsProps {
 }
 
 export function NationOverviewStats({ nation }: NationOverviewStatsProps) {
+  const t = useTranslations("selectNation.stats");
+
   const statCards = [
     {
       id: "rank",
-      label: "رتبه قدرت جهانی",
+      label: t("rank"),
       value: `#${nation.rank}`,
       icon: Award,
       iconColor: "text-amber-500",
     },
     {
       id: "gdp",
-      label: "تولید ناخالص (GDP)",
+      label: t("gdp"),
       value: nation.gdp,
       icon: Coins,
       iconColor: "text-gdp",
     },
     {
       id: "population",
-      label: "جمعیت کل",
+      label: t("population"),
       value: nation.population,
       icon: Users,
       iconColor: "text-primary",
     },
     {
       id: "treasury",
-      label: "خزانه اولیه ملی",
+      label: t("treasury"),
       value: nation.treasury,
       icon: Landmark,
       iconColor: "text-treasury",
@@ -39,7 +42,7 @@ export function NationOverviewStats({ nation }: NationOverviewStatsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 dir-rtl text-right">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-start">
       {statCards.map((card) => {
         const Icon = card.icon;
         return (

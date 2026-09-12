@@ -9,5 +9,23 @@
   "warning": "Warning",
   "turn": "Turn",
   "language": "Switch Language",
-  "tacticalEngineLoading": "Loading tactical engine and strategic dossier..."
+  "tacticalEngineLoading": "Loading tactical engine and strategic dossier...",
+  "understood": "Acknowledged",
+  "submittingOrder": "Submitting order...",
+  "maxLimit": "Maximum Permitted Limit:",
+  "requestedAmount": "Requested Amount:",
+  "actionUnavailable": "Action unavailable under current conditions.",
+  "units": {
+    "billion": "Billion USD",
+    "million": "Million USD",
+    "citizens": "citizens",
+    "facilities": "facilities",
+    "level": "Level {level}"
+  },
+  "errors": {
+    "campaignCreateFailed": "Failed to initialize new game campaign.",
+    "campaignSaveFailed": "Unable to save new campaign record in local storage.",
+    "actionExecutionFailed": "Action cannot be executed under current state.",
+    "actionFailedTitle": "Order Execution Failed"
+  }
 }

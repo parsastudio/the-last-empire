@@ -1,6 +1,7 @@
 import React from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface NationDetail {
   id: string;
@@ -26,12 +27,13 @@ export function NationListItem({
   isSelected,
   onSelect,
 }: NationListItemProps) {
+  const { isRtl, toDigits } = useLocaleFormatter();
   const flagEmoji = getFlagEmoji(nation.code);
 
   return (
     <button
       onClick={() => onSelect(nation)}
-      className={`w-full p-3 rounded-2xl transition-all flex items-center justify-between gap-3 text-right cursor-pointer border ${
+      className={`w-full p-3 rounded-2xl transition-all flex items-center justify-between gap-3 text-start cursor-pointer border ${
         isSelected
           ? "bg-secondary border-primary/40 shadow-sm"
           : "bg-background/40 border-border/60 hover:bg-secondary/30"
@@ -50,14 +52,21 @@ export function NationListItem({
             {nation.name}
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
-            رتبه جهانی: #{nation.rank}
+            #{toDigits(nation.rank)}
           </span>
         </div>
       </div>
-      <ChevronLeft
-        size={14}
-        className={`text-muted-foreground transition-transform ${isSelected ? "-translate-x-1 text-primary" : ""}`}
-      />
+      {isRtl ? (
+        <ChevronLeft
+          size={14}
+          className={`text-muted-foreground transition-transform ${isSelected ? "-translate-x-1 text-primary" : ""}`}
+        />
+      ) : (
+        <ChevronRight
+          size={14}
+          className={`text-muted-foreground transition-transform ${isSelected ? "translate-x-1 text-primary" : ""}`}
+        />
+      )}
     </button>
   );
 }

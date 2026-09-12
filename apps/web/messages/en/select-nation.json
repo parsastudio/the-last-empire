@@ -3,7 +3,25 @@
     "back": "Return to Menu",
     "badge": "Select Starting Sovereign Realm"
   },
+  "sidebar": {
+    "title": "Global Powers Roster",
+    "nationsCount": "{count} Nations",
+    "searchPlaceholder": "Search name or ISO code..."
+  },
+  "stats": {
+    "rank": "Global Power Rank",
+    "gdp": "Gross Domestic Product (GDP)",
+    "population": "Total Population",
+    "treasury": "Initial Sovereign Treasury"
+  },
+  "dossier": {
+    "title": "Strategic Dossier",
+    "template": "Official strategic dossier of {name} with global rank #{rank}."
+  },
+  "startButton": "Begin Reign over {name}",
+  "loadingNations": "Loading global intelligence roster...",
   "difficulty": {
+    "title": "Campaign Difficulty Level",
     "EASY": {
       "name": "Easy",
       "tagline": "Peaceful Expansion",

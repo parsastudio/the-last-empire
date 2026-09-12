@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
-import { PersianNumberFormatter } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { NationAllyDetail } from "./diplomacy-allies-resolver.utility";
 import { DiplomacyAllyPopover } from "./diplomacy-ally-popover";
 
@@ -13,6 +14,8 @@ export function DiplomacyAlliesBox({
   allies = [],
   onSelectAlly,
 }: DiplomacyAlliesBoxProps) {
+  const t = useTranslations("diplomacy.alliesBox");
+  const { toDigits, formatLevel } = useLocaleFormatter();
   const [selectedAllyId, setSelectedAllyId] = useState<string | null>(null);
 
   const activeAlly = allies.find((a) => a.id === selectedAllyId) || null;
@@ -23,29 +26,28 @@ export function DiplomacyAlliesBox({
 
   if (allies.length === 0) {
     return (
-      <div className="bg-emerald-950/15 border border-emerald-500/30 p-3 rounded-2xl flex items-center justify-between text-xs font-sans dir-rtl text-right shadow-sm">
+      <div className="bg-emerald-950/15 border border-emerald-500/30 p-3 rounded-2xl flex items-center justify-between text-xs font-sans text-start shadow-sm">
         <div className="flex items-center gap-2">
           <ShieldCheck size={16} className="text-emerald-400 shrink-0" />
           <div>
             <span className="text-foreground font-black text-xs block">
-              حامیان دفاعی: فاقد هرگونه پیمان دفاعی
+              {t("noAlliesTitle")}
             </span>
             <span className="text-[10px] text-muted-foreground block font-medium">
-              در صورت تهاجم به این خاک، هیچ کشور ثالثی به دفاع از آن وارد جنگ
-              نخواهد شد.
+              {t("noAlliesDesc")}
             </span>
           </div>
         </div>
 
         <span className="text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-lg shrink-0">
-          امن جهت تهاجم
+          {t("safeToAttack")}
         </span>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-r from-rose-950/30 via-card to-rose-950/20 border-2 border-rose-500/50 p-3.5 rounded-2xl space-y-2.5 dir-rtl text-right font-sans shadow-md backdrop-blur-md">
+    <div className="bg-gradient-to-r from-rose-950/30 via-card to-rose-950/20 border-2 border-rose-500/50 p-3.5 rounded-2xl space-y-2.5 text-start font-sans shadow-md backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">
@@ -53,17 +55,16 @@ export function DiplomacyAlliesBox({
           </div>
           <div>
             <span className="text-foreground font-black text-xs block">
-              هشدار حامیان دفاعی (طرف‌های مستقیم جنگ در صورت تهاجم)
+              {t("warningTitle")}
             </span>
             <span className="text-[10px] text-rose-300/90 block font-medium">
-              در صورت حمله شما به این کشور، ارتش این حامیان مستقیماً علیه شما
-              وارد جنگ می‌شوند:
+              {t("warningDesc")}
             </span>
           </div>
         </div>
 
         <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2.5 py-1 rounded-xl shrink-0">
-          {PersianNumberFormatter.toPersianDigits(allies.length)} حامی متعهد
+          {t("committedAlliesCount", { count: toDigits(allies.length) })}
         </span>
       </div>
 
@@ -75,7 +76,6 @@ export function DiplomacyAlliesBox({
               key={ally.id}
               type="button"
               onClick={() => handleToggleAlly(ally.id)}
-              title={`${ally.name} (حامی دفاعی • رتبه #${ally.rank})`}
               className={`h-9 px-3 rounded-xl flex items-center gap-2 transition-all cursor-pointer shadow-sm select-none relative ${
                 isSelected
                   ? "bg-rose-500/30 border-rose-400 border-2 scale-105 shadow-rose-500/30 ring-1 ring-rose-400/50"
@@ -87,10 +87,7 @@ export function DiplomacyAlliesBox({
                 {ally.name}
               </span>
               <span className="text-[9px] font-mono font-bold text-amber-400 bg-black/40 px-1.5 py-0.2 rounded border border-border/40">
-                لِوِل{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  ally.militaryTech.toFixed(1),
-                )}
+                {formatLevel(ally.militaryTech)}
               </span>
               {ally.isHuman && (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />

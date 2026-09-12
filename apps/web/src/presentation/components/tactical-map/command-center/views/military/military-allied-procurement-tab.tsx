@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Users, Search, ShoppingCart } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -9,6 +10,7 @@ import {
   AlliedSellerItem,
 } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-seller-card";
 import { AlliedUnitBuyGrid } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-grid";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface MilitaryAlliedProcurementTabProps {
   nation: Nation;
@@ -23,6 +25,9 @@ export function MilitaryAlliedProcurementTab({
   provincesMap,
   selectedTargetCode,
 }: MilitaryAlliedProcurementTabProps) {
+  const t = useTranslations("military.alliesTab");
+  const { locale } = useLocaleFormatter();
+
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(
     selectedTargetCode
       ? CountryRegistry.resolveCanonicalId(selectedTargetCode)
@@ -57,13 +62,19 @@ export function MilitaryAlliedProcurementTab({
       })
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const profile = CountryRegistry.getCountry(canonical);
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const tension = rel ? (rel.tension ?? 10) : 10;
         const rank = rankLookup.get(canonical) ?? 99;
 
+        const name =
+          locale === "en"
+            ? profile?.nameEn || n.name
+            : n.name || profile?.nameFa || canonical;
+
         return {
           id: canonical,
-          name: n.name,
+          name,
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
           tension,
@@ -80,6 +91,7 @@ export function MilitaryAlliedProcurementTab({
     nation.id,
     nation.relations,
     nation.military.techLevel,
+    locale,
   ]);
 
   const filteredSellers = useMemo(() => {
@@ -113,31 +125,29 @@ export function MilitaryAlliedProcurementTab({
 
   if (sellerOptions.length === 0) {
     return (
-      <div className="p-12 bg-secondary/30 border border-border/60 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
+      <div className="p-12 bg-secondary/30 border border-border/60 rounded-3xl space-y-3 text-center animate-fade-smooth">
         <Users size={36} className="text-muted-foreground mx-auto" />
         <h3 className="text-sm font-black text-foreground">
-          هیچ کشوری با فناوری نظامی بالاتر در دسترس نیست
+          {t("emptyTitle")}
         </h3>
         <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed font-sans">
-          برای واردات تسلیحات، کشور صادرکننده باید سطح فناوری دفاعی بالاتری نسبت
-          به شما داشته باشد، در وضعیت جنگ نباشد و تنش امنیتی زیر ۵۰٪ باشد.
+          {t("emptyDesc")}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 font-sans dir-rtl text-right animate-fade-smooth">
+    <div className="space-y-4 font-sans text-start animate-fade-smooth">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-secondary/30 border border-border/60 rounded-2xl">
         <div className="flex items-center gap-2">
           <ShoppingCart size={16} className="text-amber-500" />
           <div>
             <h3 className="text-xs font-black text-foreground">
-              فهرست کشورهای هم‌پیمان با فناوری پیشرفته‌تر
+              {t("header")}
             </h3>
             <span className="text-[10px] text-muted-foreground">
-              روی هر کشور کلیک کنید تا زرادخانه آن باز شود (قیمت‌گذاری بر اساس
-              اختلاف سطح فناوری محاسبه می‌گردد).
+              {t("desc")}
             </span>
           </div>
         </div>
@@ -145,14 +155,14 @@ export function MilitaryAlliedProcurementTab({
         <div className="relative min-w-[220px]">
           <Search
             size={13}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
-            placeholder="جستجوی نام یا نماد صادرکننده..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 ps-8 pe-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-start"
           />
         </div>
       </div>

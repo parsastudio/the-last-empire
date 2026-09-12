@@ -3,7 +3,25 @@
     "back": "بازگشت به منو",
     "badge": "انتخاب قلمرو آغازین"
   },
+  "sidebar": {
+    "title": "فهرست قدرت‌های جهانی",
+    "nationsCount": "{count} کشور",
+    "searchPlaceholder": "جستجوی نام یا نماد..."
+  },
+  "stats": {
+    "rank": "رتبه قدرت جهانی",
+    "gdp": "تولید ناخالص (GDP)",
+    "population": "جمعیت کل",
+    "treasury": "خزانه اولیه ملی"
+  },
+  "dossier": {
+    "title": "شناسنامه استراتژیک",
+    "template": "شناسنامه استراتژیک رسمی {name} با رتبه جهانی #{rank}."
+  },
+  "startButton": "آغاز حاکمیت بر {name}",
+  "loadingNations": "در حال بارگذاری اطلاعات کشورها...",
   "difficulty": {
+    "title": "سطح دشواری بازی",
     "EASY": {
       "name": "آسان",
       "tagline": "گسترش آرام قلمرو",

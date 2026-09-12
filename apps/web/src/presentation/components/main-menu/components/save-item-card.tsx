@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Calendar, Clock, Trash2, Check, X } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export interface SaveItemData {
@@ -18,6 +19,8 @@ interface SaveItemCardProps {
 }
 
 export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
+  const t = useTranslations("menu.saves");
+  const { toDigits } = useLocaleFormatter();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState<boolean>(false);
 
   const handleCardClick = () => {
@@ -46,7 +49,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer dir-rtl"
+      className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-start transition-all flex items-center justify-between gap-4 group cursor-pointer"
     >
       <div className="space-y-2">
         <span className="text-xs font-bold text-foreground block">
@@ -62,7 +65,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
             <span>{save.time}</span>
           </div>
           <div className="font-mono bg-secondary/80 px-2 py-0.5 rounded-md text-[9px] font-bold text-foreground">
-            نوبت: {PersianNumberFormatter.toPersianDigits(save.turn)}
+            {t("turnPrefix", { turn: toDigits(save.turn) })}
           </div>
         </div>
       </div>
@@ -74,13 +77,12 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
             className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 p-1.5 rounded-xl text-[10px] animate-fade-smooth"
           >
             <span className="text-rose-400 font-bold font-sans px-1">
-              تایید حذف؟
+              {t("confirmDelete")}
             </span>
             <button
               type="button"
               onClick={handleConfirmDelete}
               className="p-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center"
-              title="تایید حذف"
             >
               <Check size={13} />
             </button>
@@ -88,7 +90,6 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
               type="button"
               onClick={handleCancelDelete}
               className="p-1 bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground rounded-lg transition-all cursor-pointer flex items-center justify-center"
-              title="انصراف"
             >
               <X size={13} />
             </button>
@@ -98,7 +99,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
             type="button"
             onClick={handleStartDelete}
             className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
-            title="حذف پرونده ذخیره‌شده"
+            title={t("deleteTitle")}
           >
             <Trash2 size={15} />
           </button>

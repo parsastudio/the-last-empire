@@ -1,5 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { LayoutDashboard, Hammer, ShoppingCart } from "lucide-react";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export type MilitarySubTabType = "overview" | "domestic" | "allies";
 
@@ -14,29 +16,32 @@ export function MilitarySubTabsHeader({
   alliesCount,
   onSelectSubTab,
 }: MilitarySubTabsHeaderProps) {
+  const t = useTranslations("military.subTabs");
+  const { toDigits } = useLocaleFormatter();
+
   const tabs = [
     {
       id: "overview" as const,
-      label: "نمای کلی و وضعیت ارتش",
+      label: t("overview"),
       icon: LayoutDashboard,
       badge: null,
     },
     {
       id: "domestic" as const,
-      label: "صنایع دفاعی و ساخت بومی (تحویل فوری)",
+      label: t("domestic"),
       icon: Hammer,
-      badge: "تولید ملی",
+      badge: t("domesticBadge"),
     },
     {
       id: "allies" as const,
-      label: "واردات تسلیحات از هم‌پیمانان",
+      label: t("allies"),
       icon: ShoppingCart,
-      badge: `${alliesCount} صادرکننده`,
+      badge: t("alliesBadge", { count: toDigits(alliesCount) }),
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1.5 bg-background/50 border border-border/70 rounded-2xl dir-rtl">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1.5 bg-background/50 border border-border/70 rounded-2xl">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeSubTab === tab.id;

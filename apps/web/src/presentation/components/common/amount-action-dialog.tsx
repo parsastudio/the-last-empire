@@ -20,6 +20,9 @@ export interface AmountActionDialogProps {
   infoRows?: AmountActionInfoRow[];
   warningText?: string;
   emptyStateText?: string;
+  submittingText?: string;
+  ceilingLabel?: string;
+  requestedLabel?: string;
   onClose: () => void;
   onConfirm: (amount: number) => Promise<void> | void;
 }
@@ -37,6 +40,9 @@ export function AmountActionDialog({
   infoRows,
   warningText,
   emptyStateText,
+  submittingText,
+  ceilingLabel,
+  requestedLabel,
   onClose,
   onConfirm,
 }: AmountActionDialogProps) {
@@ -62,6 +68,9 @@ export function AmountActionDialog({
         infoRows={infoRows}
         warningText={warningText}
         emptyStateText={emptyStateText}
+        submittingText={submittingText}
+        ceilingLabel={ceilingLabel}
+        requestedLabel={requestedLabel}
         onClose={onClose}
         onConfirm={onConfirm}
       />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Skull,
   Coins,
@@ -13,11 +14,9 @@ import {
   Flame,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import {
-  SecurityGuaranteeValidationResult,
-  PersianNumberFormatter,
-} from "@geopolitics/domain";
+import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface EmergencyProtectorateModalProps {
   isOpen: boolean;
@@ -40,6 +39,8 @@ export function EmergencyProtectorateModal({
   onConfirmProtectorate,
   onClose,
 }: EmergencyProtectorateModalProps) {
+  const t = useTranslations("diplomacy.protectorateModal");
+  const { formatCurrency, toDigits } = useLocaleFormatter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -49,38 +50,38 @@ export function EmergencyProtectorateModal({
   const conditions = [
     {
       id: "gdp",
-      title: "نسبت تولید ناخالص ملی (GDP)",
-      desc: "تولید ناخالص ابرقدرت حامی باید حداقل برابر یا بزرگتر از کشور شما باشد (نسبت ۱.۰x یا بیشتر).",
-      currentValue: `${PersianNumberFormatter.toPersianDigits(validation.gdpRatio)}x برابری`,
+      title: t("gdpTitle"),
+      desc: t("gdpDesc"),
+      currentValue: `${toDigits(validation.gdpRatio)}x`,
       isValid: validation.isGdpValid,
       icon: Scale,
     },
     {
       id: "tech",
-      title: "برتری فناوری نظامی و تسلیحاتی",
-      desc: "سطح فناوری دفاعی ابرقدرت حامی باید از شما بالاتر باشد.",
+      title: t("techTitle"),
+      desc: t("techDesc"),
       currentValue:
         validation.techDiff > 0
-          ? `+${PersianNumberFormatter.toPersianDigits(validation.techDiff)} سطح بالاتر`
-          : "عدم برتری فناوری",
+          ? t("techAdvantage", { points: toDigits(validation.techDiff) })
+          : t("noTechAdvantage"),
       isValid: validation.isTechValid,
       icon: Award,
     },
     {
       id: "tension",
-      title: "مهار تنش دیپلماتیک",
-      desc: "تنش دوجانبه با ابرقدرت باید کمتر از ۵۰٪ باشد.",
-      currentValue: `${PersianNumberFormatter.toPersianDigits(validation.tension)}٪ تنش`,
+      title: t("tensionTitle"),
+      desc: t("tensionDesc"),
+      currentValue: `${toDigits(validation.tension)}%`,
       isValid: validation.isTensionValid,
       icon: Globe,
     },
     {
       id: "peace",
-      title: "عدم تخاصم مستقیم",
-      desc: "نمی‌توان از کشوری که با آن در حال جنگ هستید درخواست تحت‌الحمایگی کرد.",
+      title: t("peaceTitle"),
+      desc: t("peaceDesc"),
       currentValue: validation.isNotWar
-        ? "بدون جنگ مستقیم"
-        : "در حال جنگ با یکدیگر",
+        ? t("noDirectWar")
+        : t("directWarActive"),
       isValid: validation.isNotWar,
       icon: Flame,
     },
@@ -100,13 +101,13 @@ export function EmergencyProtectorateModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="پیمان استمداد امنیتی و استقرار ارتش ابرقدرت"
-      subtitle={`استقرار ارتش سنگین ${targetName} در سنگرهای شما در ازای خراج نوبتی`}
+      title={t("title")}
+      subtitle={t("subtitle", { name: targetName })}
       maxWidthClass="max-w-xl"
       zIndexClass="z-[60]"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div className="bg-gradient-to-r from-rose-950/50 via-card to-amber-950/40 border border-rose-500/50 p-4 rounded-3xl flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-rose-500/30 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
@@ -117,18 +118,18 @@ export function EmergencyProtectorateModal({
                 {targetName}
               </span>
               <span className="text-[10px] text-rose-300 font-mono font-bold">
-                ابرقدرت حامی و نجات‌بخش
+                {t("protectorRole")}
               </span>
             </div>
           </div>
 
-          <div className="text-left font-mono bg-rose-500/10 border border-rose-500/30 px-3.5 py-1.5 rounded-2xl">
+          <div className="text-end font-mono bg-rose-500/10 border border-rose-500/30 px-3.5 py-1.5 rounded-2xl">
             <span className="text-[9px] text-muted-foreground block font-sans">
-              خراج نوبتی (۵٪ GDP):
+              {t("tributeLabel")}
             </span>
             <span className="text-xs font-black text-rose-400 flex items-center gap-1 justify-end">
               <Coins size={12} />
-              {PersianNumberFormatter.formatCurrency(costPerTurn, true)}
+              {formatCurrency(costPerTurn, true)}
             </span>
           </div>
         </div>
@@ -136,28 +137,16 @@ export function EmergencyProtectorateModal({
         <div className="p-3.5 bg-rose-950/20 border border-rose-500/30 rounded-2xl space-y-1.5 text-xs shadow-inner">
           <div className="flex items-center gap-2 text-rose-400 font-black">
             <Skull size={16} className="animate-pulse shrink-0" />
-            <span>پیامدهای حاکمیتی و امتیازات دفاعی معاهده:</span>
+            <span>{t("consequencesTitle")}</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            ارتش ابرقدرت فوراً{" "}
-            <strong className="text-foreground font-black">
-              ۵۰٪ ارزش اقتصادی شما
-            </strong>{" "}
-            تانک و پدافند وارد خاکتان می‌کند؛ در ازای کسر{" "}
-            <strong className="text-rose-400 font-black">
-              ۳۰ امتیاز اعتبار جهانی
-            </strong>{" "}
-            و پرداخت{" "}
-            <strong className="text-rose-400 font-black">
-              ۵٪ خراج در هر نوبت
-            </strong>
-            .
+            {t("consequencesDesc")}
           </p>
         </div>
 
         <div className="space-y-2">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
-            چک‌لیست احراز شروط پذیرش تحت‌الحمایگی
+            {t("checklistTitle")}
           </span>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -201,7 +190,7 @@ export function EmergencyProtectorateModal({
 
                   <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[10px] font-mono">
                     <span className="text-muted-foreground font-sans">
-                      وضعیت فعلی:
+                      {t("currentStatus")}
                     </span>
                     <span
                       className={`font-bold ${
@@ -239,10 +228,10 @@ export function EmergencyProtectorateModal({
             )}
             <span>
               {isSubmitting
-                ? "در حال ثبت معاهده و استقرار ارتش حامی..."
+                ? t("submitting")
                 : validation.isValid
-                  ? `امضای پیمان استمداد امنیتی با ${targetName}`
-                  : "عدم امکان امضای معاهده"}
+                  ? t("signButton", { name: targetName })
+                  : t("invalid")}
             </span>
           </button>
         </div>
