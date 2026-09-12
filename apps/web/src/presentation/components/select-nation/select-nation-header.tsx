@@ -1,8 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { LanguageSwitcher } from "@/presentation/components/common/language-switcher";
-import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface SelectNationHeaderProps {
   onBack: () => void;
@@ -10,7 +9,6 @@ interface SelectNationHeaderProps {
 
 export function SelectNationHeader({ onBack }: SelectNationHeaderProps) {
   const t = useTranslations("selectNation.header");
-  const { isRtl } = useLocaleFormatter();
 
   return (
     <header
@@ -27,7 +25,7 @@ export function SelectNationHeader({ onBack }: SelectNationHeaderProps) {
           onClick={onBack}
           className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
         >
-          {isRtl ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}
+          <ArrowLeft size={15} className="rtl:rotate-180 shrink-0" />
           <span>{t("back")}</span>
         </button>
       </div>

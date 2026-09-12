@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Layers, Loader2, Eye, Coins } from "lucide-react";
-import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export type TacticalLayer = "political" | "gdp";
 
@@ -39,15 +38,13 @@ export function LayerController({
   onChangeLayer,
 }: LayerControllerProps) {
   const t = useTranslations("map.layers");
-  const { isRtl } = useLocaleFormatter();
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        left: isRtl ? "max(0.75rem, env(safe-area-inset-left))" : undefined,
-        right: !isRtl ? "max(0.75rem, env(safe-area-inset-right))" : undefined,
+        insetInlineStart: "max(0.75rem, env(safe-area-inset-left))",
         bottom: "max(0.75rem, env(safe-area-inset-bottom))",
       }}
       className="fixed z-40 flex flex-col gap-2 pointer-events-auto"

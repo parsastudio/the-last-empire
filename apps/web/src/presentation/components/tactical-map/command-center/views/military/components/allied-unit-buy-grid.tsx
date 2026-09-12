@@ -1,13 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Wallet,
-  Award,
-  TrendingUp,
-  Info,
-} from "lucide-react";
+import { ArrowLeft, Wallet, Award, TrendingUp, Info } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
@@ -31,7 +24,7 @@ export function AlliedUnitBuyGrid({
   onBack,
 }: AlliedUnitBuyGridProps) {
   const t = useTranslations("military.alliesGrid");
-  const { isRtl, formatCurrency, toDigits } = useLocaleFormatter();
+  const { formatCurrency, toDigits } = useLocaleFormatter();
 
   const {
     batchList,
@@ -56,9 +49,9 @@ export function AlliedUnitBuyGrid({
           <button
             type="button"
             onClick={onBack}
-            className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+            className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
           >
-            {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+            <ArrowLeft size={14} className="rtl:rotate-180 shrink-0" />
             <span>{t("back")}</span>
           </button>
           <div className="flex items-center gap-2.5">

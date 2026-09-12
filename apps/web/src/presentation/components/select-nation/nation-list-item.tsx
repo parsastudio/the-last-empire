@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -27,7 +27,7 @@ export function NationListItem({
   isSelected,
   onSelect,
 }: NationListItemProps) {
-  const { isRtl, toDigits } = useLocaleFormatter();
+  const { toDigits } = useLocaleFormatter();
   const flagEmoji = getFlagEmoji(nation.code);
 
   return (
@@ -56,17 +56,12 @@ export function NationListItem({
           </span>
         </div>
       </div>
-      {isRtl ? (
-        <ChevronLeft
-          size={14}
-          className={`text-muted-foreground transition-transform ${isSelected ? "-translate-x-1 text-primary" : ""}`}
-        />
-      ) : (
-        <ChevronRight
-          size={14}
-          className={`text-muted-foreground transition-transform ${isSelected ? "translate-x-1 text-primary" : ""}`}
-        />
-      )}
+      <ChevronRight
+        size={14}
+        className={`text-muted-foreground rtl:rotate-180 transition-transform ${
+          isSelected ? "translate-x-1 rtl:-translate-x-1 text-primary" : ""
+        }`}
+      />
     </button>
   );
 }

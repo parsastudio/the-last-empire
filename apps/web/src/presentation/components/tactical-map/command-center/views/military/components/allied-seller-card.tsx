@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Award, ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { Award, ChevronRight, ShieldCheck } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -20,7 +20,7 @@ interface AlliedSellerCardProps {
 
 export function AlliedSellerCard({ seller, onSelect }: AlliedSellerCardProps) {
   const t = useTranslations("military.alliesTab");
-  const { isRtl, toDigits } = useLocaleFormatter();
+  const { toDigits } = useLocaleFormatter();
   const flag = getFlagEmoji(seller.flagCode || seller.id);
 
   return (
@@ -60,17 +60,10 @@ export function AlliedSellerCard({ seller, onSelect }: AlliedSellerCardProps) {
           <ShieldCheck size={12} />
           {t("enterArsenal")}
         </span>
-        {isRtl ? (
-          <ChevronLeft
-            size={16}
-            className="text-muted-foreground group-hover:text-foreground group-hover:-translate-x-0.5 transition-all"
-          />
-        ) : (
-          <ChevronRight
-            size={16}
-            className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all"
-          />
-        )}
+        <ChevronRight
+          size={16}
+          className="text-muted-foreground group-hover:text-foreground rtl:rotate-180 transition-all"
+        />
       </div>
     </button>
   );

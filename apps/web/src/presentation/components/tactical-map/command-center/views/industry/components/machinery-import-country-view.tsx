@@ -1,13 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import {
-  ArrowRight,
-  ArrowLeft,
-  Wallet,
-  Cpu,
-  TrendingUp,
-  Info,
-} from "lucide-react";
+import { ArrowLeft, Wallet, Cpu, TrendingUp, Info } from "lucide-react";
 import { Nation, IndustryCalculator } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
@@ -27,7 +20,7 @@ export function MachineryImportCountryView({
   onBack,
 }: MachineryImportCountryViewProps) {
   const t = useTranslations("industry.imports");
-  const { isRtl, formatCurrency, formatLevel, toDigits } = useLocaleFormatter();
+  const { formatCurrency, formatLevel, toDigits } = useLocaleFormatter();
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
   const techDelta = Number(
     Math.max(
@@ -47,9 +40,9 @@ export function MachineryImportCountryView({
           <button
             type="button"
             onClick={onBack}
-            className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+            className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
           >
-            {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+            <ArrowLeft size={14} className="rtl:rotate-180 shrink-0" />
             <span>{t("countryViewBack")}</span>
           </button>
           <div className="flex items-center gap-2.5">

@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Sparkles,
   ArrowRight,
-  ArrowLeft,
   Building2,
 } from "lucide-react";
 import { IndustryCalculator } from "@geopolitics/domain";
@@ -33,8 +32,7 @@ export function FactoryTierCard({
   onUpgrade,
 }: FactoryTierCardProps) {
   const t = useTranslations("industry.tiers");
-  const { isRtl, formatCurrency, formatPercent, formatNumber, toDigits } =
-    useLocaleFormatter();
+  const { formatCurrency, formatNumber, toDigits } = useLocaleFormatter();
 
   const {
     batch,
@@ -113,17 +111,10 @@ export function FactoryTierCard({
                   level: toDigits(batch.techLevel.toFixed(1)),
                 })}
               </span>
-              {isRtl ? (
-                <ArrowLeft
-                  size={13}
-                  className="text-gdp shrink-0 animate-pulse"
-                />
-              ) : (
-                <ArrowRight
-                  size={13}
-                  className="text-gdp shrink-0 animate-pulse"
-                />
-              )}
+              <ArrowRight
+                size={13}
+                className="text-gdp shrink-0 animate-pulse rtl:rotate-180"
+              />
               <span className="text-gdp bg-gdp/15 border border-gdp/30 px-2 py-0.5 rounded-lg">
                 {t("levelPrefix", {
                   level: toDigits(targetTech.toFixed(1)),
