@@ -27,7 +27,7 @@ export function DiplomacyStepDownActions({
       <button
         onClick={onDeclareWar}
         disabled={!canDeclareWar}
-        className={`w-full p-3 rounded-2xl border text-right transition-all space-y-0.5 ${
+        className={`w-full p-3 rounded-2xl border text-start transition-all space-y-0.5 ${
           !canDeclareWar
             ? "bg-secondary/40 border-border/60 text-muted-foreground opacity-50 cursor-not-allowed"
             : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-400 cursor-pointer"
@@ -55,7 +55,7 @@ export function DiplomacyStepDownActions({
       <div className="space-y-2">
         <button
           onClick={onCancelTreaty}
-          className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-right transition-all cursor-pointer space-y-0.5"
+          className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-start transition-all cursor-pointer space-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold">
@@ -73,7 +73,7 @@ export function DiplomacyStepDownActions({
       <div className="space-y-2">
         <button
           onClick={onCancelTreaty}
-          className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-right transition-all cursor-pointer space-y-0.5"
+          className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-start transition-all cursor-pointer space-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold">

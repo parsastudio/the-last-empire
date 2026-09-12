@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, ChevronRight, ChevronLeft, LucideIcon } from "lucide-react";
+import { Loader2, ChevronLeft, LucideIcon } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { NextTurnButton } from "@/presentation/components/tactical-map/sidebar/next-turn-button";
 import { COMMAND_RAIL_TABS } from "@/presentation/configs/command-center-tabs.config";
@@ -68,13 +68,11 @@ function RailTabButton({
 
 function RailToggleButton({
   isCollapsed,
-  isRtl,
   onToggle,
   expandLabel,
   collapseLabel,
 }: {
   isCollapsed: boolean;
-  isRtl: boolean;
   onToggle: () => void;
   expandLabel: string;
   collapseLabel: string;
@@ -90,17 +88,12 @@ function RailToggleButton({
       className="p-1.5 md:p-2.5 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
       title={isCollapsed ? expandLabel : collapseLabel}
     >
-      {isCollapsed ? (
-        isRtl ? (
-          <ChevronLeft size={15} />
-        ) : (
-          <ChevronRight size={15} />
-        )
-      ) : isRtl ? (
-        <ChevronRight size={15} />
-      ) : (
-        <ChevronLeft size={15} />
-      )}
+      <ChevronLeft
+        size={15}
+        className={`transition-transform duration-200 ${
+          isCollapsed ? "rtl:rotate-0 rotate-180" : "rtl:rotate-180 rotate-0"
+        }`}
+      />
     </button>
   );
 }
@@ -125,7 +118,7 @@ export function CommandRail({
   onNextTurn,
 }: CommandRailProps) {
   const t = useTranslations("hud.rail");
-  const { isRtl, toDigits } = useLocaleFormatter();
+  const { toDigits } = useLocaleFormatter();
 
   const handleNextTurn = () => {
     TacticalSound.playTurnAdvance();
@@ -137,8 +130,7 @@ export function CommandRail({
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        right: isRtl ? "max(0.75rem, env(safe-area-inset-right))" : undefined,
-        left: !isRtl ? "max(0.75rem, env(safe-area-inset-left))" : undefined,
+        insetInlineEnd: "max(0.75rem, env(safe-area-inset-right))",
         top: "max(0.5rem, env(safe-area-inset-top))",
         bottom: "max(0.5rem, env(safe-area-inset-bottom))",
       }}
@@ -150,7 +142,6 @@ export function CommandRail({
         <div className="flex items-center justify-between px-0.5 shrink-0">
           <RailToggleButton
             isCollapsed={isCollapsed}
-            isRtl={isRtl}
             onToggle={onToggleCollapse}
             expandLabel={t("expand")}
             collapseLabel={t("collapse")}

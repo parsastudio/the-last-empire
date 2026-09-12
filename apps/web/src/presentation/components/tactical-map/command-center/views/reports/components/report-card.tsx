@@ -8,7 +8,6 @@ import {
 } from "@geopolitics/domain";
 import {
   Coins,
-  ArrowLeft,
   ArrowRight,
   Sparkles,
   Eye,
@@ -35,7 +34,7 @@ export function ReportCard({
   pendingProposals = [],
 }: ReportCardProps) {
   const t = useTranslations("reports.card");
-  const { isRtl, formatCurrency } = useLocaleFormatter();
+  const { formatCurrency } = useLocaleFormatter();
   const openModal = useUiStore((state) => state.openModal);
 
   const {
@@ -190,17 +189,10 @@ export function ReportCard({
 
                 {targetName && (
                   <>
-                    {isRtl ? (
-                      <ArrowLeft
-                        size={13}
-                        className="text-muted-foreground shrink-0"
-                      />
-                    ) : (
-                      <ArrowRight
-                        size={13}
-                        className="text-muted-foreground shrink-0"
-                      />
-                    )}
+                    <ArrowRight
+                      size={13}
+                      className="text-muted-foreground shrink-0 rtl:rotate-180"
+                    />
                     <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
                       <span className="text-lg select-none">{targetFlag}</span>
                       <span className="font-black text-foreground">

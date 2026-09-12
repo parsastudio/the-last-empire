@@ -6,7 +6,6 @@ import {
   Coins,
   ShieldCheck,
   ArrowRight,
-  ArrowLeft,
   Swords,
   AlertTriangle,
 } from "lucide-react";
@@ -25,7 +24,7 @@ export function DiplomacyAllyPopover({
   onSelectCountry,
 }: DiplomacyAllyPopoverProps) {
   const t = useTranslations("diplomacy.allyPopover");
-  const { isRtl, toDigits, formatLevel } = useLocaleFormatter();
+  const { toDigits, formatLevel } = useLocaleFormatter();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -125,7 +124,7 @@ export function DiplomacyAllyPopover({
         className="w-full py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
       >
         <span>{t("inspectAction", { name: ally.name })}</span>
-        {isRtl ? <ArrowLeft size={12} /> : <ArrowRight size={12} />}
+        <ArrowRight size={12} className="rtl:rotate-180 shrink-0" />
       </button>
     </div>
   );

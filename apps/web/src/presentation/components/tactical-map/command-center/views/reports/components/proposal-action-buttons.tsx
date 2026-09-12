@@ -36,7 +36,7 @@ export function ProposalActionButtons({
 
   if (isPeace) {
     return (
-      <div className="flex items-center gap-1.5 shrink-0 font-sans" dir="rtl">
+      <div className="flex items-center gap-1.5 shrink-0 font-sans">
         <button
           onClick={() =>
             openModal({
@@ -63,7 +63,7 @@ export function ProposalActionButtons({
   }
 
   return (
-    <div className="flex items-center gap-1.5 shrink-0 font-sans" dir="rtl">
+    <div className="flex items-center gap-1.5 shrink-0 font-sans">
       <button
         onClick={() => handleRespond(true)}
         disabled={isSubmitting}
