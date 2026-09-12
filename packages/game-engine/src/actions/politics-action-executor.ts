@@ -39,7 +39,7 @@ export class PoliticsActionExecutor {
           newState,
           resultData: {
             success: true,
-            message: "معاهده صلح با موفقیت امضا و شروط آن اعمال گردید.",
+            message: "PEACE_TREATY_SIGNED",
           },
         };
       }
@@ -130,7 +130,7 @@ export class PoliticsActionExecutor {
           if (!validation.isValid) {
             throw new GameError(
               "INVALID_ACTION",
-              validation.reason || "عدم احراز شرایط پیمان دفاعی.",
+              validation.reasonCode || "INVALID_ACTION",
             );
           }
         }
@@ -139,7 +139,7 @@ export class PoliticsActionExecutor {
           if (senderRel.stance !== "NON_AGGRESSION_PACT") {
             throw new GameError(
               "INVALID_ACTION",
-              "انعقاد شراکت استراتژیک نیازمند برقراری قبلی پیمان عدم تخاصم است.",
+              "NON_AGGRESSION_PACT_REQUIRED",
             );
           }
           const receiverGdp = getNationGdp(receiver, state.provinces);
@@ -150,7 +150,7 @@ export class PoliticsActionExecutor {
           if (nation.treasury < entryFee) {
             throw new GameError(
               "INSUFFICIENT_FUNDS",
-              "موجودی خزانه برای پرداخت ۳٪ هزینه ورود به شراکت استراتژیک کافی نیست.",
+              "INSUFFICIENT_FUNDS_PARTNERSHIP",
             );
           }
         }

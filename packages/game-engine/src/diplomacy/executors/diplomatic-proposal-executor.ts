@@ -23,7 +23,7 @@ export class DiplomaticProposalExecutor {
     if (!validation.isValid) {
       throw new GameError(
         "INVALID_ACTION",
-        validation.reason || "عدم احراز شرایط معاهده تحت‌الحمایگی استعماری.",
+        validation.reasonCode || "INVALID_ACTION",
       );
     }
 
@@ -68,7 +68,7 @@ export class DiplomaticProposalExecutor {
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         reputationChange: -30,
-        message: `معاهده تحت‌الحمایگی با ${receiver.name} امضا شد: اعزام ارتش فوق‌پیشرفته (۵۰٪ GDP) در ازای ۵٪ خراج نوبتی (-۳۰ پرستیژ، -۱۵٪ ثبات).`,
+        message: "EMERGENCY_PROTECTORATE_SIGNED",
       }),
     };
   }
@@ -108,7 +108,7 @@ export class DiplomaticProposalExecutor {
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
-        message: `معاهده استعماری با ${receiver.name} لغو گردید و خراج نوبتی ۵٪ قطع شد.`,
+        message: "EMERGENCY_PROTECTORATE_CANCELLED",
       }),
     };
   }

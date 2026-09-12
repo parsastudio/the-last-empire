@@ -32,7 +32,7 @@ export class PeaceSettlementExecutor {
     );
 
     if (!sourceNation || !targetNation) {
-      throw new GameError("NATION_NOT_FOUND", "یکی از طرفین معاهده یافت نشد.");
+      throw new GameError("NATION_NOT_FOUND", "NATION_NOT_FOUND");
     }
 
     const canonicalSource = CountryRegistry.resolveCanonicalId(sourceNation.id);
@@ -46,10 +46,7 @@ export class PeaceSettlementExecutor {
       rel?.warDeclaredTurn !== undefined &&
       state.currentTurn <= rel.warDeclaredTurn
     ) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "امکان امضای معاهده صلح در همان نوبت آغاز جنگ وجود ندارد (باید حداقل یک نوبت بگذرد).",
-      );
+      throw new GameError("INVALID_ACTION", "WAR_FIRST_TURN_COOLDOWN");
     }
 
     const humanCanonical = CountryRegistry.resolveCanonicalId(
@@ -76,7 +73,7 @@ export class PeaceSettlementExecutor {
     if (!terms.canAffordTerms) {
       throw new GameError(
         "INVALID_ACTION",
-        terms.description || "شروط معاهده صلح در حال حاضر قابل اجرا نیست.",
+        terms.statusCode || "INVALID_ACTION",
       );
     }
 
@@ -268,7 +265,8 @@ export class PeaceSettlementExecutor {
         targetNation.id,
         "TREATY_ACCEPTED",
         {
-          treatyLabel: terms.headline,
+          treatyType: "PEACE_TREATY",
+          treatyLabel: terms.statusCode,
           money: terms.moneyAmount,
           provincesCount: terms.concededProvinceIds.length,
         },
