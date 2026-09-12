@@ -1,8 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Check, X, Globe, ShieldCheck, Skull, Coins } from "lucide-react";
-import { getProposalTypeName } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
-import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface DiplomaticProposalFeedbackData {
   proposalType:
@@ -35,11 +33,15 @@ export function TreatyResponseFeedbackContent({
   onClose,
 }: TreatyResponseFeedbackContentProps) {
   const t = useTranslations("diplomacy.treatyFeedback");
+  const tDiplomacy = useTranslations("diplomacy");
   const tCommon = useTranslations("common");
-  const { locale } = useLocaleFormatter();
 
   const isAccepted = feedback.accepted;
-  const proposalName = getProposalTypeName(feedback.proposalType, locale);
+  let proposalName = feedback.proposalType;
+  try {
+    proposalName = tDiplomacy(`proposalTypes.${feedback.proposalType}`);
+  } catch {}
+
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
   const isSecurityCancel =
     feedback.proposalType === "CANCEL_SECURITY_GUARANTEE" ||

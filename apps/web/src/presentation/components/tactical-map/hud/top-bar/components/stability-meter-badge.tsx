@@ -1,26 +1,32 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Landmark } from "lucide-react";
 import { StabilityBracketUtility } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { StabilityBracketVisualUtility } from "@/presentation/components/tactical-map/sidebar/utils/stability-bracket-visual.utility";
 
 interface StabilityMeterBadgeProps {
   stability: number;
 }
 
 export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
-  const { isRtl, toDigits, formatPercent } = useLocaleFormatter();
+  const t = useTranslations("overview.stabilityCard");
+  const { toDigits, formatPercent } = useLocaleFormatter();
 
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(stability),
     [stability],
   );
 
+  const visual = useMemo(
+    () => StabilityBracketVisualUtility.getVisual(bracket.type),
+    [bracket.type],
+  );
+
   const isCrisis = stability < 25;
   const isProsperous = stability >= 75;
 
-  const tooltipText = isRtl
-    ? `ثبات سیاسی: ${toDigits(stability)}% (${bracket.labelFa} • ${bracket.rateTextFa})`
-    : `Political Stability: ${toDigits(stability)}% (${bracket.type})`;
+  const tooltipText = `${t("title")}: ${toDigits(stability)}% (${t(`brackets.${bracket.type}`)} • ${t(`rateTexts.${bracket.type}`)})`;
 
   return (
     <div
@@ -38,7 +44,7 @@ export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
         className="text-diplomacy shrink-0 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]"
       />
       <div className="flex items-center gap-2">
-        <span className={`font-black ${bracket.textColorClass}`}>
+        <span className={`font-black ${visual.textColorClass}`}>
           {formatPercent(stability)}
         </span>
         <div className="w-12 h-1.5 bg-background/90 rounded-full overflow-hidden border border-border/60 shadow-inner">

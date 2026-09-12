@@ -1,6 +1,5 @@
 import { LocaleNumberFormatter, AppLocale } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export interface FormattedNationSummary {
@@ -14,7 +13,6 @@ export interface FormattedNationSummary {
   gdpText: string;
   populationText: string;
   treasuryText: string;
-  governmentLabel: string;
 }
 
 export class NationPresentationMapper {
@@ -51,7 +49,6 @@ export class NationPresentationMapper {
     rank: number,
     gdp: number,
     population: number,
-    governmentType: string,
     treasury?: number,
     locale: AppLocale = "fa",
   ): FormattedNationSummary {
@@ -79,7 +76,6 @@ export class NationPresentationMapper {
         true,
         locale,
       ),
-      governmentLabel: getGovernmentTypeLabel(governmentType, locale),
     };
   }
 }

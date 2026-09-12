@@ -40,6 +40,7 @@ export function EmergencyProtectorateModal({
   onClose,
 }: EmergencyProtectorateModalProps) {
   const t = useTranslations("diplomacy.protectorateModal");
+  const tErrors = useTranslations("diplomacy.validationErrors");
   const tCommon = useTranslations("common");
   const { formatCurrency, toDigits } = useLocaleFormatter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,6 +99,10 @@ export function EmergencyProtectorateModal({
       setIsSubmitting(false);
     }
   };
+
+  const validationReason = validation.reasonCode
+    ? tErrors(validation.reasonCode)
+    : t("invalid");
 
   return (
     <UnifiedModalShell
@@ -232,7 +237,7 @@ export function EmergencyProtectorateModal({
                 ? t("submitting")
                 : validation.isValid
                   ? t("signButton", { name: targetName })
-                  : t("invalid")}
+                  : validationReason}
             </span>
           </button>
         </div>
