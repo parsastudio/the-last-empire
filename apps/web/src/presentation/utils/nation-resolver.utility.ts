@@ -1,4 +1,5 @@
-import { Nation, AppLocale } from "@geopolitics/domain";
+import { Nation } from "@geopolitics/domain";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import {
   NationPresenter,
   PresentedNation,

@@ -48,12 +48,13 @@ export class NationPresenter {
     defaultCode = "IR",
   ): string {
     if (!nationOrId) return defaultCode;
-    const nation = typeof nationOrId === "object" ? nationOrId : null;
-    const rawId = typeof nationOrId === "string" ? nationOrId : nation.id;
+    const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
     const canonicalId = this.resolveCanonicalId(rawId);
     const profile = CountryRegistry.getCountry(canonicalId);
+    const flagFromNation =
+      typeof nationOrId === "object" ? nationOrId.flagCode : undefined;
 
-    return nation?.flagCode || profile?.flagCode || canonicalId || defaultCode;
+    return flagFromNation || profile?.flagCode || canonicalId || defaultCode;
   }
 
   public static resolveFlagEmoji(
