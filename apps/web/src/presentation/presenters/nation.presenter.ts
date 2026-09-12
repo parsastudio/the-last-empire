@@ -1,6 +1,7 @@
 import { Nation, CountryRegistry, CountryProfile } from "@geopolitics/domain";
 import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { COUNTRY_NAMES_DATA } from "@/presentation/resources/country-names.data";
 
 export interface PresentedNation {
   id: string;
@@ -34,13 +35,19 @@ export class NationPresenter {
 
     const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
     const canonicalId = this.resolveCanonicalId(rawId);
-    const profile = CountryRegistry.getCountry(canonicalId);
+    const localizedEntry = COUNTRY_NAMES_DATA[canonicalId];
 
-    if (locale === "en") {
-      return profile?.nameEn || fallback || canonicalId || "Unknown";
+    if (localizedEntry) {
+      return locale === "en" ? localizedEntry.en : localizedEntry.fa;
     }
 
-    return profile?.nameFa || fallback || canonicalId || "نامشخص";
+    const profile = CountryRegistry.getCountry(canonicalId);
+    if (profile) {
+      if (locale === "en" && profile.nameEn) return profile.nameEn;
+      if (locale === "fa" && profile.nameFa) return profile.nameFa;
+    }
+
+    return fallback || canonicalId || (locale === "en" ? "Unknown" : "نامشخص");
   }
 
   public static resolveFlagCode(

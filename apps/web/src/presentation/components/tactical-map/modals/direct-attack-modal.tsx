@@ -71,6 +71,7 @@ export function DirectAttackModal({
           defenderFlagCode={form.targetNation.flagCode || form.targetNation.id}
           originRegionName={form.originRegionName}
           targetRegionName={form.targetRegionName}
+          targetProvinceId={form.targetProvinceId}
           attackType={form.attackType}
         />
 
@@ -101,6 +102,7 @@ export function DirectAttackModal({
           reputationPenalty={form.reputationPenalty}
           targetNationName={defenderDisplayName}
           targetRegionName={form.targetRegionName}
+          targetProvinceId={form.targetProvinceId}
           hasAlreadyAttackedThisTurn={form.hasAlreadyAttackedThisTurn}
           activeGuarantorNames={form.activeGuarantorNames}
           mutualGuarantorNames={form.mutualGuarantorNames}

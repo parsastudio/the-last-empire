@@ -59,6 +59,7 @@ export const BattlePhaseGroundDetailSchema = z.object({
 export const BattleSpoilsDetailsSchema = z.object({
   conqueredPixels: z.number().nonnegative().default(0),
   conqueredProvincesCount: z.number().nonnegative().default(0),
+  conqueredProvinceIds: z.array(z.number().positive()).default([]),
   conqueredProvincesNames: z.array(z.string()).default([]),
   gainedPopulation: z.number().nonnegative().default(0),
   gainedGdp: z.number().nonnegative().default(0),
@@ -81,6 +82,7 @@ export const AuxiliaryGuarantorDefenseSchema = z.object({
 export const BattleFullReportDataSchema = z.object({
   attackerId: z.string(),
   defenderId: z.string(),
+  targetProvinceId: z.number().positive().optional(),
   targetProvinceName: z.string().optional(),
   attackType: z.enum(["LAND", "NAVAL"]).default("LAND"),
   isAttackerVictory: z.boolean(),

@@ -21,6 +21,7 @@ interface AttackStatusAlertsProps {
   reputationPenalty: number;
   targetNationName: string;
   targetRegionName: string;
+  targetProvinceId?: number | null;
   hasAlreadyAttackedThisTurn?: boolean;
   activeGuarantorNames?: string[];
   mutualGuarantorNames?: string[];
@@ -35,6 +36,7 @@ export function AttackStatusAlerts({
   reputationPenalty,
   targetNationName,
   targetRegionName,
+  targetProvinceId,
   hasAlreadyAttackedThisTurn = false,
   activeGuarantorNames = [],
   mutualGuarantorNames = [],
@@ -45,10 +47,9 @@ export function AttackStatusAlerts({
   const { locale, toDigits } = useLocaleFormatter();
 
   const isAccessible = isLandNeighbor || isNavalValid;
-  const formattedRegionName = ProvinceNameFormatter.format(
-    targetRegionName,
-    locale,
-  );
+  const formattedRegionName = targetProvinceId
+    ? ProvinceNameFormatter.format(targetProvinceId, locale)
+    : targetRegionName;
 
   const stanceLabel = tDiplomacy(currentStance);
 

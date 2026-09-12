@@ -293,6 +293,7 @@ export function useDirectAttackForm({
     targetNation,
     targetGuarantorNation,
     targetProvince: reach.targetProvince,
+    targetProvinceId: reach.targetProvinceId,
     isLandNeighbor: reach.isLandNeighbor,
     isNavalValid: reach.isNavalValid,
     attackType: reach.attackType,

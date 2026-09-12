@@ -14,6 +14,7 @@ interface AttackHeaderProps {
   defenderFlagCode: string;
   originRegionName?: string;
   targetRegionName: string;
+  targetProvinceId?: number | null;
   attackType?: "LAND" | "NAVAL";
 }
 
@@ -25,16 +26,18 @@ export function AttackHeader({
   defenderCode,
   defenderFlagCode,
   targetRegionName,
+  targetProvinceId,
   attackType = "LAND",
 }: AttackHeaderProps) {
   const t = useTranslations("attack.header");
   const { locale } = useLocaleFormatter();
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
-  const formattedTarget = ProvinceNameFormatter.format(
-    targetRegionName,
-    locale,
-  );
+
+  const displayTarget = targetProvinceId
+    ? ProvinceNameFormatter.format(targetProvinceId, locale)
+    : targetRegionName;
+
   const isNaval = attackType === "NAVAL";
 
   return (
@@ -72,7 +75,7 @@ export function AttackHeader({
             {defenderName}
           </span>
           <span className="text-[9px] md:text-[10px] font-mono text-military font-bold bg-military/10 border border-military/30 px-1.5 py-0.2 md:px-2 md:py-0.5 rounded-md md:rounded-lg inline-block font-sans truncate max-w-[110px] sm:max-w-none">
-            {formattedTarget}
+            {displayTarget}
           </span>
         </div>
         <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-secondary/80 border border-border/80 flex items-center justify-center text-2xl md:text-3xl shadow-inner select-none shrink-0 ring-1 ring-military/20">

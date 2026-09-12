@@ -5,16 +5,21 @@ import { ProvinceNameFormatter } from "@/presentation/utils/province-name-format
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ConqueredProvincesListProps {
+  provinceIds?: number[];
   provincesNames?: string[];
 }
 
 export function ConqueredProvincesList({
+  provinceIds,
   provincesNames,
 }: ConqueredProvincesListProps) {
   const t = useTranslations("reports.spoils.provinces");
   const { locale } = useLocaleFormatter();
 
-  if (!provincesNames || provincesNames.length === 0) return null;
+  const hasIds = provinceIds && provinceIds.length > 0;
+  const hasNames = provincesNames && provincesNames.length > 0;
+
+  if (!hasIds && !hasNames) return null;
 
   return (
     <div className="bg-card/90 border border-border/80 p-3 rounded-2xl space-y-2 w-full text-start font-sans">
@@ -23,15 +28,25 @@ export function ConqueredProvincesList({
         <span>{t("title")}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {provincesNames.map((name, idx) => (
-          <span
-            key={idx}
-            className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
-          >
-            <span>📍</span>
-            <span>{ProvinceNameFormatter.format(name, locale)}</span>
-          </span>
-        ))}
+        {hasIds
+          ? provinceIds!.map((id) => (
+              <span
+                key={id}
+                className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
+              >
+                <span>📍</span>
+                <span>{ProvinceNameFormatter.format(id, locale)}</span>
+              </span>
+            ))
+          : provincesNames!.map((name, idx) => (
+              <span
+                key={idx}
+                className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
+              >
+                <span>📍</span>
+                <span>{name}</span>
+              </span>
+            ))}
       </div>
     </div>
   );
