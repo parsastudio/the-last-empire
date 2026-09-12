@@ -4,8 +4,9 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { MapTopologyRegistry } from "@geopolitics/domain";
+import { MapTopologyRegistry, AppLocale } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -17,7 +18,8 @@ export interface ContextMenuState {
 }
 
 export function useContextMenu() {
-  const locale = useLocale();
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
@@ -40,9 +42,12 @@ export function useContextMenu() {
       const province = provincesMap
         ? provincesMap[provinceId.toString()]
         : null;
-      const provinceName = MapTopologyRegistry.getNameFa(
+
+      const rawTopologyName = MapTopologyRegistry.getNameFa(provinceId, "");
+      const provinceName = ProvinceNameFormatter.format(
+        rawTopologyName,
+        locale,
         provinceId,
-        locale === "en" ? `Province #${provinceId}` : `استان #${provinceId}`,
       );
 
       const ownerNationId = province ? province.ownerNationId : "";

@@ -46,7 +46,6 @@ function mapManifestToNationDetails(
         rank,
         gdp,
         pop,
-        gov,
         treasury,
         locale,
       );
@@ -99,7 +98,6 @@ function mapManifestToNationDetails(
       rank,
       gdp,
       population,
-      gov,
       treasury,
       locale,
     );

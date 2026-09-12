@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
+import { useLocale } from "next-intl";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import {
   Nation,
   CountryRegistry,
   getNationGdp,
   Province,
+  AppLocale,
 } from "@geopolitics/domain";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
@@ -21,6 +23,8 @@ export function useWideDiplomacy({
   humanNationId,
   provincesMap,
 }: UseWideDiplomacyProps) {
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
   const [searchQuery, setSearchQuery] = useState("");
   const activeHumanId = CountryRegistry.resolveCanonicalId(
     humanNationId || "USA",
@@ -46,11 +50,12 @@ export function useWideDiplomacy({
         humanNation,
         nationsMap,
         provincesMap,
+        locale,
       );
     });
 
     return list.sort((a, b) => a.rank - b.rank);
-  }, [liveNationsList, humanNation, nationsMap, provincesMap]);
+  }, [liveNationsList, humanNation, nationsMap, provincesMap, locale]);
 
   const defaultCode = relationsList[0]?.code || "";
   const [userSelectedCode, setUserSelectedCode] = useState<string | null>(null);
@@ -79,8 +84,16 @@ export function useWideDiplomacy({
       humanNation,
       nationsMap,
       provincesMap,
+      locale,
     );
-  }, [activeCode, selectedTargetNation, humanNation, nationsMap, provincesMap]);
+  }, [
+    activeCode,
+    selectedTargetNation,
+    humanNation,
+    nationsMap,
+    provincesMap,
+    locale,
+  ]);
 
   return {
     searchQuery,

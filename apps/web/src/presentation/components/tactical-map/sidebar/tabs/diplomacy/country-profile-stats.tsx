@@ -14,6 +14,7 @@ import { StabilityBracketUtility } from "@geopolitics/domain";
 import { DiplomacyAlliesBox } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-box";
 import { NationAllyDetail } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-resolver.utility";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { StabilityBracketVisualUtility } from "@/presentation/components/tactical-map/sidebar/utils/stability-bracket-visual.utility";
 
 export interface CountryProfileData {
   gdp: string;
@@ -40,14 +41,28 @@ export function CountryProfileStats({
   onSelectAlly,
 }: CountryProfileStatsProps) {
   const t = useTranslations("diplomacy.stats");
+  const tGovernments = useTranslations("governments");
   const tOverview = useTranslations("overview.stabilityCard.brackets");
-  const { isRtl, formatLevel, formatPercent } = useLocaleFormatter();
+  const { formatLevel, formatPercent } = useLocaleFormatter();
   const isArmsEligible = data.isArmsEligible ?? data.tension < 50;
 
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(data.stability),
     [data.stability],
   );
+
+  const visual = useMemo(
+    () => StabilityBracketVisualUtility.getVisual(bracket.type),
+    [bracket.type],
+  );
+
+  const resolvedGovernmentLabel = useMemo(() => {
+    try {
+      return tGovernments(`${data.governmentType}.name`);
+    } catch {
+      return data.governmentType;
+    }
+  }, [data.governmentType, tGovernments]);
 
   return (
     <div className="space-y-3 font-mono text-xs text-start font-sans">
@@ -144,7 +159,7 @@ export function CountryProfileStats({
             <span>{t("governmentType")}</span>
           </div>
           <span className="text-xs font-extrabold text-foreground font-sans">
-            {data.governmentType}
+            {resolvedGovernmentLabel}
           </span>
         </div>
 
@@ -154,11 +169,11 @@ export function CountryProfileStats({
           </span>
           <div className="flex items-center gap-2">
             <span
-              className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border ${bracket.badgeStyleClass}`}
+              className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border ${visual.badgeStyleClass}`}
             >
-              {isRtl ? bracket.labelFa : tOverview(bracket.type)}
+              {tOverview(bracket.type)}
             </span>
-            <span className={`font-bold ${bracket.textColorClass}`}>
+            <span className={`font-bold ${visual.textColorClass}`}>
               {formatPercent(data.stability)}
             </span>
           </div>

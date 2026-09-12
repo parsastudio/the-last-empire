@@ -2,27 +2,7 @@ import {
   DiplomaticStance,
   DiplomaticPosture,
   DiplomaticProposalType,
-  DIPLOMATIC_PROPOSAL_LABELS_FA,
-  DIPLOMATIC_PROPOSAL_LABELS_EN,
-  DIPLOMATIC_STANCE_LABELS_FA,
-  DIPLOMATIC_STANCE_LABELS_EN,
-  DIPLOMATIC_POSTURE_LABELS_FA,
-  DIPLOMATIC_POSTURE_LABELS_EN,
 } from "@geopolitics/domain";
-
-export function getPostureLabel(
-  posture: DiplomaticPosture,
-  locale: "fa" | "en" = "fa",
-): string {
-  const map =
-    locale === "en"
-      ? DIPLOMATIC_POSTURE_LABELS_EN
-      : DIPLOMATIC_POSTURE_LABELS_FA;
-  return (
-    map[posture] ||
-    (locale === "en" ? "Neutral Coexistence" : "همزیستی مسالمت‌آمیز")
-  );
-}
 
 export function getPostureBadgeClass(posture: DiplomaticPosture): string {
   switch (posture) {
@@ -36,18 +16,6 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
     default:
       return "bg-secondary text-muted-foreground border-border/60";
   }
-}
-
-export function getDiplomaticStanceLabel(
-  stance: DiplomaticStance | string,
-  locale: "fa" | "en" = "fa",
-): string {
-  const map =
-    locale === "en" ? DIPLOMATIC_STANCE_LABELS_EN : DIPLOMATIC_STANCE_LABELS_FA;
-  if (stance in map) {
-    return map[stance as DiplomaticStance];
-  }
-  return String(stance);
 }
 
 export function getDiplomaticStanceBadgeClass(
@@ -64,20 +32,6 @@ export function getDiplomaticStanceBadgeClass(
     default:
       return "bg-secondary text-muted-foreground border-border/60";
   }
-}
-
-export function getProposalTypeName(
-  type: string,
-  locale: "fa" | "en" = "fa",
-): string {
-  const map =
-    locale === "en"
-      ? DIPLOMATIC_PROPOSAL_LABELS_EN
-      : DIPLOMATIC_PROPOSAL_LABELS_FA;
-  if (type in map) {
-    return map[type as DiplomaticProposalType];
-  }
-  return locale === "en" ? "Diplomatic Accord" : "معاهده دیپلماتیک";
 }
 
 export function getAlignmentColor(alignment: number): string {

@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   Skull,
 } from "lucide-react";
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, CountryRegistry } from "@geopolitics/domain";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -32,18 +32,25 @@ export function AttackDiscoveredIntelGrid({
   onAutoOptimizeDeploy,
 }: AttackDiscoveredIntelGridProps) {
   const t = useTranslations("attack.intel");
-  const { formatNumber, formatCurrency, formatLevel } = useLocaleFormatter();
+  const { formatNumber, formatCurrency, formatLevel, locale } =
+    useLocaleFormatter();
   const aux = forecast.auxiliaryGuarantor;
 
+  const targetProfile = CountryRegistry.getCountry(targetNation.id);
+  const targetDisplayName =
+    locale === "en"
+      ? targetProfile?.nameEn || targetNation.name
+      : targetNation.name;
+
   return (
-    <div className="bg-gradient-to-r from-emerald-950/25 via-card to-cyan-950/20 border border-emerald-500/40 p-3.5 rounded-3xl space-y-3 shadow-lg backdrop-blur-xl">
+    <div className="bg-gradient-to-r from-emerald-950/25 via-card to-cyan-950/20 border border-emerald-500/40 p-3.5 rounded-3xl space-y-3 shadow-lg backdrop-blur-xl text-start font-sans">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-border/50">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
             <CheckCircle2 size={14} />
           </div>
           <span className="text-xs font-black text-foreground">
-            {t("fullIntelTitle", { name: targetNation.name })}
+            {t("fullIntelTitle", { name: targetDisplayName })}
           </span>
         </div>
 

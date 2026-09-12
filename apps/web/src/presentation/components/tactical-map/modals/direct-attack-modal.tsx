@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation, GameState } from "@geopolitics/domain";
+import { Nation, GameState, CountryRegistry } from "@geopolitics/domain";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 import { AttackHeader } from "@/presentation/components/tactical-map/modals/attack/attack-header";
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
@@ -10,6 +10,7 @@ import { AttackIntelPanel } from "@/presentation/components/tactical-map/modals/
 import { NavalTransportCapacityCard } from "@/presentation/components/tactical-map/modals/attack/naval-transport-capacity-card";
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export function DirectAttackModal({
 }: DirectAttackModalProps) {
   const t = useTranslations("attack");
   const tMil = useTranslations("military");
+  const { locale } = useLocaleFormatter();
 
   const form = useDirectAttackForm({
     targetNationId,
@@ -45,6 +47,18 @@ export function DirectAttackModal({
   const modalTitle =
     form.attackType === "NAVAL" ? t("modalTitleNaval") : t("modalTitleLand");
 
+  const attackerProfile = CountryRegistry.getCountry(humanNation.id);
+  const attackerDisplayName =
+    locale === "en"
+      ? attackerProfile?.nameEn || humanNation.name
+      : humanNation.name;
+
+  const defenderProfile = CountryRegistry.getCountry(form.targetNation.id);
+  const defenderDisplayName =
+    locale === "en"
+      ? defenderProfile?.nameEn || form.targetNation.name
+      : form.targetNation.name;
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
@@ -54,10 +68,10 @@ export function DirectAttackModal({
     >
       <div className="space-y-2.5 md:space-y-4 text-start font-sans">
         <AttackHeader
-          attackerName={humanNation.name}
+          attackerName={attackerDisplayName}
           attackerCode={humanNation.id}
           attackerFlagCode={humanNation.flagCode || humanNation.id}
-          defenderName={form.targetNation.name}
+          defenderName={defenderDisplayName}
           defenderCode={form.targetNation.id}
           defenderFlagCode={form.targetNation.flagCode || form.targetNation.id}
           originRegionName={form.originRegionName}
@@ -90,7 +104,7 @@ export function DirectAttackModal({
           isWarStance={form.isWarStance}
           currentStance={form.currentStance}
           reputationPenalty={form.reputationPenalty}
-          targetNationName={form.targetNation.name}
+          targetNationName={defenderDisplayName}
           targetRegionName={form.targetRegionName}
           hasAlreadyAttackedThisTurn={form.hasAlreadyAttackedThisTurn}
           activeGuarantorNames={form.activeGuarantorNames}

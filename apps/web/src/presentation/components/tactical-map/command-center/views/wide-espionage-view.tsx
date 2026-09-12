@@ -8,7 +8,11 @@ import { EspionageTargetSelector } from "@/presentation/components/tactical-map/
 import { EspionageTierCard } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-tier-card";
 import { EspionageResultBanner } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-result-banner";
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
-import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  NationTurnActivity,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface WideEspionageViewProps {
@@ -27,8 +31,7 @@ export function WideEspionageView({
   turnActivity,
 }: WideEspionageViewProps) {
   const t = useTranslations("espionage");
-  const { formatCurrency, formatPercent, formatLevel, toDigits } =
-    useLocaleFormatter();
+  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
 
   const form = useWideEspionageForm({
     nation,
@@ -46,26 +49,42 @@ export function WideEspionageView({
       )
     : 99;
 
+  const targetProfile = form.selectedTargetNation
+    ? CountryRegistry.getCountry(form.selectedTargetNation.id)
+    : null;
+
+  const targetDisplayName = form.selectedTargetNation
+    ? locale === "en"
+      ? targetProfile?.nameEn || form.selectedTargetNation.name
+      : form.selectedTargetNation.name
+    : "";
+
   const tier3Subtitle = useMemo(() => {
     if (!form.selectedTargetNation) return "";
     const sup = form.techSuperiority;
     if (sup.heistMode === "DUAL") {
-      return t("view.subtitles.dual", { name: form.selectedTargetNation.name });
+      return t("view.subtitles.dual", { name: targetDisplayName });
     }
     if (sup.heistMode === "MILITARY_ONLY") {
       return t("view.subtitles.militaryOnly", {
-        name: form.selectedTargetNation.name,
-        points: formatLevel(sup.militaryGain),
+        name: targetDisplayName,
+        points: toDigits(sup.militaryGain.toFixed(1)),
       });
     }
     if (sup.heistMode === "INDUSTRIAL_ONLY") {
       return t("view.subtitles.industrialOnly", {
-        name: form.selectedTargetNation.name,
-        points: formatLevel(sup.industrialGain),
+        name: targetDisplayName,
+        points: toDigits(sup.industrialGain.toFixed(1)),
       });
     }
-    return t("view.subtitles.none", { name: form.selectedTargetNation.name });
-  }, [form.selectedTargetNation, form.techSuperiority, t, formatLevel]);
+    return t("view.subtitles.none", { name: targetDisplayName });
+  }, [
+    form.selectedTargetNation,
+    targetDisplayName,
+    form.techSuperiority,
+    t,
+    toDigits,
+  ]);
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200 text-start font-sans">
@@ -88,7 +107,7 @@ export function WideEspionageView({
                   <span
                     className="text-3xl select-none"
                     role="img"
-                    aria-label={form.selectedTargetNation.name}
+                    aria-label={targetDisplayName}
                   >
                     {getFlagEmoji(form.selectedTargetNation.flagCode)}
                   </span>
@@ -96,7 +115,7 @@ export function WideEspionageView({
                     <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
                       <span>
                         {t("view.blackOpsTitle", {
-                          name: form.selectedTargetNation.name,
+                          name: targetDisplayName,
                         })}
                       </span>
                       <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground border border-border/60">
@@ -108,7 +127,7 @@ export function WideEspionageView({
                     <span className="text-[10px] text-muted-foreground font-mono">
                       {t("view.meta", {
                         gdp: formatCurrency(form.targetGdp, true),
-                        stability: formatPercent(
+                        stability: toDigits(
                           form.selectedTargetNation.government.stability,
                         ),
                       })}
@@ -121,7 +140,7 @@ export function WideEspionageView({
                     <Award size={12} />
                     <span>
                       {t("view.yourMilTech", {
-                        level: formatLevel(nation.military.techLevel),
+                        level: toDigits(nation.military.techLevel.toFixed(1)),
                       })}
                     </span>
                   </div>
@@ -129,7 +148,7 @@ export function WideEspionageView({
                     <Cpu size={12} />
                     <span>
                       {t("view.yourIndTech", {
-                        level: formatLevel(nation.industrialLevel),
+                        level: toDigits(nation.industrialLevel.toFixed(1)),
                       })}
                     </span>
                   </div>

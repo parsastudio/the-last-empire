@@ -93,10 +93,28 @@ export class DirectAttackSelector {
       !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
+    const attackerProfile = humanNation
+      ? CountryRegistry.getCountry(humanNation.id)
+      : null;
+    const attackerDisplayName = humanNation
+      ? locale === "en"
+        ? attackerProfile?.nameEn || humanNation.name
+        : humanNation.name
+      : "";
+
+    const targetProfile = targetNation
+      ? CountryRegistry.getCountry(targetNation.id)
+      : null;
+    const targetDisplayName = targetNation
+      ? locale === "en"
+        ? targetProfile?.nameEn || targetNation.name
+        : targetNation.name
+      : "";
+
     const originRegionName = humanNation
       ? locale === "en"
-        ? `${humanNation.name} Territory`
-        : `خاک ${humanNation.name}`
+        ? `${attackerDisplayName} Territory`
+        : `خاک ${attackerDisplayName}`
       : locale === "en"
         ? "Sovereign Mainland"
         : "خاک اصلی کشور";
@@ -111,8 +129,8 @@ export class DirectAttackSelector {
     } else if (targetNation) {
       targetRegionName =
         locale === "en"
-          ? `${targetNation.name} Mainland`
-          : `خاک اصلی ${targetNation.name}`;
+          ? `${targetDisplayName} Mainland`
+          : `خاک اصلی ${targetDisplayName}`;
     }
 
     return {
@@ -164,6 +182,7 @@ export class DirectAttackSelector {
     targetNation: Nation | null,
     gameState: GameState | null,
     isWarStance: boolean,
+    locale: AppLocale = "fa",
   ): DirectAttackGuarantorsEvaluation {
     if (!targetNation || !gameState || !humanNation || isWarStance) {
       return {
@@ -196,12 +215,16 @@ export class DirectAttackSelector {
 
       if (!gNation || !gNation.isAlive) continue;
 
+      const gProfile = CountryRegistry.getCountry(canonicalG);
+      const gDisplayName =
+        locale === "en" ? gProfile?.nameEn || gNation.name : gNation.name;
+
       const isMutual = humanGuarantors.some(
         (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,
       );
 
       if (isMutual) {
-        mutualGuarantorNames.push(gNation.name);
+        mutualGuarantorNames.push(gDisplayName);
         continue;
       }
 
@@ -210,11 +233,11 @@ export class DirectAttackSelector {
         humanNation.relations?.[canonicalG];
 
       if (rel?.stance === "STRATEGIC_PARTNERSHIP") {
-        partnerGuarantorNames.push(gNation.name);
+        partnerGuarantorNames.push(gDisplayName);
         continue;
       }
 
-      activeGuarantorNames.push(gNation.name);
+      activeGuarantorNames.push(gDisplayName);
     }
 
     return {

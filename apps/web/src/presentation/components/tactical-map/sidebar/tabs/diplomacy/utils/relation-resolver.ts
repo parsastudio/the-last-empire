@@ -13,18 +13,12 @@ import {
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import {
-  getPostureLabel,
   getPostureBadgeClass,
   getAlignmentColor,
   getTensionColor,
 } from "./relation-appearance.utility";
 
-export {
-  getPostureLabel,
-  getPostureBadgeClass,
-  getAlignmentColor,
-  getTensionColor,
-};
+export { getPostureBadgeClass, getAlignmentColor, getTensionColor };
 
 export interface DiplomaticRelation {
   code: string;
@@ -35,7 +29,6 @@ export interface DiplomaticRelation {
   alignment: number;
   tension: number;
   posture: DiplomaticPosture;
-  postureLabel: string;
   hasSecurityGuarantee: boolean;
   isEmergencyProtectorate: boolean;
   profileData: CountryProfileData;
@@ -169,7 +162,6 @@ export function resolveProfileRelation(
     alignment,
     tension,
     posture,
-    postureLabel: getPostureLabel(posture, locale),
     hasSecurityGuarantee,
     isEmergencyProtectorate,
     profileData: {

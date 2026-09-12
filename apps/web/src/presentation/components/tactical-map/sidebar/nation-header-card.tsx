@@ -30,6 +30,7 @@ export function NationHeaderCard({
   difficulty = "NORMAL",
 }: NationHeaderCardProps) {
   const t = useTranslations("overview.header");
+  const tGov = useTranslations("governments");
   const tDiff = useTranslations("selectNation.difficulty");
   const { locale, toDigits, formatLevel } = useLocaleFormatter();
 
@@ -42,16 +43,20 @@ export function NationHeaderCard({
       rank,
       0,
       population,
-      governmentType,
       0,
       locale,
     );
+
+    let governmentLabel = governmentType;
+    try {
+      governmentLabel = tGov(`${governmentType}.name`);
+    } catch {}
 
     return {
       flagEmoji: summary.flagEmoji,
       displayName: summary.name,
       formattedPopulation: summary.populationText,
-      governmentLabel: summary.governmentLabel,
+      governmentLabel,
       militaryTechFormatted: formatLevel(militaryTechLevel),
       industrialTechFormatted: formatLevel(industrialLevel),
     };
@@ -66,6 +71,7 @@ export function NationHeaderCard({
     industrialLevel,
     locale,
     formatLevel,
+    tGov,
   ]);
 
   const diffVisual =

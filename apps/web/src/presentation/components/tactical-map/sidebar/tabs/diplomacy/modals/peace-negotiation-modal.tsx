@@ -75,8 +75,8 @@ export function PeaceNegotiationModal({
   const humanFlag = getFlagEmoji(humanNation.flagCode || humanNation.id);
   const targetFlag = getFlagEmoji(targetNation.flagCode || targetNation.id);
 
-  const isDominantAi = terms.ratio >= 2.0;
-  const isCrushedAi = terms.ratio <= 0.5;
+  const isDominantAi = terms.statusCode === "AI_DOMINANT_REFUSAL";
+  const isCrushedAi = terms.statusCode === "AI_DESPERATE_CAPITULATION";
   const isWhitePeace = terms.settlementType === "WHITE_PEACE";
 
   const handleDeclinePeace = () => {
@@ -101,15 +101,10 @@ export function PeaceNegotiationModal({
     }
   };
 
-  const resolvedHeadline = isDominantAi
-    ? t("badges.aiRefusal")
-    : isCrushedAi
-      ? t("badges.aiDesperation")
-      : isWhitePeace
-        ? t("badges.whitePeace")
-        : terms.isAiOffering
-          ? t("badges.aiOffering")
-          : t("badges.humanDemanded");
+  const resolvedHeadline = t(`statusTerms.${terms.statusCode}.headline`);
+  const resolvedDescription = t(`statusTerms.${terms.statusCode}.description`, {
+    name: targetNation.name,
+  });
 
   return (
     <UnifiedModalShell
@@ -170,7 +165,7 @@ export function PeaceNegotiationModal({
                 {resolvedHeadline}
               </span>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {terms.description}
+                {resolvedDescription}
               </p>
             </div>
           </div>
@@ -214,7 +209,7 @@ export function PeaceNegotiationModal({
           </div>
 
           <p className="text-xs text-foreground/90 leading-relaxed font-sans font-medium">
-            {terms.description}
+            {resolvedDescription}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-border/40 font-mono text-xs">

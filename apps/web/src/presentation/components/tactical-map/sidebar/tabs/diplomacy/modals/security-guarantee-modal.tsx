@@ -40,6 +40,7 @@ export function SecurityGuaranteeModal({
   onClose,
 }: SecurityGuaranteeModalProps) {
   const t = useTranslations("diplomacy.guaranteeModal");
+  const tErrors = useTranslations("diplomacy.validationErrors");
   const tCommon = useTranslations("common");
   const { formatCurrency, toDigits } = useLocaleFormatter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,6 +98,10 @@ export function SecurityGuaranteeModal({
       setIsSubmitting(false);
     }
   };
+
+  const validationReason = validation.reasonCode
+    ? tErrors(validation.reasonCode)
+    : t("invalid");
 
   return (
     <UnifiedModalShell
@@ -228,7 +233,7 @@ export function SecurityGuaranteeModal({
                 ? t("submitting")
                 : validation.isValid
                   ? t("signingButton", { name: targetName })
-                  : t("invalid")}
+                  : validationReason}
             </span>
           </button>
         </div>

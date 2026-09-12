@@ -115,8 +115,9 @@ export function useDirectAttackForm({
       targetNation,
       gameState,
       penalty.isWarStance,
+      locale,
     );
-  }, [humanNation, targetNation, gameState, penalty.isWarStance]);
+  }, [humanNation, targetNation, gameState, penalty.isWarStance, locale]);
 
   const logistics = useMemo(() => {
     return DirectAttackSelector.selectLogistics(
