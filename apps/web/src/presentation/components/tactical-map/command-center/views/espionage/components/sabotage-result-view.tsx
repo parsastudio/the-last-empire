@@ -1,13 +1,14 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { EspionageSabotageData } from "@/domain/espionage/espionage.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export function SabotageResultView({ data }: { data: EspionageSabotageData }) {
   const t = useTranslations("espionage.results.sabotage");
+  const { formatNumber } = useLocaleFormatter();
 
   return (
-    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2 font-mono text-xs">
+    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2 font-mono text-xs text-start font-sans">
       <span className="text-[10px] text-muted-foreground font-sans font-bold block">
         {t("title")}
       </span>
@@ -18,9 +19,7 @@ export function SabotageResultView({ data }: { data: EspionageSabotageData }) {
               {t("airDefense")}
             </span>
             <span className="font-bold text-military block mt-0.5">
-              -
-              {PersianNumberFormatter.toPersianDigits(data.airDefenseDestroyed)}{" "}
-              {t("unit")}
+              -{formatNumber(data.airDefenseDestroyed)} {t("unit")}
             </span>
           </div>
         )}
@@ -30,8 +29,7 @@ export function SabotageResultView({ data }: { data: EspionageSabotageData }) {
               {t("armor")}
             </span>
             <span className="font-bold text-military block mt-0.5">
-              -{PersianNumberFormatter.toPersianDigits(data.armorDestroyed)}{" "}
-              {t("unit")}
+              -{formatNumber(data.armorDestroyed)} {t("unit")}
             </span>
           </div>
         )}
@@ -41,8 +39,7 @@ export function SabotageResultView({ data }: { data: EspionageSabotageData }) {
               {t("airForce")}
             </span>
             <span className="font-bold text-military block mt-0.5">
-              -{PersianNumberFormatter.toPersianDigits(data.airForceDestroyed)}{" "}
-              {t("jet")}
+              -{formatNumber(data.airForceDestroyed)} {t("jet")}
             </span>
           </div>
         )}
@@ -52,11 +49,7 @@ export function SabotageResultView({ data }: { data: EspionageSabotageData }) {
               {t("droneMissile")}
             </span>
             <span className="font-bold text-military block mt-0.5">
-              -
-              {PersianNumberFormatter.toPersianDigits(
-                data.droneMissileDestroyed,
-              )}{" "}
-              {t("brigade")}
+              -{formatNumber(data.droneMissileDestroyed)} {t("brigade")}
             </span>
           </div>
         )}

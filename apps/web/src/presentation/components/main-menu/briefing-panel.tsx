@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Radio,
   AlertCircle,
@@ -7,7 +7,10 @@ import {
   Swords,
   BellRing,
 } from "lucide-react";
-import { INITIAL_BRIEFING_MESSAGES } from "@/presentation/components/main-menu/config/briefing-messages.config";
+import {
+  INITIAL_BRIEFING_MESSAGES,
+  FeedMessageItem,
+} from "@/presentation/components/main-menu/config/briefing-messages.config";
 
 export interface FeedMessage {
   id: string;
@@ -31,7 +34,7 @@ function BriefingFeedItem({ message }: { message: FeedMessage }) {
   };
 
   return (
-    <div className="flex items-start gap-2.5 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-background/60 border border-border/60 backdrop-blur-sm transition-all hover:border-primary/30">
+    <div className="flex items-start gap-2.5 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-background/60 border border-border/60 backdrop-blur-sm transition-all hover:border-primary/30 text-start font-sans">
       <div className="mt-0.5">{getIcon()}</div>
       <div className="flex-1 space-y-0.5 overflow-hidden text-start">
         <p className="text-[10px] sm:text-[11px] font-medium text-foreground leading-relaxed truncate">
@@ -47,9 +50,19 @@ function BriefingFeedItem({ message }: { message: FeedMessage }) {
 
 export function BriefingPanel() {
   const t = useTranslations("menu.briefing");
+  const locale = useLocale();
+
+  const messages: FeedMessage[] = INITIAL_BRIEFING_MESSAGES.map(
+    (item: FeedMessageItem) => ({
+      id: item.id,
+      type: item.type,
+      text: locale === "en" ? item.textEn : item.textFa,
+      time: locale === "en" ? item.timeEn : item.timeFa,
+    }),
+  );
 
   return (
-    <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-4 space-y-2 sm:space-y-3 w-full shadow-lg flex flex-col h-[150px] sm:h-[180px] md:h-[240px]">
+    <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-4 space-y-2 sm:space-y-3 w-full shadow-lg flex flex-col h-[150px] sm:h-[180px] md:h-[240px] text-start font-sans">
       <div className="flex items-center justify-between pb-2 border-b border-border/80 shrink-0">
         <div className="flex items-center gap-2">
           <Radio size={13} className="text-primary animate-pulse" />
@@ -61,7 +74,7 @@ export function BriefingPanel() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto space-y-1.5 pe-1 ps-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent text-start">
-        {INITIAL_BRIEFING_MESSAGES.map((msg) => (
+        {messages.map((msg) => (
           <BriefingFeedItem key={msg.id} message={msg} />
         ))}
       </div>

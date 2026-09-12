@@ -5,11 +5,11 @@ import {
   Nation,
   CountryRegistry,
   PendingDiplomaticProposal,
-  PersianNumberFormatter,
 } from "@geopolitics/domain";
 import {
   Coins,
   ArrowLeft,
+  ArrowRight,
   Sparkles,
   Eye,
   ShieldAlert,
@@ -19,6 +19,7 @@ import {
 import { ProposalActionButtons } from "./proposal-action-buttons";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { useReportCardMeta } from "./hooks/use-report-card-meta";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ReportCardProps {
   log: TurnLogEntry;
@@ -34,6 +35,7 @@ export function ReportCard({
   pendingProposals = [],
 }: ReportCardProps) {
   const t = useTranslations("reports.card");
+  const { isRtl, formatCurrency } = useLocaleFormatter();
   const openModal = useUiStore((state) => state.openModal);
 
   const {
@@ -100,7 +102,7 @@ export function ReportCard({
 
   return (
     <div
-      className={`p-4.5 rounded-3xl border ${style.border} ${style.cardBg} flex items-start gap-4 transition-all font-sans text-right dir-rtl backdrop-blur-md shadow-md hover:shadow-xl relative overflow-hidden`}
+      className={`p-4.5 rounded-3xl border ${style.border} ${style.cardBg} flex items-start gap-4 transition-all font-sans text-start backdrop-blur-md shadow-md hover:shadow-xl relative overflow-hidden`}
     >
       <div
         className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${style.iconBg}`}
@@ -159,9 +161,7 @@ export function ReportCard({
           {log.eventCode === "FOREIGN_AID_SENT" && foreignAidAmount > 0 && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-xl shrink-0">
               <Coins size={12} />
-              <span>
-                +{PersianNumberFormatter.formatCurrency(foreignAidAmount, true)}
-              </span>
+              <span>+{formatCurrency(foreignAidAmount, true)}</span>
             </span>
           )}
 
@@ -190,10 +190,17 @@ export function ReportCard({
 
                 {targetName && (
                   <>
-                    <ArrowLeft
-                      size={13}
-                      className="text-muted-foreground shrink-0"
-                    />
+                    {isRtl ? (
+                      <ArrowLeft
+                        size={13}
+                        className="text-muted-foreground shrink-0"
+                      />
+                    ) : (
+                      <ArrowRight
+                        size={13}
+                        className="text-muted-foreground shrink-0"
+                      />
+                    )}
                     <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
                       <span className="text-lg select-none">{targetFlag}</span>
                       <span className="font-black text-foreground">

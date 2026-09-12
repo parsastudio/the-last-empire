@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { DiplomacyListItem } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomacy-list-item";
 import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
@@ -11,6 +12,7 @@ import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/s
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry, NationTurnActivity } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
@@ -33,6 +35,8 @@ export function WideDiplomacyView({
   turnActivity,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
+  const t = useTranslations("diplomacy.view");
+  const { toDigits } = useLocaleFormatter();
   const [mobileTab, setMobileTab] = useState<"list" | "details">("details");
 
   const activeHumanId = CountryRegistry.resolveCanonicalId(
@@ -77,7 +81,7 @@ export function WideDiplomacyView({
   };
 
   return (
-    <div className="space-y-3 animate-in fade-in duration-200 dir-rtl text-right font-sans">
+    <div className="space-y-3 animate-in fade-in duration-200 text-start font-sans">
       <div className="flex md:hidden items-center gap-1.5 p-1 bg-secondary/60 border border-border/80 rounded-xl w-full">
         <button
           type="button"
@@ -89,7 +93,9 @@ export function WideDiplomacyView({
           }`}
         >
           <Shield size={13} />
-          <span>پرونده {diplomacy.selectedRelation.name}</span>
+          <span>
+            {t("dossierTab", { name: diplomacy.selectedRelation.name })}
+          </span>
         </button>
 
         <button
@@ -102,7 +108,11 @@ export function WideDiplomacyView({
           }`}
         >
           <Globe size={13} />
-          <span>فهرست کشورها ({diplomacy.filteredRelations.length})</span>
+          <span>
+            {t("rosterTab", {
+              count: toDigits(diplomacy.filteredRelations.length),
+            })}
+          </span>
         </button>
       </div>
 
@@ -115,21 +125,21 @@ export function WideDiplomacyView({
           <div className="relative">
             <Search
               size={14}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute start-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               type="text"
-              placeholder="جستجوی نام یا نماد کشور..."
+              placeholder={t("searchPlaceholder")}
               value={diplomacy.searchQuery}
               onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
-              className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 md:py-2 pr-9 pl-3 text-xs text-foreground text-right focus:outline-none focus:border-primary"
+              className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 md:py-2 ps-9 pe-3 text-xs text-foreground text-start focus:outline-none focus:border-primary"
             />
           </div>
 
-          <div className="space-y-1.5 md:space-y-2 max-h-[420px] md:max-h-[580px] overflow-y-auto pr-1 pb-2 touch-pan-y overscroll-contain scrollbar-thin scrollbar-thumb-border/60">
+          <div className="space-y-1.5 md:space-y-2 max-h-[420px] md:max-h-[580px] overflow-y-auto pe-1 pb-2 touch-pan-y overscroll-contain scrollbar-thin scrollbar-thumb-border/60">
             {diplomacy.filteredRelations.length === 0 ? (
               <div className="py-12 text-center text-xs text-muted-foreground italic">
-                هیچ کشوری با این عبارت یافت نشد.
+                {t("noResults")}
               </div>
             ) : (
               diplomacy.filteredRelations.map((rel) => (

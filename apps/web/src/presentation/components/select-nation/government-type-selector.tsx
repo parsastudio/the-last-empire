@@ -43,7 +43,7 @@ export function GovernmentTypeSelector({
   const ActiveIcon = GOVERNMENT_ICONS[currentType] ?? Landmark;
 
   return (
-    <div className="space-y-3 sm:space-y-4 dir-rtl text-right font-sans">
+    <div className="space-y-3 sm:space-y-4 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
           {t("selectorTitle")}
@@ -63,7 +63,7 @@ export function GovernmentTypeSelector({
               key={gov.type}
               type="button"
               onClick={() => onSelect(gov.type)}
-              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl text-right transition-all border flex items-center justify-between gap-2.5 cursor-pointer relative overflow-hidden group ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl text-start transition-all border flex items-center justify-between gap-2.5 cursor-pointer relative overflow-hidden group ${
                 isSelected
                   ? "bg-primary/15 border-primary shadow-md ring-1 ring-primary/40 scale-[1.005]"
                   : "bg-background/50 border-border/70 hover:bg-secondary/60 hover:border-border"

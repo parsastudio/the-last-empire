@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { LucideIcon, Coins, CheckCircle2, Lock, Zap } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface EspionageTierCardProps {
   tier: 1 | 2 | 3;
@@ -37,13 +37,14 @@ export function EspionageTierCard({
   onExecute,
 }: EspionageTierCardProps) {
   const t = useTranslations("espionage.tierCard");
+  const { formatCurrency, formatPercent, toDigits } = useLocaleFormatter();
 
   const isButtonDisabled =
     isExecutedThisTurn || !canAfford || isDisabledCondition || isExecuting;
 
   return (
     <div
-      className={`bg-background/40 border ${borderColorClass} p-4.5 rounded-3xl space-y-3.5 shadow-sm transition-all`}
+      className={`bg-background/40 border ${borderColorClass} p-4.5 rounded-3xl space-y-3.5 shadow-sm transition-all text-start font-sans`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -56,7 +57,7 @@ export function EspionageTierCard({
             <h4 className="text-xs font-black text-foreground">{title}</h4>
             <span className="text-[10px] text-muted-foreground font-sans block">
               {t("tierLevel", {
-                tier: PersianNumberFormatter.toPersianDigits(tier),
+                tier: toDigits(tier),
               })}
             </span>
           </div>
@@ -65,9 +66,7 @@ export function EspionageTierCard({
         <div className="flex items-center gap-1.5 font-mono text-[10px]">
           <span className="bg-secondary/80 border border-border/60 px-2 py-0.5 rounded-lg font-bold text-foreground">
             {t("successRate", {
-              rate: PersianNumberFormatter.toPersianDigits(
-                Math.round(successRate * 100),
-              ),
+              rate: formatPercent(Math.round(successRate * 100)),
             })}
           </span>
         </div>
@@ -83,7 +82,7 @@ export function EspionageTierCard({
         </span>
         <span className="font-extrabold text-gdp flex items-center gap-1">
           <Coins size={13} />
-          {PersianNumberFormatter.formatCurrency(cost)}
+          {formatCurrency(cost)}
         </span>
       </div>
 

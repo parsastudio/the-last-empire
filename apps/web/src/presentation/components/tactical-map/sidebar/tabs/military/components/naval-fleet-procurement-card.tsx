@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Ship, Anchor, Coins, ShieldCheck, Zap, Lock } from "lucide-react";
 import {
-  PersianNumberFormatter,
   ActionFactory,
   NAVAL_FLEET_CONFIG,
   ProcurementBatchCalculator,
@@ -12,6 +11,7 @@ import {
 import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface NavalFleetProcurementCardProps {
   nationId: string;
@@ -27,6 +27,7 @@ export function NavalFleetProcurementCard({
   hasSeaAccess,
 }: NavalFleetProcurementCardProps) {
   const t = useTranslations("military");
+  const { formatCurrency, formatPercent, toDigits } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const { triggerFeedback, getFeedbacksFor } = useFloatingFeedback<string>();
 
@@ -49,7 +50,7 @@ export function NavalFleetProcurementCard({
   const turnRevenue = Math.floor(
     navalFleetCount * fleetCost * NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
   );
-  const revenuePercentText = PersianNumberFormatter.toPersianDigits(
+  const revenuePercentText = formatPercent(
     Math.round(NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE * 100),
   );
 
@@ -61,11 +62,9 @@ export function NavalFleetProcurementCard({
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
 
-    triggerFeedback(
-      "fleet",
-      `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)}`,
-      { playSound: false },
-    );
+    triggerFeedback("fleet", `+${toDigits(batchInfo.batchQuantity)}`, {
+      playSound: false,
+    });
 
     const action = ActionFactory.buyNavalFleet(
       nationId,
@@ -77,7 +76,7 @@ export function NavalFleetProcurementCard({
   const activeFeedbacks = getFeedbacksFor("fleet");
 
   return (
-    <div className="relative p-4 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-card to-blue-950/25 space-y-3 font-sans dir-rtl text-right shadow-lg backdrop-blur-md">
+    <div className="relative p-4 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-card to-blue-950/25 space-y-3 font-sans text-start shadow-lg backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
@@ -90,14 +89,13 @@ export function NavalFleetProcurementCard({
               </h4>
               <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-lg">
                 {t("navalFleetInStock", {
-                  count:
-                    PersianNumberFormatter.toPersianDigits(navalFleetCount),
+                  count: toDigits(navalFleetCount),
                 })}
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono block">
               {t("navalFleetPrice", {
-                price: PersianNumberFormatter.formatCurrency(fleetCost),
+                price: formatCurrency(fleetCost),
               })}
             </span>
           </div>
@@ -129,9 +127,7 @@ export function NavalFleetProcurementCard({
               <Coins size={12} />
               <span>
                 {t("navalBuyInstant", {
-                  cost: PersianNumberFormatter.formatCurrency(
-                    batchInfo.batchCost,
-                  ),
+                  cost: formatCurrency(batchInfo.batchCost),
                 })}
               </span>
             </button>
@@ -146,8 +142,7 @@ export function NavalFleetProcurementCard({
             {t("navalRevenue", { pct: revenuePercentText })}
           </span>
           <span className="font-extrabold text-gdp text-xs block">
-            +{PersianNumberFormatter.formatCurrency(turnRevenue, true)}{" "}
-            {t("perTurn")}
+            +{formatCurrency(turnRevenue, true)} {t("perTurn")}
           </span>
         </div>
 
@@ -168,9 +163,7 @@ export function NavalFleetProcurementCard({
           </span>
           <span className="font-extrabold text-foreground text-xs block">
             {t("navalTotalUnits", {
-              count: PersianNumberFormatter.toPersianDigits(
-                totalTransportCapacity,
-              ),
+              count: toDigits(totalTransportCapacity),
             })}
           </span>
         </div>

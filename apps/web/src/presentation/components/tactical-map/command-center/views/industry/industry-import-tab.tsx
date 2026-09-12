@@ -84,7 +84,7 @@ export function IndustryImportTab({
   }
 
   return (
-    <div className="space-y-4 dir-rtl text-right font-sans animate-in fade-in duration-200">
+    <div className="space-y-4 text-start font-sans animate-in fade-in duration-200">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-secondary/30 border border-border/60 rounded-2xl">
         <div className="flex items-center gap-2">
           <ShoppingCart size={16} className="text-primary" />
@@ -99,14 +99,14 @@ export function IndustryImportTab({
         <div className="relative min-w-[220px]">
           <Search
             size={13}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
             placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 ps-8 pe-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-start"
           />
         </div>
       </div>

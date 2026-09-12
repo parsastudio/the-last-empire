@@ -8,7 +8,8 @@ import {
   ShieldCheck,
   Skull,
 } from "lucide-react";
-import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
+import { DiplomaticStance } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
@@ -24,6 +25,7 @@ export function TreatyStatusBanner({
   dividendAmount = 0,
 }: TreatyStatusBannerProps) {
   const t = useTranslations("diplomacy");
+  const { formatCurrency } = useLocaleFormatter();
 
   if (isEmergencyProtectorate) {
     return (
@@ -69,9 +71,7 @@ export function TreatyStatusBanner({
 
   if (stance === "STRATEGIC_PARTNERSHIP") {
     const dividendText =
-      dividendAmount > 0
-        ? `: +${PersianNumberFormatter.formatCurrency(dividendAmount, true)}`
-        : "";
+      dividendAmount > 0 ? `: +${formatCurrency(dividendAmount, true)}` : "";
 
     return (
       <div className="w-full p-3 rounded-xl bg-gdp/15 border border-gdp/40 text-gdp flex items-center justify-between text-xs font-bold font-sans">

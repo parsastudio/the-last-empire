@@ -1,12 +1,13 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { EspionageReconData } from "@/domain/espionage/espionage.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { ShieldCheck, Skull, Swords } from "lucide-react";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export function ReconResultView({ data }: { data: EspionageReconData }) {
   const t = useTranslations("espionage.results.recon");
+  const { formatCurrency, formatNumber, formatLevel } = useLocaleFormatter();
 
   const guarantorFlag =
     data.guarantorFlagCode || data.guarantorNationId
@@ -18,12 +19,12 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
   );
 
   return (
-    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs">
+    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs text-start font-sans">
       <div className="flex items-center justify-between text-[10px] text-muted-foreground font-sans font-bold border-b border-border/40 pb-1.5">
         <span>{t("title")}</span>
         <span className="text-gdp">
           {t("treasury", {
-            treasury: PersianNumberFormatter.formatCurrency(data.treasury),
+            treasury: formatCurrency(data.treasury),
           })}
         </span>
       </div>
@@ -76,7 +77,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             {t("infantry")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.formatNumberWithCommas(data.infantry)}
+            {formatNumber(data.infantry)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -84,7 +85,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             {t("armor")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.formatNumberWithCommas(data.armor)}
+            {formatNumber(data.armor)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -92,7 +93,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             {t("airDefense")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.formatNumberWithCommas(data.airDefense)}
+            {formatNumber(data.airDefense)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -100,7 +101,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             {t("airForce")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.formatNumberWithCommas(data.airForce)}
+            {formatNumber(data.airForce)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -108,7 +109,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             {t("droneMissile")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.formatNumberWithCommas(data.droneMissile)}
+            {formatNumber(data.droneMissile)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -117,7 +118,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
           </span>
           <span className="font-bold text-amber-500 block mt-0.5">
             {t("techBadge", {
-              level: PersianNumberFormatter.toPersianDigits(data.techLevel),
+              level: formatLevel(data.techLevel),
             })}
           </span>
         </div>

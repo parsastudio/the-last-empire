@@ -4,26 +4,32 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { WarLogFormatter } from "@/domain/game/formatters/war-log-formatter";
 import { DiplomacyLogFormatter } from "@/domain/game/formatters/diplomacy-log-formatter";
 import { NationalEventsLogFormatter } from "@/domain/game/formatters/national-events-log-formatter";
+import { AppLocale } from "@/domain/shared/locale-number-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
     id: string | undefined,
     nationsMap?: Record<string, Nation>,
+    locale: AppLocale = "fa",
   ): string {
-    if (!id) return "کشور نامشخص";
+    if (!id) return locale === "en" ? "Unknown Realm" : "کشور نامشخص";
     const canonical = CountryRegistry.resolveCanonicalId(id);
     const nation = nationsMap ? nationsMap[canonical] || nationsMap[id] : null;
-    if (nation) return nation.name;
     const profile = CountryRegistry.getCountry(canonical);
-    return profile ? profile.nameFa : canonical;
+
+    if (locale === "en") {
+      return profile?.nameEn || nation?.name || canonical;
+    }
+    return nation?.name || profile?.nameFa || canonical;
   }
 
   public static formatMessage(
     log: TurnLogEntry,
     nationsMap?: Record<string, Nation>,
+    locale: AppLocale = "fa",
   ): string {
-    const sourceName = this.resolveName(log.sourceNationId, nationsMap);
-    const targetName = this.resolveName(log.targetNationId, nationsMap);
+    const sourceName = this.resolveName(log.sourceNationId, nationsMap, locale);
+    const targetName = this.resolveName(log.targetNationId, nationsMap, locale);
     const params = log.params || {};
 
     const warFormatted = WarLogFormatter.format(
@@ -31,6 +37,7 @@ export class TurnLogFormatter {
       sourceName,
       targetName,
       params,
+      locale,
     );
     if (warFormatted) return warFormatted;
 
@@ -39,6 +46,7 @@ export class TurnLogFormatter {
       sourceName,
       targetName,
       params,
+      locale,
     );
     if (dipFormatted) return dipFormatted;
 
@@ -48,6 +56,7 @@ export class TurnLogFormatter {
       targetName,
       params,
       log.message,
+      locale,
     );
   }
 }

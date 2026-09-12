@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { EspionageTechTheftData } from "@/domain/espionage/espionage.schema";
-import { PersianNumberFormatter } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { Award, Cpu } from "lucide-react";
 
 export function TechTheftResultView({
@@ -10,9 +10,10 @@ export function TechTheftResultView({
   data: EspionageTechTheftData;
 }) {
   const t = useTranslations("espionage.results.techTheft");
+  const { formatLevel } = useLocaleFormatter();
 
   return (
-    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2 font-mono text-xs">
+    <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2 font-mono text-xs text-start font-sans">
       <span className="text-[10px] text-muted-foreground font-sans font-bold block">
         {t("title")}
       </span>
@@ -27,9 +28,7 @@ export function TechTheftResultView({
             </div>
             <span className="font-bold text-amber-400 text-xs">
               {t("levelGain", {
-                points: PersianNumberFormatter.toPersianDigits(
-                  data.militaryTechGained.toFixed(1),
-                ),
+                points: formatLevel(data.militaryTechGained),
               })}
             </span>
           </div>
@@ -45,9 +44,7 @@ export function TechTheftResultView({
             </div>
             <span className="font-bold text-emerald-400 text-xs">
               {t("levelGain", {
-                points: PersianNumberFormatter.toPersianDigits(
-                  data.industrialTechGained.toFixed(1),
-                ),
+                points: formatLevel(data.industrialTechGained),
               })}
             </span>
           </div>

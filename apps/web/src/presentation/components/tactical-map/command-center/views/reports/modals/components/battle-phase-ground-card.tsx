@@ -1,9 +1,9 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { Swords } from "lucide-react";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface BattlePhaseGroundCardProps {
   reportData: BattleFullReportData;
@@ -21,6 +21,7 @@ export function BattlePhaseGroundCard({
   defenderFlag,
 }: BattlePhaseGroundCardProps) {
   const t = useTranslations("reports.phase3");
+  const { formatNumber, toDigits } = useLocaleFormatter();
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
     ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
@@ -29,7 +30,7 @@ export function BattlePhaseGroundCard({
   const winnerName = isAttackerWin ? attackerName : defenderName;
 
   return (
-    <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+    <div className="space-y-4 font-sans text-start animate-fade-smooth">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">⚔️</span>
@@ -65,9 +66,7 @@ export function BattlePhaseGroundCard({
                 {t("attArmor")}
               </span>
               <span className="font-black text-foreground text-base">
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.attArmor,
-                )}{" "}
+                {formatNumber(reportData.phase3Ground.attArmor)}{" "}
                 {t("armorUnit")}
               </span>
             </div>
@@ -76,10 +75,7 @@ export function BattlePhaseGroundCard({
                 {t("attArmorLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
-                -
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.attArmorLost,
-                )}{" "}
+                -{formatNumber(reportData.phase3Ground.attArmorLost)}{" "}
                 {t("armorLostUnit")}
               </span>
             </div>
@@ -88,9 +84,7 @@ export function BattlePhaseGroundCard({
                 {t("attInfantry")}
               </span>
               <span className="font-black text-foreground text-base">
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.attInfantry,
-                )}{" "}
+                {formatNumber(reportData.phase3Ground.attInfantry)}{" "}
                 {t("infantryUnit")}
               </span>
             </div>
@@ -99,10 +93,7 @@ export function BattlePhaseGroundCard({
                 {t("attInfantryLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
-                -
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.attInfantryLost,
-                )}{" "}
+                -{formatNumber(reportData.phase3Ground.attInfantryLost)}{" "}
                 {t("infantryLostUnit")}
               </span>
             </div>
@@ -120,12 +111,8 @@ export function BattlePhaseGroundCard({
                 <span>{auxFlag}</span>
                 <span>
                   {t("auxGround", {
-                    armor: PersianNumberFormatter.toPersianDigits(
-                      aux.deployedArmor,
-                    ),
-                    infantry: PersianNumberFormatter.toPersianDigits(
-                      aux.deployedInfantry,
-                    ),
+                    armor: toDigits(aux.deployedArmor),
+                    infantry: toDigits(aux.deployedInfantry),
                   })}
                 </span>
               </span>
@@ -138,9 +125,7 @@ export function BattlePhaseGroundCard({
                 {t("defArmor")}
               </span>
               <span className="font-black text-foreground text-base">
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.defArmor,
-                )}{" "}
+                {formatNumber(reportData.phase3Ground.defArmor)}{" "}
                 {t("armorUnit")}
               </span>
             </div>
@@ -149,10 +134,7 @@ export function BattlePhaseGroundCard({
                 {t("defArmorLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
-                -
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.defArmorLost,
-                )}{" "}
+                -{formatNumber(reportData.phase3Ground.defArmorLost)}{" "}
                 {t("armorLostUnit")}
               </span>
             </div>
@@ -161,9 +143,7 @@ export function BattlePhaseGroundCard({
                 {t("defInfantry")}
               </span>
               <span className="font-black text-foreground text-base">
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.defInfantry,
-                )}{" "}
+                {formatNumber(reportData.phase3Ground.defInfantry)}{" "}
                 {t("infantryUnit")}
               </span>
             </div>
@@ -172,10 +152,7 @@ export function BattlePhaseGroundCard({
                 {t("defInfantryLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
-                -
-                {PersianNumberFormatter.toPersianDigits(
-                  reportData.phase3Ground.defInfantryLost,
-                )}{" "}
+                -{formatNumber(reportData.phase3Ground.defInfantryLost)}{" "}
                 {t("infantryLostUnit")}
               </span>
             </div>

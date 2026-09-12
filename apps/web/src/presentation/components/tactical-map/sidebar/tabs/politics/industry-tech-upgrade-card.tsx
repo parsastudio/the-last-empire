@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { Factory, Zap, Loader2, Sparkles } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface IndustryTechUpgradeCardProps {
   nationId: string;
@@ -22,6 +22,7 @@ export function IndustryTechUpgradeCard({
   governmentType,
 }: IndustryTechUpgradeCardProps) {
   const t = useTranslations("industry.techUpgrade");
+  const { formatCurrency, formatPercent, formatLevel } = useLocaleFormatter();
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
 
@@ -48,7 +49,7 @@ export function IndustryTechUpgradeCard({
   };
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right font-sans">
+    <div className="space-y-2.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Factory size={14} className="text-gdp" />
@@ -58,7 +59,7 @@ export function IndustryTechUpgradeCard({
         </div>
         <span className="text-[10px] font-mono font-bold bg-gdp/10 text-gdp border border-gdp/30 px-2.5 py-0.5 rounded-md flex items-center gap-1">
           <Sparkles size={10} />
-          {PersianNumberFormatter.toPersianDigits(industrialLevel.toFixed(1))}
+          {formatLevel(industrialLevel)}
         </span>
       </div>
 
@@ -72,7 +73,7 @@ export function IndustryTechUpgradeCard({
               canAffordTech ? "text-gdp" : "text-military"
             }`}
           >
-            {PersianNumberFormatter.formatCurrency(stepResearchCost, true)}
+            {formatCurrency(stepResearchCost, true)}
           </span>
         </div>
 
@@ -80,7 +81,7 @@ export function IndustryTechUpgradeCard({
           <div className="flex items-center justify-between text-muted-foreground font-sans">
             <span>{t("progressToNext")}</span>
             <span className="font-bold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(subLevelIndex * 10)}٪
+              {formatPercent(subLevelIndex * 10)}
             </span>
           </div>
           <div className="grid grid-cols-10 gap-1">
@@ -112,9 +113,7 @@ export function IndustryTechUpgradeCard({
               ? t("submitting")
               : canAffordTech
                 ? t("upgradeBtn", {
-                    level: PersianNumberFormatter.toPersianDigits(
-                      nextStepLevel.toFixed(1),
-                    ),
+                    level: formatLevel(nextStepLevel),
                   })
                 : t("insufficientFunds")}
           </span>

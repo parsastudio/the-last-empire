@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { ActionSoundResolverUtility } from "@/presentation/utils/action-sound-resolver.utility";
 
 export function useGameActions(onActionExecuted?: () => void) {
+  const tErrors = useTranslations("common.errors");
+  const tCommon = useTranslations("common");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { showToast } = useToast();
   const dispatchStoreAction = useGameStore((state) => state.dispatchAction);
@@ -30,23 +33,28 @@ export function useGameActions(onActionExecuted?: () => void) {
         }
 
         showToast(
-          "خطا در اجرای دستور",
-          result.message || "امکان اجرای این دستور وجود ندارد.",
+          tErrors("actionFailedTitle"),
+          result.message || tErrors("actionExecutionFailed"),
           "error",
         );
         return { success: false };
       } catch (err) {
         const errorMsg =
-          err instanceof Error
-            ? err.message
-            : "امکان اجرای این دستور وجود ندارد.";
-        showToast("خطا در سیستم", errorMsg, "error");
+          err instanceof Error ? err.message : tErrors("actionExecutionFailed");
+        showToast(tCommon("systemError"), errorMsg, "error");
         return { success: false };
       } finally {
         setIsSubmitting(false);
       }
     },
-    [dispatchStoreAction, showToast, onActionExecuted, isSubmitting],
+    [
+      dispatchStoreAction,
+      showToast,
+      onActionExecuted,
+      isSubmitting,
+      tErrors,
+      tCommon,
+    ],
   );
 
   return {

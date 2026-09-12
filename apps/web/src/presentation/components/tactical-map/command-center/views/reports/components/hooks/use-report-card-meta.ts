@@ -10,6 +10,7 @@ import { ExportSalesBuyerItem } from "@/presentation/stores/use-ui-store";
 import { ReportCardStylerUtility } from "../utils/report-card-styler.utility";
 import { usePendingProposalMatcher } from "./use-pending-proposal-matcher";
 import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UseReportCardMetaProps {
   log: TurnLogEntry;
@@ -24,19 +25,25 @@ export function useReportCardMeta({
   humanNationId,
   pendingProposals = [],
 }: UseReportCardMetaProps) {
+  const { locale } = useLocaleFormatter();
+
   const source = useMemo(
-    () => NationResolverUtility.resolve(log.sourceNationId, nationsMap),
-    [log.sourceNationId, nationsMap],
+    () => NationResolverUtility.resolve(log.sourceNationId, nationsMap, locale),
+    [log.sourceNationId, nationsMap, locale],
   );
 
   const target = useMemo(() => {
     if (!log.targetNationId) return null;
-    return NationResolverUtility.resolve(log.targetNationId, nationsMap);
-  }, [log.targetNationId, nationsMap]);
+    return NationResolverUtility.resolve(
+      log.targetNationId,
+      nationsMap,
+      locale,
+    );
+  }, [log.targetNationId, nationsMap, locale]);
 
   const dynamicMessage = useMemo(() => {
-    return TurnLogFormatter.formatMessage(log, nationsMap);
-  }, [log, nationsMap]);
+    return TurnLogFormatter.formatMessage(log, nationsMap, locale);
+  }, [log, nationsMap, locale]);
 
   const battleReportData = useMemo<BattleFullReportData | null>(() => {
     if (

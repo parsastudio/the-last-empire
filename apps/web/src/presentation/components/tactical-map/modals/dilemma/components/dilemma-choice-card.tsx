@@ -12,7 +12,8 @@ import {
   Radio,
   CheckCircle2,
 } from "lucide-react";
-import { DilemmaChoice, PersianNumberFormatter } from "@geopolitics/domain";
+import { DilemmaChoice } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DilemmaChoiceCardProps {
   eventId: string;
@@ -32,6 +33,8 @@ export function DilemmaChoiceCard({
   onSelect,
 }: DilemmaChoiceCardProps) {
   const t = useTranslations("dilemmas");
+  const { formatCurrency, formatPercent, formatNumber, toDigits } =
+    useLocaleFormatter();
   const effect = choice.effect;
 
   const choiceLabel = t(`events.${eventId}.choices.${choice.id}.label`);
@@ -51,7 +54,7 @@ export function DilemmaChoiceCard({
     <button
       type="button"
       onClick={() => onSelect(choice.id)}
-      className={`w-full p-4 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-3 font-sans dir-rtl text-right cursor-pointer group backdrop-blur-xl ${
+      className={`w-full p-4 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-3 font-sans text-start cursor-pointer group backdrop-blur-xl ${
         isSelected
           ? "bg-primary/20 border-primary shadow-xl shadow-primary/20 ring-2 ring-primary/40 scale-[1.01]"
           : "bg-card/90 border-border/80 hover:border-primary/50 hover:bg-secondary/40 shadow-sm hover:shadow-md"
@@ -61,7 +64,7 @@ export function DilemmaChoiceCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="w-6 h-6 rounded-xl bg-secondary/80 border border-border/70 flex items-center justify-center text-xs font-mono font-black text-muted-foreground group-hover:text-primary transition-colors shrink-0">
-              {PersianNumberFormatter.toPersianDigits(choiceIndex + 1)}
+              {toDigits(choiceIndex + 1)}
             </span>
             <h4 className="text-sm font-black text-foreground group-hover:text-primary transition-colors">
               {choiceLabel}
@@ -79,12 +82,12 @@ export function DilemmaChoiceCard({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed font-sans pr-8">
+        <p className="text-xs text-muted-foreground leading-relaxed font-sans ps-8">
           {choiceDescription}
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 pr-8 font-mono text-[10px] w-full pt-1 border-t border-border/40">
+      <div className="flex flex-wrap gap-1.5 ps-8 font-mono text-[10px] w-full pt-1 border-t border-border/40">
         {moneyVal !== 0 && (
           <span
             className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
@@ -96,7 +99,7 @@ export function DilemmaChoiceCard({
             <Coins size={11} />
             <span>
               {moneyVal > 0 ? "+" : ""}
-              {PersianNumberFormatter.formatCurrency(moneyVal, true)}
+              {formatCurrency(moneyVal, true)}
             </span>
           </span>
         )}
@@ -112,9 +115,8 @@ export function DilemmaChoiceCard({
             <Landmark size={11} />
             <span>
               {effect.stabilityDelta > 0 ? "+" : ""}
-              {PersianNumberFormatter.toPersianDigits(
-                effect.stabilityDelta,
-              )}٪ {t("modal.units.stability")}
+              {formatPercent(effect.stabilityDelta)}{" "}
+              {t("modal.units.stability")}
             </span>
           </span>
         )}
@@ -131,9 +133,7 @@ export function DilemmaChoiceCard({
               <Globe size={11} />
               <span>
                 {effect.globalReputationDelta > 0 ? "+" : ""}
-                {PersianNumberFormatter.toPersianDigits(
-                  effect.globalReputationDelta,
-                )}{" "}
+                {toDigits(effect.globalReputationDelta)}{" "}
                 {t("modal.units.prestige")}
               </span>
             </span>
@@ -144,11 +144,7 @@ export function DilemmaChoiceCard({
             <span className="px-2 py-0.5 rounded-lg border bg-amber-500/15 text-amber-300 border-amber-500/30 flex items-center gap-1 font-bold">
               <Award size={11} />
               <span>
-                +
-                {PersianNumberFormatter.toPersianDigits(
-                  effect.militaryTechDelta,
-                )}{" "}
-                {t("modal.units.milTech")}
+                +{toDigits(effect.militaryTechDelta)} {t("modal.units.milTech")}
               </span>
             </span>
           )}
@@ -158,10 +154,7 @@ export function DilemmaChoiceCard({
             <span className="px-2 py-0.5 rounded-lg border bg-emerald-500/15 text-emerald-300 border-emerald-500/30 flex items-center gap-1 font-bold">
               <Cpu size={11} />
               <span>
-                +
-                {PersianNumberFormatter.toPersianDigits(
-                  effect.industrialLevelDelta,
-                )}{" "}
+                +{toDigits(effect.industrialLevelDelta)}{" "}
                 {t("modal.units.indTech")}
               </span>
             </span>
@@ -178,10 +171,7 @@ export function DilemmaChoiceCard({
             <Shield size={11} />
             <span>
               {effect.infantryDelta > 0 ? "+" : ""}
-              {PersianNumberFormatter.formatNumberWithCommas(
-                effect.infantryDelta,
-              )}{" "}
-              {t("modal.units.infantry")}
+              {formatNumber(effect.infantryDelta)} {t("modal.units.infantry")}
             </span>
           </span>
         )}
@@ -197,10 +187,7 @@ export function DilemmaChoiceCard({
             <ShieldAlert size={11} />
             <span>
               {effect.armorDelta > 0 ? "+" : ""}
-              {PersianNumberFormatter.formatNumberWithCommas(
-                effect.armorDelta,
-              )}{" "}
-              {t("modal.units.armor")}
+              {formatNumber(effect.armorDelta)} {t("modal.units.armor")}
             </span>
           </span>
         )}
@@ -217,9 +204,7 @@ export function DilemmaChoiceCard({
               <Crosshair size={11} />
               <span>
                 {effect.airDefenseDelta > 0 ? "+" : ""}
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  effect.airDefenseDelta,
-                )}{" "}
+                {formatNumber(effect.airDefenseDelta)}{" "}
                 {t("modal.units.airDefense")}
               </span>
             </span>
@@ -237,9 +222,7 @@ export function DilemmaChoiceCard({
               <Radio size={11} />
               <span>
                 {effect.droneMissileDelta > 0 ? "+" : ""}
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  effect.droneMissileDelta,
-                )}{" "}
+                {formatNumber(effect.droneMissileDelta)}{" "}
                 {t("modal.units.droneMissile")}
               </span>
             </span>

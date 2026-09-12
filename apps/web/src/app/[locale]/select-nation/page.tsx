@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
@@ -10,14 +11,16 @@ import { useSelectNationForm } from "@/presentation/components/select-nation/hoo
 
 export default function SelectNationPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("selectNation");
   const form = useSelectNationForm();
 
   if (!form.selectedNation) {
     return (
-      <div className="w-screen h-screen bg-background text-foreground flex flex-col items-center justify-center gap-4 dir-rtl">
+      <div className="w-screen h-screen bg-background text-foreground flex flex-col items-center justify-center gap-4">
         <div className="w-10 h-10 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
         <p className="text-xs font-bold font-sans text-muted-foreground">
-          در حال بارگذاری اطلاعات کشورها...
+          {t("loadingNations")}
         </p>
       </div>
     );
@@ -25,8 +28,8 @@ export default function SelectNationPage() {
 
   return (
     <div
-      className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none dir-rtl"
-      dir="rtl"
+      className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none"
+      dir={locale === "fa" ? "rtl" : "ltr"}
     >
       <SelectNationHeader onBack={() => router.push("/")} />
 

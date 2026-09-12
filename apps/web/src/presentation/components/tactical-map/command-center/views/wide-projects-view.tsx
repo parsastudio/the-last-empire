@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Nation, NationTurnActivity } from "@geopolitics/domain";
 import { useNationalProjects } from "./projects/hooks/use-national-projects";
 import { ProjectQuotaHeader } from "./projects/components/project-quota-header";
@@ -15,6 +16,7 @@ export function WideProjectsView({
   nation,
   turnActivity,
 }: WideProjectsViewProps) {
+  const t = useTranslations("projects");
   const {
     selectedTierFilter,
     setSelectedTierFilter,
@@ -32,7 +34,7 @@ export function WideProjectsView({
   } = useNationalProjects(nation, turnActivity);
 
   return (
-    <div className="space-y-5 dir-rtl text-right font-sans animate-fade-smooth pb-6">
+    <div className="space-y-5 text-start font-sans animate-fade-smooth pb-6">
       <ProjectQuotaHeader
         treasury={nation.treasury}
         boostedCountThisTurn={boostedThisTurn.length}
@@ -46,16 +48,16 @@ export function WideProjectsView({
           <div className="flex items-center gap-2">
             <Layers size={16} className="text-primary" />
             <h3 className="text-sm font-black text-foreground">
-              فهرست برنامه‌ها و پژوهش‌های راهبردی کشور
+              {t("headerTitle")}
             </h3>
           </div>
 
           <div className="flex items-center gap-1.5 p-1 bg-secondary/60 border border-border/80 rounded-2xl w-fit text-xs">
             {[
-              { id: "ALL" as const, label: "همه طرح‌ها" },
-              { id: "SHORT_TERM" as const, label: "کوتاه‌مدت" },
-              { id: "MID_TERM" as const, label: "میان‌مدت" },
-              { id: "LONG_TERM" as const, label: "ابرپروژه‌ها" },
+              { id: "ALL" as const, label: t("allTiers") },
+              { id: "SHORT_TERM" as const, label: t("shortTerm") },
+              { id: "MID_TERM" as const, label: t("midTerm") },
+              { id: "LONG_TERM" as const, label: t("longTerm") },
             ].map((tab) => (
               <button
                 key={tab.id}

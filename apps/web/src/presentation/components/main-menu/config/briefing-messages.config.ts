@@ -1,124 +1,184 @@
-import { FeedMessage } from "@/presentation/components/main-menu/briefing-panel";
+export interface FeedMessageItem {
+  id: string;
+  type: "warning" | "danger" | "info" | "combat";
+  textFa: string;
+  textEn: string;
+  timeFa: string;
+  timeEn: string;
+}
 
-export const INITIAL_BRIEFING_MESSAGES: FeedMessage[] = [
+export const INITIAL_BRIEFING_MESSAGES: FeedMessageItem[] = [
   {
     id: "1",
     type: "info",
-    text: "محموله تسلیحاتی جدید وارد پادگان‌های خط مقدم شد.",
-    time: "لحظاتی پیش",
+    textFa: "محموله تسلیحاتی جدید وارد پادگان‌های خط مقدم شد.",
+    textEn: "Fresh arms shipment delivered to frontline garrison depots.",
+    timeFa: "لحظاتی پیش",
+    timeEn: "Just now",
   },
   {
     id: "2",
     type: "danger",
-    text: "گزارش بحران: تورم بالا و آغاز موج اعتصابات کارگری در پایتخت.",
-    time: "۲ دقیقه پیش",
+    textFa: "گزارش بحران: تورم بالا و آغاز موج اعتصابات کارگری در پایتخت.",
+    textEn:
+      "Crisis report: High inflation sparks labor strikes across capital.",
+    timeFa: "۲ دقیقه پیش",
+    timeEn: "2 min ago",
   },
   {
     id: "3",
     type: "warning",
-    text: "بحران زیرساخت: اشغال حداکثری ظرفیت صنعتی استان مرکزی.",
-    time: "۵ دقیقه پیش",
+    textFa: "بحران زیرساخت: اشغال حداکثری ظرفیت صنعتی استان مرکزی.",
+    textEn:
+      "Infrastructure alert: Industrial slot saturation in central provinces.",
+    timeFa: "۵ دقیقه پیش",
+    timeEn: "5 min ago",
   },
   {
     id: "4",
     type: "info",
-    text: "رصد اطلاعاتی: تردد کاروان‌های تسلیحاتی در نزدیکی مرز مشترک.",
-    time: "۸ دقیقه پیش",
+    textFa: "رصد اطلاعاتی: تردد کاروان‌های تسلیحاتی در نزدیکی مرز مشترک.",
+    textEn: "Intel surveillance: Military convoys tracked near shared border.",
+    timeFa: "۸ دقیقه پیش",
+    timeEn: "8 min ago",
   },
   {
     id: "5",
     type: "info",
-    text: "عملیات هوایی: آغاز گشت‌زنی مداوم جنگنده‌ها بر فراز نوار مرزی.",
-    time: "۱۲ دقیقه پیش",
+    textFa: "عملیات هوایی: آغاز گشت‌زنی مداوم جنگنده‌ها بر فراز نوار مرزی.",
+    textEn:
+      "Air wing patrol: Persistent fighter sorties launched over perimeter.",
+    timeFa: "۱۲ دقیقه پیش",
+    timeEn: "12 min ago",
   },
   {
     id: "6",
     type: "warning",
-    text: "هشدار مالی: کسری بودجه دولت، سقف وام خارجی را تهدید می‌کند.",
-    time: "۱۵ دقیقه پیش",
+    textFa: "هشدار مالی: کسری بودجه دولت، سقف وام خارجی را تهدید می‌کند.",
+    textEn:
+      "Fiscal warning: National budget deficit nearing external credit limit.",
+    timeFa: "۱۵ دقیقه پیش",
+    timeEn: "15 min ago",
   },
   {
     id: "7",
     type: "info",
-    text: "پیشنهاد رسمی دولت همسایه جهت امضای پیمان عدم تخاصم دریافت شد.",
-    time: "۲۰ دقیقه پیش",
+    textFa: "پیشنهاد رسمی دولت همسایه جهت امضای پیمان عدم تخاصم دریافت شد.",
+    textEn: "Official proposal received from neighbor for Non-Aggression Pact.",
+    timeFa: "۲۰ دقیقه پیش",
+    timeEn: "20 min ago",
   },
   {
     id: "8",
     type: "danger",
-    text: "کد قرمز امنیت: شورش خیابانی و افت شدید ثبات حاکمیت در کشور.",
-    time: "۲۵ دقیقه پیش",
+    textFa: "کد قرمز امنیت: شورش خیابانی و افت شدید ثبات حاکمیت در کشور.",
+    textEn:
+      "Security Code Red: Civil unrest triggers sharp drop in regime stability.",
+    timeFa: "۲۵ دقیقه پیش",
+    timeEn: "25 min ago",
   },
   {
     id: "9",
     type: "warning",
-    text: "فشار بودجه: هزینه‌های سرسام‌آور حقوق و نگهداری یگان‌های ارتش.",
-    time: "۳۰ دقیقه پیش",
+    textFa: "فشار بودجه: هزینه‌های سرسام‌آور حقوق و نگهداری یگان‌های ارتش.",
+    textEn:
+      "Budget pressure: Armed forces payroll maintenance burdens treasury.",
+    timeFa: "۳۰ دقیقه پیش",
+    timeEn: "30 min ago",
   },
   {
     id: "10",
     type: "info",
-    text: "ستاد کل: ارزیابی سطح آمادگی رزمی نیروها در تمام پایگاه‌ها ثبت شد.",
-    time: "۳۵ دقیقه پیش",
+    textFa: "ستاد کل: ارزیابی سطح آمادگی رزمی نیروها در تمام پایگاه‌ها ثبت شد.",
+    textEn:
+      "General Staff: Combat readiness audits finalized across all commands.",
+    timeFa: "۳۵ دقیقه پیش",
+    timeEn: "35 min ago",
   },
   {
     id: "11",
     type: "info",
-    text: "جهش صنعتی: تکمیل فاز مدرن‌سازی کارخانجات سنگین کشور.",
-    time: "۴۰ دقیقه پیش",
+    textFa: "جهش صنعتی: تکمیل فاز مدرن‌سازی کارخانجات سنگین کشور.",
+    textEn:
+      "Industrial milestone: Heavy manufacturing modernization phase complete.",
+    timeFa: "۴۰ دقیقه پیش",
+    timeEn: "40 min ago",
   },
   {
     id: "12",
     type: "danger",
-    text: "افت نرخ رشد جمعیت کشور به دلیل ناآرامی‌ها و کاهش شاخص ثبات.",
-    time: "۴۵ دقیقه پیش",
+    textFa: "افت نرخ رشد جمعیت کشور به دلیل ناآرامی‌ها و کاهش شاخص ثبات.",
+    textEn: "Demographic contraction recorded amid civil friction and unrest.",
+    timeFa: "۴۵ دقیقه پیش",
+    timeEn: "45 min ago",
   },
   {
     id: "13",
     type: "warning",
-    text: "اولتیماتوم بانک جهانی: اخطار تسویه بهره وام‌ها به خزانه‌داری.",
-    time: "۵۰ دقیقه پیش",
+    textFa: "اولتیماتوم بانک جهانی: اخطار تسویه بهره وام‌ها به خزانه‌داری.",
+    textEn:
+      "World Bank ultimatum: Overdue interest settlement notice delivered.",
+    timeFa: "۵۰ دقیقه پیش",
+    timeEn: "50 min ago",
   },
   {
     id: "14",
     type: "info",
-    text: "رونق بازار کار: ثبت بازدهی مثبت نیروی کار در کارخانجات سراسر کشور.",
-    time: "۱ ساعت پیش",
+    textFa:
+      "رونق بازار کار: ثبت بازدهی مثبت نیروی کار در کارخانجات سراسر کشور.",
+    textEn: "Labor output boom: Positive productivity index across facilities.",
+    timeFa: "۱ ساعت پیش",
+    timeEn: "1 hour ago",
   },
   {
     id: "15",
     type: "info",
-    text: "گشت‌های مرزی: امنیت کامل و روان بودن ترانزیت تجاری در مرزها.",
-    time: "۱ ساعت پیش",
+    textFa: "گشت‌های مرزی: امنیت کامل و روان بودن ترانزیت تجاری در مرزها.",
+    textEn: "Border checkpoint report: Trade corridors secure and flowing.",
+    timeFa: "۱ ساعت پیش",
+    timeEn: "1 hour ago",
   },
   {
     id: "16",
     type: "danger",
-    text: "هشدار ضدجاسوسی: اجرای طرح ضربتی پاکسازی نفوذی‌ها در دستگاه‌های اجرایی.",
-    time: "۱ ساعت پیش",
+    textFa:
+      "هشدار ضدجاسوسی: اجرای طرح ضربتی پاکسازی نفوذی‌ها در دستگاه‌های اجرایی.",
+    textEn:
+      "Counter-intel alert: Infiltration ring neutralized inside ministries.",
+    timeFa: "۱ ساعت پیش",
+    timeEn: "1 hour ago",
   },
   {
     id: "17",
     type: "warning",
-    text: "اعتراض بازرگانان به دلیل افزایش تعرفه‌ها و کاهش مبادلات فرامرزی.",
-    time: "۲ ساعت پیش",
+    textFa: "اعتراض بازرگانان به دلیل افزایش تعرفه‌ها و کاهش مبادلات فرامرزی.",
+    textEn: "Merchant protests erupt following border tariff adjustments.",
+    timeFa: "۲ ساعت پیش",
+    timeEn: "2 hours ago",
   },
   {
     id: "18",
     type: "info",
-    text: "دستورالعمل ارتقای فناوری پدافندی در ستاد کل آماده ابلاغ است.",
-    time: "۲ ساعت پیش",
+    textFa: "دستورالعمل ارتقای فناوری پدافندی در ستاد کل آماده ابلاغ است.",
+    textEn: "Air Defense directive drafted for immediate missile dome upgrade.",
+    timeFa: "۲ ساعت پیش",
+    timeEn: "2 hours ago",
   },
   {
     id: "19",
     type: "danger",
-    text: "عملیات ویژه: نفوذ موفق تیم‌های خرابکاری به شبکه راداری دشمن.",
-    time: "۳ ساعت پیش",
+    textFa: "عملیات ویژه: نفوذ موفق تیم‌های خرابکاری به شبکه راداری دشمن.",
+    textEn: "Covert black ops: Sabotage team disabled adversary radar network.",
+    timeFa: "۳ ساعت پیش",
+    timeEn: "3 hours ago",
   },
   {
     id: "20",
     type: "info",
-    text: "پایداری حداکثری: رشد منظم جمعیت و پایداری جامعه در سایه ثبات ملی.",
-    time: "۳ ساعت پیش",
+    textFa: "پایداری حداکثری: رشد منظم جمعیت و پایداری جامعه در سایه ثبات ملی.",
+    textEn:
+      "National Golden Age: Steadfast governance solidifies civic stability.",
+    timeFa: "۳ ساعت پیش",
+    timeEn: "3 hours ago",
   },
 ];

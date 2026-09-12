@@ -4,12 +4,12 @@ import { ShieldAlert, Binary, Award, Users, Cpu } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { EspionageTargetSelector } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
 import { EspionageTierCard } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-tier-card";
 import { EspionageResultBanner } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-result-banner";
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
 import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface WideEspionageViewProps {
   nation: Nation;
@@ -27,6 +27,8 @@ export function WideEspionageView({
   turnActivity,
 }: WideEspionageViewProps) {
   const t = useTranslations("espionage");
+  const { formatCurrency, formatPercent, formatLevel, toDigits } =
+    useLocaleFormatter();
 
   const form = useWideEspionageForm({
     nation,
@@ -53,25 +55,21 @@ export function WideEspionageView({
     if (sup.heistMode === "MILITARY_ONLY") {
       return t("view.subtitles.militaryOnly", {
         name: form.selectedTargetNation.name,
-        points: PersianNumberFormatter.toPersianDigits(
-          sup.militaryGain.toFixed(1),
-        ),
+        points: formatLevel(sup.militaryGain),
       });
     }
     if (sup.heistMode === "INDUSTRIAL_ONLY") {
       return t("view.subtitles.industrialOnly", {
         name: form.selectedTargetNation.name,
-        points: PersianNumberFormatter.toPersianDigits(
-          sup.industrialGain.toFixed(1),
-        ),
+        points: formatLevel(sup.industrialGain),
       });
     }
     return t("view.subtitles.none", { name: form.selectedTargetNation.name });
-  }, [form.selectedTargetNation, form.techSuperiority, t]);
+  }, [form.selectedTargetNation, form.techSuperiority, t, formatLevel]);
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 dir-rtl text-right">
+    <div className="space-y-5 animate-in fade-in duration-200 text-start font-sans">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 text-start">
         <div className="lg:col-span-4">
           <EspionageTargetSelector
             targets={form.countryOptions}
@@ -103,19 +101,14 @@ export function WideEspionageView({
                       </span>
                       <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground border border-border/60">
                         {t("view.rank", {
-                          rank: PersianNumberFormatter.toPersianDigits(
-                            targetRank,
-                          ),
+                          rank: toDigits(targetRank),
                         })}
                       </span>
                     </h3>
                     <span className="text-[10px] text-muted-foreground font-mono">
                       {t("view.meta", {
-                        gdp: PersianNumberFormatter.formatCurrency(
-                          form.targetGdp,
-                          true,
-                        ),
-                        stability: PersianNumberFormatter.toPersianDigits(
+                        gdp: formatCurrency(form.targetGdp, true),
+                        stability: formatPercent(
                           form.selectedTargetNation.government.stability,
                         ),
                       })}
@@ -128,9 +121,7 @@ export function WideEspionageView({
                     <Award size={12} />
                     <span>
                       {t("view.yourMilTech", {
-                        level: PersianNumberFormatter.toPersianDigits(
-                          nation.military.techLevel.toFixed(1),
-                        ),
+                        level: formatLevel(nation.military.techLevel),
                       })}
                     </span>
                   </div>
@@ -138,9 +129,7 @@ export function WideEspionageView({
                     <Cpu size={12} />
                     <span>
                       {t("view.yourIndTech", {
-                        level: PersianNumberFormatter.toPersianDigits(
-                          nation.industrialLevel.toFixed(1),
-                        ),
+                        level: formatLevel(nation.industrialLevel),
                       })}
                     </span>
                   </div>

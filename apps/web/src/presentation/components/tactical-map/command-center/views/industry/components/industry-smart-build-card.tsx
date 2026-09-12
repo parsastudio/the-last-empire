@@ -1,10 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Factory, Zap, Loader2, CheckCircle2 } from "lucide-react";
-import {
-  PersianNumberFormatter,
-  IndustryCalculator,
-} from "@geopolitics/domain";
+import { IndustryCalculator } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface IndustrySmartBuildCardProps {
   totalActiveFactories: number;
@@ -28,6 +26,7 @@ export function IndustrySmartBuildCard({
   onBuild,
 }: IndustrySmartBuildCardProps) {
   const t = useTranslations("industry.smartBuild");
+  const { formatCurrency, formatNumber, formatPercent } = useLocaleFormatter();
   const isFull = totalEmptySlots <= 0;
   const occupancyPct =
     totalMaxSlots > 0
@@ -35,14 +34,11 @@ export function IndustrySmartBuildCard({
       : 100;
 
   const unitCostText = t("unitCost", {
-    cost: PersianNumberFormatter.formatCurrency(
-      IndustryCalculator.FACTORY_REBUILD_COST,
-      true,
-    ),
+    cost: formatCurrency(IndustryCalculator.FACTORY_REBUILD_COST, true),
   });
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right font-sans">
+    <div className="space-y-2.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Factory size={14} className="text-gdp" />
@@ -67,14 +63,10 @@ export function IndustrySmartBuildCard({
             {t("occupancy")}
           </span>
           <span className="font-extrabold text-xs text-foreground">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              totalActiveFactories,
-            )}{" "}
+            {formatNumber(totalActiveFactories)}{" "}
             <span className="text-[10px] text-muted-foreground font-normal">
               {t("ofTotalSlots", {
-                max: PersianNumberFormatter.formatNumberWithCommas(
-                  totalMaxSlots,
-                ),
+                max: formatNumber(totalMaxSlots),
               })}
             </span>
           </span>
@@ -88,7 +80,7 @@ export function IndustrySmartBuildCard({
                 isFull ? "text-emerald-400" : "text-gdp"
               }`}
             >
-              {PersianNumberFormatter.toPersianDigits(occupancyPct)}٪
+              {formatPercent(occupancyPct)}
             </span>
           </div>
           <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden border border-border/40">
@@ -122,14 +114,8 @@ export function IndustrySmartBuildCard({
               {!canAfford
                 ? t("insufficientFunds")
                 : t("buildAction", {
-                    count:
-                      PersianNumberFormatter.formatNumberWithCommas(
-                        batchQuantity,
-                      ),
-                    cost: PersianNumberFormatter.formatCurrency(
-                      batchCost,
-                      true,
-                    ),
+                    count: formatNumber(batchQuantity),
+                    cost: formatCurrency(batchCost, true),
                   })}
             </span>
           </button>

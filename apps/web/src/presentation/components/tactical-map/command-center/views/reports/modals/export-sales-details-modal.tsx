@@ -3,10 +3,10 @@ import { useTranslations } from "next-intl";
 import { ShoppingCart, Coins, Award, Globe, TrendingUp } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation, NationGettersUtility } from "@geopolitics/domain";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ExportSalesModalData } from "@/presentation/stores/use-ui-store";
 import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ExportSalesDetailsModalProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ export function ExportSalesDetailsModal({
   onClose,
 }: ExportSalesDetailsModalProps) {
   const t = useTranslations("reports.exportSales");
+  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
 
   useEffect(() => {
     if (isOpen) {
@@ -32,7 +33,11 @@ export function ExportSalesDetailsModal({
   if (!isOpen || !data) return null;
 
   const buyersWithDetails = data.buyers.map((item) => {
-    const resolved = NationResolverUtility.resolve(item.nationId, nationsMap);
+    const resolved = NationResolverUtility.resolve(
+      item.nationId,
+      nationsMap,
+      locale,
+    );
     const rank = resolved.nation
       ? NationGettersUtility.getRank(resolved.nation.id, nationsMap)
       : 99;
@@ -51,12 +56,12 @@ export function ExportSalesDetailsModal({
       isOpen={isOpen}
       title={t("modalTitle")}
       subtitle={t("modalSubtitle", {
-        turn: PersianNumberFormatter.toPersianDigits(data.turn),
+        turn: toDigits(data.turn),
       })}
       maxWidthClass="max-w-lg"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+      <div className="space-y-4 text-start font-sans pb-1">
         <div className="bg-gradient-to-r from-emerald-950/40 via-card to-emerald-950/30 border border-emerald-500/40 p-4.5 rounded-3xl flex items-center justify-between shadow-xl backdrop-blur-xl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
@@ -72,15 +77,13 @@ export function ExportSalesDetailsModal({
             </div>
           </div>
 
-          <div className="text-left font-mono">
+          <div className="text-end font-mono">
             <span className="text-base font-black text-gdp">
-              +{PersianNumberFormatter.formatCurrency(data.totalProfit, true)}
+              +{formatCurrency(data.totalProfit, true)}
             </span>
             <span className="text-[10px] text-muted-foreground block font-sans">
               {t("fromCountries", {
-                count: PersianNumberFormatter.toPersianDigits(
-                  data.buyers.length,
-                ),
+                count: toDigits(data.buyers.length),
               })}
             </span>
           </div>
@@ -97,7 +100,7 @@ export function ExportSalesDetailsModal({
             </span>
           </div>
 
-          <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
+          <div className="space-y-2 max-h-[360px] overflow-y-auto pe-1 scrollbar-thin scrollbar-thumb-border">
             {buyersWithDetails.map((buyer, idx) => (
               <div
                 key={buyer.nationId}
@@ -113,16 +116,14 @@ export function ExportSalesDetailsModal({
                         {buyer.name}
                       </span>
                       <span className="text-[9px] font-mono font-bold bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-                        #{PersianNumberFormatter.toPersianDigits(idx + 1)}
+                        #{toDigits(idx + 1)}
                       </span>
                     </div>
                     <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-1">
                       <Award size={10} className="text-amber-500" />
                       <span>
                         {t("worldRank", {
-                          rank: PersianNumberFormatter.toPersianDigits(
-                            buyer.rank,
-                          ),
+                          rank: toDigits(buyer.rank),
                         })}
                       </span>
                     </span>
@@ -130,13 +131,10 @@ export function ExportSalesDetailsModal({
                 </div>
 
                 <div className="flex items-center gap-2 font-mono">
-                  <div className="text-left bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
+                  <div className="text-start bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
                     <span className="text-xs font-black text-gdp flex items-center gap-1">
                       <TrendingUp size={11} />
-                      {PersianNumberFormatter.formatCurrency(
-                        buyer.amount,
-                        true,
-                      )}
+                      {formatCurrency(buyer.amount, true)}
                     </span>
                   </div>
                 </div>

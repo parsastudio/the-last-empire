@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Check, X, Globe, ShieldCheck, Skull, Coins } from "lucide-react";
 import { getProposalTypeName } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface DiplomaticProposalFeedbackData {
   proposalType:
@@ -32,8 +34,12 @@ export function TreatyResponseFeedbackContent({
   flagEmoji,
   onClose,
 }: TreatyResponseFeedbackContentProps) {
+  const t = useTranslations("diplomacy.treatyFeedback");
+  const tCommon = useTranslations("common");
+  const { locale } = useLocaleFormatter();
+
   const isAccepted = feedback.accepted;
-  const proposalName = getProposalTypeName(feedback.proposalType);
+  const proposalName = getProposalTypeName(feedback.proposalType, locale);
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
   const isSecurityCancel =
     feedback.proposalType === "CANCEL_SECURITY_GUARANTEE" ||
@@ -42,7 +48,7 @@ export function TreatyResponseFeedbackContent({
   const isPartnership = feedback.proposalType === "STRATEGIC_PARTNERSHIP";
 
   return (
-    <div className="py-2 flex flex-col items-center justify-center gap-4 text-center dir-rtl font-sans">
+    <div className="py-2 flex flex-col items-center justify-center gap-4 text-center font-sans">
       <div
         className={`w-16 h-16 rounded-full flex items-center justify-center border shadow-xl transition-all ${
           isAccepted
@@ -76,81 +82,64 @@ export function TreatyResponseFeedbackContent({
         {isEmergency && isAccepted ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground leading-relaxed">
-              پیمان استمداد امنیتی با امپراتوری{" "}
-              <strong className="text-rose-400">{feedback.targetName}</strong>{" "}
-              منعقد گردید.
+              {t("protectorateAccepted", { name: feedback.targetName })}
             </p>
             <div className="flex flex-col gap-1.5 text-[10px] font-mono font-bold">
               <span className="px-2.5 py-1 bg-rose-500/15 text-rose-300 border border-rose-500/30 rounded-xl">
-                استقرار نیروی ضربت فوق‌پیشرفته (معادل ۵۰٪ GDP شما)
+                {t("protectorateGarrisonBadge")}
               </span>
               <span className="px-2.5 py-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-xl">
-                پرداخت نوبتی ۵٪ خراج • ۳۰- پرستیژ • ۱۵-٪ ثبات
+                {t("protectorateCostBadge")}
               </span>
             </div>
           </div>
         ) : isSecurityCancel ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-              پیمان دفاعی با دولت{" "}
-              <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-              فسخ گردید.
+              {t("securityCancelled", { name: feedback.targetName })}
             </p>
           </div>
         ) : isCancel ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-              معاهده پیشین با دولت{" "}
-              <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-              لغو گردید و سطح روابط با موفقیت{" "}
-              <span className="text-amber-400 font-black">تنزل یافت</span>.
+              {t("treatyCancelled", { name: feedback.targetName })}
             </p>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-military/10 border border-military/30 rounded-full text-[11px] font-mono font-bold text-military">
               <Globe size={12} />
-              <span>۲- امتیاز اعتبار جهانی (تنزل معاهده)</span>
+              <span>{t("downgradePenaltyBadge")}</span>
             </div>
           </div>
         ) : isAccepted ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-              دولت{" "}
-              <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-              درخواست{" "}
-              <span className="font-black text-emerald-400">
-                {proposalName}
-              </span>{" "}
-              شما را <span className="font-black text-emerald-400">پذیرفت</span>
-              .
+              {t("accepted", {
+                name: feedback.targetName,
+                proposal: proposalName,
+              })}
             </p>
             {feedback.proposalType === "SECURITY_GUARANTEE" ? (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-mono font-bold text-cyan-300">
                 <ShieldCheck size={12} />
-                <span>
-                  انعقاد پیمان دفاعی (ورود مستقیم ارتش حامی به جنگ در صورت تهاجم
-                  دشمن)
-                </span>
+                <span>{t("securityGuaranteeAcceptedBadge")}</span>
               </div>
             ) : isPartnership ? (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
                 <Coins size={12} />
-                <span>
-                  واریز دائمی ۰.۶٪ از GDP هر دو کشور به خزانه یکدیگر در هر نوبت
-                </span>
+                <span>{t("partnershipAcceptedBadge")}</span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
                 <Globe size={12} />
-                <span>۱+ امتیاز اعتبار جهانی</span>
+                <span>{t("reputationGainBadge")}</span>
               </div>
             )}
           </div>
         ) : (
           <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-            دولت{" "}
-            <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-            درخواست{" "}
-            <span className="font-black text-rose-400">{proposalName}</span> شما
-            را <span className="font-black text-rose-400">رد کرد</span>.
+            {t("rejected", {
+              name: feedback.targetName,
+              proposal: proposalName,
+            })}
           </p>
         )}
       </div>
@@ -159,7 +148,7 @@ export function TreatyResponseFeedbackContent({
         onClick={onClose}
         className="w-full mt-2 py-3 rounded-2xl bg-secondary hover:bg-secondary/80 border border-border text-foreground font-bold text-xs transition-all cursor-pointer"
       >
-        متوجه شدم
+        {tCommon("understood")}
       </button>
     </div>
   );

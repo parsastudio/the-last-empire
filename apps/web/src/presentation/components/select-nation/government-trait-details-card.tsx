@@ -7,7 +7,8 @@ import {
   CheckCircle2,
   AlertTriangle,
 } from "lucide-react";
-import { GovernmentType, PersianNumberFormatter } from "@geopolitics/domain";
+import { GovernmentType } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface GovernmentTraitDetailsCardProps {
   type: GovernmentType;
@@ -19,6 +20,7 @@ export function GovernmentTraitDetailsCard({
   icon: Icon,
 }: GovernmentTraitDetailsCardProps) {
   const t = useTranslations("governments");
+  const { toDigits } = useLocaleFormatter();
 
   const name = t(`${type}.name`);
   const headline = t(`${type}.headline`);
@@ -27,7 +29,7 @@ export function GovernmentTraitDetailsCard({
   const cons = t.raw(`${type}.cons`) as string[];
 
   return (
-    <div className="p-5 rounded-3xl bg-card/95 border border-primary/40 shadow-xl backdrop-blur-2xl space-y-4 animate-fade-smooth dir-rtl text-right font-sans relative overflow-hidden ring-1 ring-white/5">
+    <div className="p-5 rounded-3xl bg-card/95 border border-primary/40 shadow-xl backdrop-blur-2xl space-y-4 animate-fade-smooth text-start font-sans relative overflow-hidden ring-1 ring-white/5">
       <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
       <div className="flex items-center gap-3 pb-3 border-b border-border/60">
@@ -52,7 +54,7 @@ export function GovernmentTraitDetailsCard({
             <Sparkles size={14} />
             <span>
               {t("prosTitle", {
-                count: PersianNumberFormatter.toPersianDigits(pros.length),
+                count: toDigits(pros.length),
               })}
             </span>
           </div>
@@ -74,7 +76,7 @@ export function GovernmentTraitDetailsCard({
             <ShieldAlert size={14} />
             <span>
               {t("consTitle", {
-                count: PersianNumberFormatter.toPersianDigits(cons.length),
+                count: toDigits(cons.length),
               })}
             </span>
           </div>

@@ -25,6 +25,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export function PeaceNegotiationModal({
   onClose,
 }: PeaceNegotiationModalProps) {
   const t = useTranslations("diplomacy.peaceModal");
-  const { formatCurrency, toDigits } = useLocaleFormatter();
+  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -99,6 +100,16 @@ export function PeaceNegotiationModal({
       setIsProcessing(false);
     }
   };
+
+  const resolvedHeadline = isDominantAi
+    ? t("badges.aiRefusal")
+    : isCrushedAi
+      ? t("badges.aiDesperation")
+      : isWhitePeace
+        ? t("badges.whitePeace")
+        : terms.isAiOffering
+          ? t("badges.aiOffering")
+          : t("badges.humanDemanded");
 
   return (
     <UnifiedModalShell
@@ -156,7 +167,7 @@ export function PeaceNegotiationModal({
             />
             <div className="space-y-0.5">
               <span className="font-black block text-rose-400">
-                {terms.headline}
+                {resolvedHeadline}
               </span>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {terms.description}
@@ -182,7 +193,7 @@ export function PeaceNegotiationModal({
             <div className="flex items-center gap-2">
               <Scroll size={16} className="text-foreground shrink-0" />
               <h4 className="text-xs font-black text-foreground">
-                {terms.headline}
+                {resolvedHeadline}
               </h4>
             </div>
             <span
@@ -198,15 +209,7 @@ export function PeaceNegotiationModal({
                         : "bg-amber-500/20 text-amber-300 border-amber-500/40"
               }`}
             >
-              {isDominantAi
-                ? t("badges.aiRefusal")
-                : isCrushedAi
-                  ? t("badges.aiDesperation")
-                  : isWhitePeace
-                    ? t("badges.whitePeace")
-                    : terms.isAiOffering
-                      ? t("badges.aiOffering")
-                      : t("badges.humanDemanded")}
+              {resolvedHeadline}
             </span>
           </div>
 
@@ -236,7 +239,7 @@ export function PeaceNegotiationModal({
               </div>
             )}
 
-            {terms.concededProvincesNames.length > 0 && (
+            {terms.concededProvinceIds.length > 0 && (
               <div className="bg-background/80 p-3 rounded-2xl border border-border/50 space-y-1">
                 <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
                   <MapPin size={12} className="text-primary" />
@@ -247,7 +250,9 @@ export function PeaceNegotiationModal({
                   </span>
                 </span>
                 <span className="font-black text-foreground text-xs block truncate font-sans">
-                  {terms.concededProvincesNames.join(", ")}
+                  {terms.concededProvinceIds
+                    .map((id) => ProvinceNameFormatter.format(null, locale, id))
+                    .join(", ")}
                 </span>
               </div>
             )}
@@ -285,7 +290,7 @@ export function PeaceNegotiationModal({
               {isProcessing || isSubmitting
                 ? t("submitting")
                 : !terms.canAffordTerms
-                  ? terms.headline
+                  ? resolvedHeadline
                   : t("signAndRatify")}
             </span>
           </button>

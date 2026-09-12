@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useToast } from "@/presentation/context/toast-context";
 import {
@@ -23,6 +23,7 @@ import { TacticalSound } from "@/presentation/utils/tactical-sound";
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
   locale: AppLocale = "fa",
+  dossierTemplate?: (values: { name: string; rank: number }) => string,
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -50,8 +51,9 @@ function mapManifestToNationDetails(
         locale,
       );
 
-      const desc =
-        locale === "en"
+      const desc = dossierTemplate
+        ? dossierTemplate({ name: summary.name, rank })
+        : locale === "en"
           ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
           : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
 
@@ -102,8 +104,9 @@ function mapManifestToNationDetails(
       locale,
     );
 
-    const desc =
-      locale === "en"
+    const desc = dossierTemplate
+      ? dossierTemplate({ name: summary.name, rank })
+      : locale === "en"
         ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
         : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
 
@@ -126,6 +129,8 @@ export function useSelectNationForm() {
   const router = useRouter();
   const currentLocale = useLocale() as AppLocale;
   const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const tDossier = useTranslations("selectNation.dossier");
+  const tErrors = useTranslations("common.errors");
   const { showToast } = useToast();
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
@@ -173,8 +178,11 @@ export function useSelectNationForm() {
   }, []);
 
   const allNations = useMemo(
-    () => mapManifestToNationDetails(manifest, locale),
-    [manifest, locale],
+    () =>
+      mapManifestToNationDetails(manifest, locale, (values) =>
+        tDossier("template", values),
+      ),
+    [manifest, locale, tDossier],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {
@@ -229,19 +237,15 @@ export function useSelectNationForm() {
         router.push(`/play/${gameId}`);
       } else {
         showToast(
-          locale === "en" ? "Campaign Error" : "خطا در ایجاد کمپین",
-          locale === "en"
-            ? "Failed to initialize new game campaign"
-            : "خطا در راه‌اندازی کمپین جدید بازی",
+          tErrors("actionFailedTitle"),
+          tErrors("campaignCreateFailed"),
           "error",
         );
       }
     } catch {
       showToast(
-        locale === "en" ? "Campaign Error" : "خطا در ایجاد کمپین",
-        locale === "en"
-          ? "Unable to save new campaign record in local storage"
-          : "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",
+        tErrors("actionFailedTitle"),
+        tErrors("campaignSaveFailed"),
         "error",
       );
     }
@@ -253,7 +257,7 @@ export function useSelectNationForm() {
     manifest,
     router,
     showToast,
-    locale,
+    tErrors,
   ]);
 
   return {

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocale } from "next-intl";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
+import { CountryRegistry, AppLocale } from "@geopolitics/domain";
 
 export interface SavedCampaignMeta {
   id: string;
@@ -10,6 +12,8 @@ export interface SavedCampaignMeta {
 }
 
 export function useSavedCampaigns() {
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
   const [saves, setSaves] = useState<SavedCampaignMeta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -23,16 +27,33 @@ export function useSavedCampaigns() {
       for (const rec of records) {
         if (rec.gameId === "active_game") continue;
         const state = rec.state;
-        const humanNation = state.nations[state.humanNationId];
-        const nationName = humanNation ? humanNation.name : state.humanNationId;
+        const canonicalHuman = CountryRegistry.resolveCanonicalId(
+          state.humanNationId,
+        );
+        const humanNation =
+          state.nations[canonicalHuman] || state.nations[state.humanNationId];
+        const profile = CountryRegistry.getCountry(canonicalHuman);
+
+        const nationName = humanNation
+          ? locale === "en"
+            ? profile?.nameEn || humanNation.name
+            : humanNation.name
+          : canonicalHuman;
+
         const saveDate = new Date(rec.timestamp);
+        const dateLocale = locale === "en" ? "en-US" : "fa-IR";
+
+        const title =
+          locale === "en"
+            ? `Campaign ${state.gameId} - ${nationName}`
+            : `کمپین ${state.gameId} - ${nationName}`;
 
         mapped.push({
           id: state.gameId,
-          title: `کمپین ${state.gameId} - ${nationName}`,
+          title,
           turn: state.currentTurn,
-          date: saveDate.toLocaleDateString("fa-IR"),
-          time: saveDate.toLocaleTimeString("fa-IR", {
+          date: saveDate.toLocaleDateString(dateLocale),
+          time: saveDate.toLocaleTimeString(dateLocale, {
             hour: "2-digit",
             minute: "2-digit",
           }),
@@ -44,7 +65,7 @@ export function useSavedCampaigns() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     let active = true;

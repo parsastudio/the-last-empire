@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Swords, Users, Binary, ShieldAlert } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ReportStatsOverviewProps {
   stats: {
@@ -18,6 +18,7 @@ export function ReportStatsOverview({
   turnLabel,
 }: ReportStatsOverviewProps) {
   const t = useTranslations("reports.stats");
+  const { toDigits } = useLocaleFormatter();
 
   const cards = [
     {
@@ -59,7 +60,7 @@ export function ReportStatsOverview({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-sans dir-rtl text-right">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-sans text-start">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
@@ -76,7 +77,7 @@ export function ReportStatsOverview({
             <span
               className={`text-lg font-black font-mono block ${card.color}`}
             >
-              {PersianNumberFormatter.toPersianDigits(card.value)}
+              {toDigits(card.value)}
             </span>
           </div>
         );

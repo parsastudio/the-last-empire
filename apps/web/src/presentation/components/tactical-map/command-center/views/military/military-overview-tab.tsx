@@ -15,7 +15,7 @@ export function MilitaryOverviewTab({
   provincesMap,
 }: MilitaryOverviewTabProps) {
   return (
-    <div className="space-y-6 animate-fade-smooth dir-rtl text-right">
+    <div className="space-y-6 animate-fade-smooth text-start font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <MilitaryForcesSection nation={nation} provincesMap={provincesMap} />
 

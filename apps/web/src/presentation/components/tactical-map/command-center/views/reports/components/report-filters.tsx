@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { ShieldCheck, Globe2, Clock, Search } from "lucide-react";
 import { TurnLogScope } from "@/domain/game/game-state.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ReportFiltersProps {
   selectedScope: TurnLogScope;
@@ -24,9 +24,10 @@ export function ReportFilters({
   onSearchChange,
 }: ReportFiltersProps) {
   const t = useTranslations("reports.filters");
+  const { toDigits } = useLocaleFormatter();
 
   return (
-    <div className="space-y-3 font-sans dir-rtl text-right">
+    <div className="space-y-3 font-sans text-start">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <button
           onClick={() => onScopeChange("NATIONAL")}
@@ -36,7 +37,7 @@ export function ReportFilters({
               : "bg-secondary/40 border-border/60 hover:bg-secondary/70 text-muted-foreground"
           }`}
         >
-          <div className="flex items-center gap-3 text-right">
+          <div className="flex items-center gap-3 text-start">
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                 selectedScope === "NATIONAL"
@@ -68,7 +69,7 @@ export function ReportFilters({
               : "bg-secondary/40 border-border/60 hover:bg-secondary/70 text-muted-foreground"
           }`}
         >
-          <div className="flex items-center gap-3 text-right">
+          <div className="flex items-center gap-3 text-start">
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                 selectedScope === "GLOBAL"
@@ -95,7 +96,7 @@ export function ReportFilters({
 
       <div className="bg-background/40 border border-border/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-inner">
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold shrink-0 ml-1">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold shrink-0 ms-1">
             <Clock size={13} className="text-primary" />
             <span>{t("turnLabel")}</span>
           </div>
@@ -109,9 +110,7 @@ export function ReportFilters({
             }`}
           >
             {t("currentTurn", {
-              turn: PersianNumberFormatter.toPersianDigits(
-                availableTurns[0] ?? 1,
-              ),
+              turn: toDigits(availableTurns[0] ?? 1),
             })}
           </button>
 
@@ -126,7 +125,7 @@ export function ReportFilters({
               }`}
             >
               {t("turnNumber", {
-                turn: PersianNumberFormatter.toPersianDigits(turn),
+                turn: toDigits(turn),
               })}
             </button>
           ))}
@@ -146,14 +145,14 @@ export function ReportFilters({
         <div className="relative min-w-[200px] flex-1 sm:flex-initial">
           <Search
             size={13}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
             placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+            className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 ps-8 pe-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-start"
           />
         </div>
       </div>

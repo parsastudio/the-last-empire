@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Globe2, Users, Building2, Coins } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface BattleSpoilsMetricsGridProps {
   spoils?: BattleFullReportData["spoils"];
@@ -12,9 +12,11 @@ export function BattleSpoilsMetricsGrid({
   spoils,
 }: BattleSpoilsMetricsGridProps) {
   const t = useTranslations("reports.spoils.metrics");
+  const { formatNumber, toDigits, formatCompact, formatCurrency } =
+    useLocaleFormatter();
 
   return (
-    <div className="grid grid-cols-2 gap-3 font-mono w-full">
+    <div className="grid grid-cols-2 gap-3 font-mono w-full text-start font-sans">
       <div className="bg-card/90 border border-border/80 p-3.5 rounded-2xl space-y-1 shadow-sm">
         <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
           <span className="flex items-center gap-1">
@@ -25,16 +27,12 @@ export function BattleSpoilsMetricsGrid({
         </div>
         <span className="text-base font-black text-foreground block">
           {t("pixelsUnit", {
-            count: PersianNumberFormatter.formatNumberWithCommas(
-              spoils?.conqueredPixels || 0,
-            ),
+            count: formatNumber(spoils?.conqueredPixels || 0),
           })}
         </span>
         <span className="text-[9px] text-muted-foreground font-sans block">
           {t("provincesUnit", {
-            count: PersianNumberFormatter.toPersianDigits(
-              spoils?.conqueredProvincesCount || 0,
-            ),
+            count: toDigits(spoils?.conqueredProvincesCount || 0),
           })}
         </span>
       </div>
@@ -49,9 +47,7 @@ export function BattleSpoilsMetricsGrid({
         </div>
         <span className="text-base font-black text-foreground block">
           {t("citizensUnit", {
-            count: PersianNumberFormatter.formatCompactNumber(
-              spoils?.gainedPopulation || 0,
-            ),
+            count: formatCompact(spoils?.gainedPopulation || 0),
           })}
         </span>
         <span className="text-[9px] text-gdp font-sans block">
@@ -68,7 +64,7 @@ export function BattleSpoilsMetricsGrid({
           <span>📈</span>
         </div>
         <span className="text-base font-black text-gdp block">
-          +{PersianNumberFormatter.formatCurrency(spoils?.gainedGdp || 0, true)}
+          +{formatCurrency(spoils?.gainedGdp || 0, true)}
         </span>
         <span className="text-[9px] text-muted-foreground font-sans block">
           {t("economicBase")}
@@ -84,11 +80,7 @@ export function BattleSpoilsMetricsGrid({
           <span>💰</span>
         </div>
         <span className="text-base font-black text-amber-400 block">
-          +
-          {PersianNumberFormatter.formatCurrency(
-            spoils?.lootedTreasury || 0,
-            true,
-          )}
+          +{formatCurrency(spoils?.lootedTreasury || 0, true)}
         </span>
         <span className="text-[9px] text-muted-foreground font-sans block">
           {t("treasuryDeposit")}

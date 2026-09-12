@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import {
   Plane,
   Flame,
@@ -29,6 +29,7 @@ export function BattlePhaseAirCard({
   defenderFlag,
 }: BattlePhaseAirCardProps) {
   const t = useTranslations("reports.phase2");
+  const { formatNumber, toDigits } = useLocaleFormatter();
 
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
@@ -41,7 +42,7 @@ export function BattlePhaseAirCard({
 
   if (isSkipped) {
     return (
-      <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+      <div className="space-y-4 font-sans text-start animate-fade-smooth">
         <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-secondary/80 flex items-center justify-center text-xl border border-border">
@@ -90,7 +91,7 @@ export function BattlePhaseAirCard({
   const defArmorDestroyedByAir = reportData.phase2Air.defArmorDestroyedByAir;
 
   return (
-    <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+    <div className="space-y-4 font-sans text-start animate-fade-smooth">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-xl text-cyan-400">
@@ -148,8 +149,7 @@ export function BattlePhaseAirCard({
                 <span>{t("attAirForce")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(attTotalAir)}{" "}
-                {t("aircraftUnit")}
+                {formatNumber(attTotalAir)} {t("aircraftUnit")}
               </span>
             </div>
 
@@ -160,7 +160,7 @@ export function BattlePhaseAirCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {attLostDogfight > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostDogfight)} ${t("lostAircraftUnit")}`
+                  ? `-${formatNumber(attLostDogfight)} ${t("lostAircraftUnit")}`
                   : t("noCasualties")}
               </span>
             </div>
@@ -172,7 +172,7 @@ export function BattlePhaseAirCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {attLostAirDefense > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(attLostAirDefense)} ${t("targetAirDefenseUnit")}`
+                  ? `-${formatNumber(attLostAirDefense)} ${t("targetAirDefenseUnit")}`
                   : t("zeroLosses")}
               </span>
             </div>
@@ -190,9 +190,7 @@ export function BattlePhaseAirCard({
                 <span>{auxFlag}</span>
                 <span>
                   {t("auxAirForce", {
-                    count: PersianNumberFormatter.toPersianDigits(
-                      aux.deployedAirForce,
-                    ),
+                    count: toDigits(aux.deployedAirForce),
                   })}
                 </span>
               </span>
@@ -210,8 +208,7 @@ export function BattlePhaseAirCard({
                 <span>{t("defAirForce")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(defTotalAir)}{" "}
-                {t("aircraftUnit")}
+                {formatNumber(defTotalAir)} {t("aircraftUnit")}
               </span>
             </div>
 
@@ -222,7 +219,7 @@ export function BattlePhaseAirCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {defAirLost > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defAirLost)} ${t("lostAircraftUnit")}`
+                  ? `-${formatNumber(defAirLost)} ${t("lostAircraftUnit")}`
                   : t("noCasualties")}
               </span>
             </div>
@@ -234,7 +231,7 @@ export function BattlePhaseAirCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {defArmorDestroyedByAir > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(defArmorDestroyedByAir)} ${t("armorDestroyedUnit")}`
+                  ? `-${formatNumber(defArmorDestroyedByAir)} ${t("armorDestroyedUnit")}`
                   : t("noArmorBombing")}
               </span>
             </div>

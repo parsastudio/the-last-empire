@@ -8,10 +8,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { MilitaryStack } from "@/domain/military/military.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { selectMilitaryValuationViewModel } from "@/presentation/selectors/military-view-model.selector";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface MilitaryValuationCardProps {
   military: MilitaryStack;
@@ -27,6 +27,7 @@ export function MilitaryValuationCard({
   provincesMap,
 }: MilitaryValuationCardProps) {
   const t = useTranslations("overview.militaryValuation");
+  const { formatCurrency, formatNumber, formatPercent } = useLocaleFormatter();
 
   const metrics = useMemo(
     () =>
@@ -40,7 +41,7 @@ export function MilitaryValuationCard({
   );
 
   return (
-    <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right font-sans">
+    <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 text-start font-sans">
       <div className="flex items-center justify-between pb-1 border-b border-border/40">
         <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
           <Receipt size={15} className="text-treasury" />
@@ -50,9 +51,7 @@ export function MilitaryValuationCard({
           <Layers size={11} />
           <span>
             {t("activeUnits", {
-              count: PersianNumberFormatter.formatNumberWithCommas(
-                metrics.totalUnits,
-              ),
+              count: formatNumber(metrics.totalUnits),
             })}
           </span>
         </span>
@@ -65,16 +64,11 @@ export function MilitaryValuationCard({
             {t("totalValuation")}
           </span>
           <span className="font-extrabold text-gdp text-xs block truncate">
-            {PersianNumberFormatter.formatCurrency(
-              metrics.totalValuation,
-              true,
-            )}
+            {formatCurrency(metrics.totalValuation, true)}
           </span>
           <span className="text-[9px] text-muted-foreground block font-sans">
             {t("capacityRatio", {
-              pct: PersianNumberFormatter.toPersianDigits(
-                metrics.capacityRatio,
-              ),
+              pct: formatPercent(metrics.capacityRatio),
             })}
           </span>
         </div>
@@ -85,7 +79,7 @@ export function MilitaryValuationCard({
             {t("turnPayroll")}
           </span>
           <span className="font-extrabold text-military text-xs block truncate">
-            -{PersianNumberFormatter.formatCurrency(metrics.totalPayroll, true)}
+            -{formatCurrency(metrics.totalPayroll, true)}
           </span>
           {metrics.isGdpCapped && (
             <span className="text-[9px] text-amber-400 font-bold block font-sans flex items-center gap-0.5">

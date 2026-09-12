@@ -7,6 +7,7 @@ import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-pea
 import { PeaceConcessionBuilder } from "@/domain/diplomacy/peace/peace-concession-builder";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { AppLocale } from "@/domain/shared/locale-number-formatter";
 
 export class PeaceConcessionResolverUtility {
   public static resolveTerms(
@@ -16,6 +17,7 @@ export class PeaceConcessionResolverUtility {
     aiTwmi: number,
     provincesMap?: Record<string, ProvinceDynamicState>,
     currentTurn?: number,
+    locale: AppLocale = "fa",
   ): PeaceTermsPackage {
     const ratio = Number((aiTwmi / Math.max(1, humanTwmi)).toFixed(2));
     const rel = NationRelationResolver.getBilateralRelation(
@@ -41,9 +43,14 @@ export class PeaceConcessionResolverUtility {
         moneyAmount: 0,
         concededProvinceIds: [],
         concededProvincesNames: [],
-        headline: "ممنوعیت پایان جنگ در نوبت اول",
+        headline:
+          locale === "en"
+            ? "Ceasefire Prohibited in First Turn"
+            : "ممنوعیت پایان جنگ در نوبت اول",
         description:
-          "به دلیل آغاز جنگ در نوبت جاری، تا سپری شدن حداقل یک نوبت کامل امکان هیچ‌گونه مذاکره صلح وجود ندارد.",
+          locale === "en"
+            ? "Hostilities commenced this turn; peace negotiations unlock after at least 1 turn elapses."
+            : "به دلیل آغاز جنگ در نوبت جاری، تا سپری شدن حداقل یک نوبت کامل امکان هیچ‌گونه مذاکره صلح وجود ندارد.",
         canAffordTerms: false,
       };
     }
@@ -84,6 +91,7 @@ export class PeaceConcessionResolverUtility {
         ratio,
         aiTwmi,
         humanTwmi,
+        locale,
       );
     }
 
@@ -96,6 +104,7 @@ export class PeaceConcessionResolverUtility {
         humanTwmi,
         allAiProvinces,
         maxAiCash,
+        locale,
       );
     }
 
@@ -106,6 +115,7 @@ export class PeaceConcessionResolverUtility {
         ratio,
         aiTwmi,
         humanTwmi,
+        locale,
       );
     }
 
@@ -119,6 +129,7 @@ export class PeaceConcessionResolverUtility {
         allAiProvinces,
         maxAiCash,
         provincesMap,
+        locale,
       );
     }
 
@@ -131,6 +142,7 @@ export class PeaceConcessionResolverUtility {
       allHumanProvinces,
       maxHumanCash,
       provincesMap,
+      locale,
     );
   }
 }

@@ -9,7 +9,7 @@ import { useWideReports } from "@/presentation/components/tactical-map/command-c
 import { ReportStatsOverview } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-stats-overview";
 import { ReportFilters } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-filters";
 import { ReportCard } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-card";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { FileQuestion, Loader2 } from "lucide-react";
 
 interface WideReportsViewProps {
@@ -30,6 +30,7 @@ export function WideReportsView({
   gameId,
 }: WideReportsViewProps) {
   const t = useTranslations("reports.views");
+  const { toDigits } = useLocaleFormatter();
 
   const {
     selectedScope,
@@ -48,11 +49,11 @@ export function WideReportsView({
     selectedTurn === "ALL"
       ? t("allTurns")
       : t("turnPrefix", {
-          turn: PersianNumberFormatter.toPersianDigits(selectedTurn),
+          turn: toDigits(selectedTurn),
         });
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right font-sans pb-6">
+    <div className="space-y-4 animate-in fade-in duration-200 text-start font-sans pb-6">
       <ReportFilters
         selectedScope={selectedScope}
         selectedTurn={selectedTurn}

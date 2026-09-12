@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   FactoryBatch,
   IndustryCalculator,
@@ -9,6 +10,7 @@ import {
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface FactoryTierUpgradeItem {
   batch: FactoryBatch;
@@ -42,6 +44,8 @@ export function useFactoryTierProcurement({
   sellerId,
   actionType = "DOMESTIC",
 }: UseFactoryTierProcurementProps) {
+  const t = useTranslations("industry.tiers.feedbacks");
+  const { formatNumber } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const { feedbacks, triggerFeedback, getFeedbacksFor } =
     useFloatingFeedback<number>();
@@ -107,8 +111,8 @@ export function useFactoryTierProcurement({
 
       const feedbackText =
         actionType === "IMPORT"
-          ? `+${item.batchQuantity} سوله وارداتی`
-          : `+${item.batchQuantity} سوله مدرن`;
+          ? t("import", { count: formatNumber(item.batchQuantity) })
+          : t("domestic", { count: formatNumber(item.batchQuantity) });
 
       triggerFeedback(item.rankIndex, feedbackText, {
         durationMs: 700,
@@ -139,6 +143,8 @@ export function useFactoryTierProcurement({
       isSubmitting,
       dispatchAction,
       triggerFeedback,
+      t,
+      formatNumber,
     ],
   );
 

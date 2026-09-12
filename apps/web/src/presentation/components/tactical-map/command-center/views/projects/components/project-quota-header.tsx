@@ -1,6 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Rocket, Wallet, CheckCircle2 } from "lucide-react";
-import { PersianNumberFormatter } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ProjectQuotaHeaderProps {
   treasury: number;
@@ -13,20 +14,22 @@ export function ProjectQuotaHeader({
   boostedCountThisTurn,
   maxBoostsPerTurn,
 }: ProjectQuotaHeaderProps) {
+  const t = useTranslations("projects");
+  const { formatCurrency, toDigits } = useLocaleFormatter();
   const remainingQuota = Math.max(0, maxBoostsPerTurn - boostedCountThisTurn);
 
   return (
-    <div className="bg-card/95 border border-border/80 p-4.5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-2xl font-sans dir-rtl text-right">
+    <div className="bg-card/95 border border-border/80 p-4.5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-2xl font-sans text-start">
       <div className="flex items-center gap-3.5">
         <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0 shadow-inner">
           <Rocket size={20} className="animate-pulse" />
         </div>
         <div className="space-y-1">
           <h3 className="text-sm md:text-base font-black text-foreground">
-            پژوهش‌ها و برنامه‌های راهبردی ملی
+            {t("headerTitle")}
           </h3>
           <span className="text-xs text-muted-foreground block font-sans">
-            سرمایه‌گذاری گام‌به‌گام در فناوری‌های کشور (هر گام ۵ میلیارد دلار)
+            {t("headerSubtitle")}
           </span>
         </div>
       </div>
@@ -35,10 +38,10 @@ export function ProjectQuotaHeader({
         <div className="flex items-center gap-2 bg-secondary/80 border border-border/70 px-4 py-2 rounded-2xl">
           <Wallet size={15} className="text-gdp" />
           <span className="text-xs text-muted-foreground font-sans font-bold">
-            خزانه:
+            {t("treasury")}:
           </span>
           <span className="font-black text-gdp text-sm font-mono">
-            {PersianNumberFormatter.formatCurrency(treasury, true)}
+            {formatCurrency(treasury, true)}
           </span>
         </div>
 
@@ -56,8 +59,11 @@ export function ProjectQuotaHeader({
           )}
           <span className="text-xs font-extrabold">
             {remainingQuota > 0
-              ? `سهمیه این نوبت: ${PersianNumberFormatter.toPersianDigits(remainingQuota)} از ${PersianNumberFormatter.toPersianDigits(maxBoostsPerTurn)}`
-              : "تکمیل سهمیه این نوبت"}
+              ? t("quotaRemaining", {
+                  remaining: toDigits(remainingQuota),
+                  max: toDigits(maxBoostsPerTurn),
+                })
+              : t("quotaFull")}
           </span>
         </div>
       </div>

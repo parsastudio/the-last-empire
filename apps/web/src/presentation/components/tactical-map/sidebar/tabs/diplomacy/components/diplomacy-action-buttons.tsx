@@ -1,11 +1,11 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { HeartHandshake, CheckCircle2 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   DiplomaticStance,
   SecurityGuaranteeValidationResult,
 } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { DiplomacyStepUpActions } from "./diplomacy-step-up-actions";
 import { DiplomacySecurityUmbrellaActions } from "./diplomacy-security-umbrella-actions";
 import { DiplomacyStepDownActions } from "./diplomacy-step-down-actions";
@@ -72,6 +72,7 @@ export function DiplomacyActionButtons({
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
   const t = useTranslations("diplomacy");
+  const { formatCurrency } = useLocaleFormatter();
   const isWar = currentStance === "WAR";
   const isAidDisabled = isAidSentThisTurn || !canAffordAid;
 
@@ -109,7 +110,7 @@ export function DiplomacyActionButtons({
         <button
           onClick={onSendAid}
           disabled={isAidDisabled}
-          className={`w-full p-3 rounded-2xl border text-right transition-all space-y-1 ${
+          className={`w-full p-3 rounded-2xl border text-start transition-all space-y-1 ${
             isAidDisabled
               ? "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-60"
               : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-500 cursor-pointer shadow-sm"
@@ -126,11 +127,11 @@ export function DiplomacyActionButtons({
                 </>
               ) : !canAffordAid ? (
                 t("actions.foreignAidInsufficient", {
-                  cost: PersianNumberFormatter.formatCurrency(foreignAidCost),
+                  cost: formatCurrency(foreignAidCost),
                 })
               ) : (
                 t("actions.sendForeignAid", {
-                  cost: PersianNumberFormatter.formatCurrency(foreignAidCost),
+                  cost: formatCurrency(foreignAidCost),
                 })
               )}
             </span>

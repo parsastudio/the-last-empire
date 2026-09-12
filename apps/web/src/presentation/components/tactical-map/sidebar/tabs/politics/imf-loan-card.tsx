@@ -8,12 +8,12 @@ import {
   ArrowDownRight,
   DollarSign,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { DebtCalculatorUtility } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ImfLoanCardProps {
   nationId: string;
@@ -29,6 +29,7 @@ export function ImfLoanCard({
   treasury = 100000,
 }: ImfLoanCardProps) {
   const t = useTranslations("overview.imf");
+  const { formatCurrency } = useLocaleFormatter();
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
@@ -67,7 +68,7 @@ export function ImfLoanCard({
 
   return (
     <>
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 text-start font-sans">
         <div className="flex items-center gap-2 px-1">
           <Landmark size={13} className="text-treasury" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -75,13 +76,13 @@ export function ImfLoanCard({
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
+        <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3">
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="text-muted-foreground font-sans">
               {t("availableCredit")}
             </span>
             <span className="font-bold text-gdp">
-              {PersianNumberFormatter.formatCurrency(availableLoan)}
+              {formatCurrency(availableLoan)}
             </span>
           </div>
 
@@ -91,7 +92,7 @@ export function ImfLoanCard({
                 {t("overdueLoans")}
               </span>
               <span className="font-bold text-military block">
-                {PersianNumberFormatter.formatCurrency(nationalDebt)}
+                {formatCurrency(nationalDebt)}
               </span>
             </div>
 
@@ -100,7 +101,7 @@ export function ImfLoanCard({
                 {t("turnInterest")}
               </span>
               <span className="font-bold text-treasury block">
-                {PersianNumberFormatter.formatCurrency(
+                {formatCurrency(
                   DebtCalculatorUtility.calculateInterest(nationalDebt),
                 )}
               </span>
@@ -153,7 +154,7 @@ export function ImfLoanCard({
           {isSmallDebt && !canAffordFullRepay && (
             <div className="text-[10px] text-military font-sans bg-military/10 p-2 rounded-xl border border-military/30 text-center">
               {t("smallDebtWarning", {
-                amount: PersianNumberFormatter.formatCurrency(nationalDebt),
+                amount: formatCurrency(nationalDebt),
               })}
             </div>
           )}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Coins, Zap, Anchor, Compass, CheckCircle2 } from "lucide-react";
@@ -55,7 +57,7 @@ export function EconomicDoctrineControlCard({
   const doctrineName = t(`doctrines.${selectedStance}.name`);
 
   return (
-    <div className="space-y-3 font-sans dir-rtl text-right">
+    <div className="space-y-3 font-sans text-start">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <Coins size={14} className="text-gdp" />

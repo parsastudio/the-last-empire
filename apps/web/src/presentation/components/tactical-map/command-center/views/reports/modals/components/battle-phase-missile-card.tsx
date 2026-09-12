@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import {
   Flame,
   ShieldCheck,
@@ -30,6 +30,7 @@ export function BattlePhaseMissileCard({
   defenderFlag,
 }: BattlePhaseMissileCardProps) {
   const t = useTranslations("reports.phase1");
+  const { formatNumber, toDigits } = useLocaleFormatter();
 
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
@@ -42,7 +43,7 @@ export function BattlePhaseMissileCard({
 
   if (isSkipped) {
     return (
-      <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+      <div className="space-y-4 font-sans text-start animate-fade-smooth">
         <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-secondary/80 flex items-center justify-center text-xl border border-border">
@@ -90,7 +91,7 @@ export function BattlePhaseMissileCard({
   const destructionScope = reportData.phase1Missile.factoryDestructionScope;
 
   return (
-    <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+    <div className="space-y-4 font-sans text-start animate-fade-smooth">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-xl text-rose-400">
@@ -138,10 +139,7 @@ export function BattlePhaseMissileCard({
                 <span>{t("launched")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  missilesLaunched,
-                )}{" "}
-                {t("missilesUnit")}
+                {formatNumber(missilesLaunched)} {t("missilesUnit")}
               </span>
             </div>
 
@@ -151,10 +149,7 @@ export function BattlePhaseMissileCard({
                 <span>{t("intercepted")}</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  missilesIntercepted,
-                )}{" "}
-                {t("interceptedUnit")}
+                {formatNumber(missilesIntercepted)} {t("interceptedUnit")}
               </span>
             </div>
 
@@ -164,10 +159,7 @@ export function BattlePhaseMissileCard({
                 <span>{t("penetrated")}</span>
               </span>
               <span className="font-black text-emerald-400 text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  missilesPenetrated,
-                )}{" "}
-                {t("penetratedUnit")}
+                {formatNumber(missilesPenetrated)} {t("penetratedUnit")}
               </span>
             </div>
           </div>
@@ -184,9 +176,7 @@ export function BattlePhaseMissileCard({
                 <span>{auxFlag}</span>
                 <span>
                   {t("auxAirDefense", {
-                    count: PersianNumberFormatter.toPersianDigits(
-                      aux.deployedAirDefense,
-                    ),
+                    count: toDigits(aux.deployedAirDefense),
                   })}
                 </span>
               </span>
@@ -204,9 +194,7 @@ export function BattlePhaseMissileCard({
                 <span>{t("defAirDefense")}</span>
               </span>
               <span className="font-black text-foreground text-sm">
-                {PersianNumberFormatter.formatNumberWithCommas(
-                  reportData.phase1Missile.defAirDefense,
-                )}{" "}
+                {formatNumber(reportData.phase1Missile.defAirDefense)}{" "}
                 {t("airDefenseUnit")}
               </span>
             </div>
@@ -218,7 +206,7 @@ export function BattlePhaseMissileCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {airDefenseLost > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(airDefenseLost)} ${t("lostUnit")}`
+                  ? `-${formatNumber(airDefenseLost)} ${t("lostUnit")}`
                   : t("noCasualties")}
               </span>
             </div>
@@ -230,7 +218,7 @@ export function BattlePhaseMissileCard({
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {factoriesDestroyed > 0
-                  ? `-${PersianNumberFormatter.formatNumberWithCommas(factoriesDestroyed)} ${t("factoriesUnit")}`
+                  ? `-${formatNumber(factoriesDestroyed)} ${t("factoriesUnit")}`
                   : t("noDestruction")}
               </span>
             </div>
@@ -241,7 +229,7 @@ export function BattlePhaseMissileCard({
       {factoriesDestroyed > 0 && (
         <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-foreground/90 shadow-sm">
           <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
-          <div className="space-y-1 text-right">
+          <div className="space-y-1 text-start">
             <span className="font-black text-amber-400 block">
               {t("bombardmentAreasTitle")}
             </span>
@@ -250,10 +238,7 @@ export function BattlePhaseMissileCard({
                 ? t("otherProvincesBombarded", { name: defenderName })
                 : t("allProvincesBombarded", {
                     name: defenderName,
-                    count:
-                      PersianNumberFormatter.formatNumberWithCommas(
-                        factoriesDestroyed,
-                      ),
+                    count: formatNumber(factoriesDestroyed),
                   })}
             </p>
           </div>

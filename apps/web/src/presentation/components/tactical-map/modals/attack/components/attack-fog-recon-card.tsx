@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Radio, AlertTriangle, Loader2 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackFogReconCardProps {
   reconCost: number;
@@ -23,9 +23,10 @@ export function AttackFogReconCard({
   onExecuteRecon,
 }: AttackFogReconCardProps) {
   const t = useTranslations("attack.recon");
+  const { formatCurrency } = useLocaleFormatter();
 
   return (
-    <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-3.5 rounded-3xl space-y-3 shadow-md backdrop-blur-xl">
+    <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-3.5 rounded-3xl space-y-3 shadow-md backdrop-blur-xl text-start font-sans">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/25 shrink-0">
@@ -54,7 +55,7 @@ export function AttackFogReconCard({
           )}
           <span>
             {t("scanButton", {
-              cost: PersianNumberFormatter.formatCurrency(reconCost),
+              cost: formatCurrency(reconCost),
             })}
           </span>
         </button>

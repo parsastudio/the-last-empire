@@ -11,6 +11,7 @@ import {
   MILITARY_UNIT_STATS,
   NationTurnActivity,
   MapTopologyRegistry,
+  AppLocale,
 } from "@geopolitics/domain";
 import {
   BattleCalculator,
@@ -19,6 +20,7 @@ import {
   EspionageCalculator,
 } from "@geopolitics/game-engine";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
@@ -62,6 +64,7 @@ export class DirectAttackSelector {
     targetNation: Nation | null,
     targetProvinceId: number | null,
     gameState: GameState | null,
+    locale: AppLocale = "fa",
   ): DirectAttackReachEvaluation {
     const targetProvince =
       gameState && targetProvinceId
@@ -91,17 +94,25 @@ export class DirectAttackSelector {
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
     const originRegionName = humanNation
-      ? `خاک ${humanNation.name}`
-      : "خاک اصلی کشور";
+      ? locale === "en"
+        ? `${humanNation.name} Territory`
+        : `خاک ${humanNation.name}`
+      : locale === "en"
+        ? "Sovereign Mainland"
+        : "خاک اصلی کشور";
 
     let targetRegionName = "";
     if (targetProvince) {
-      targetRegionName = MapTopologyRegistry.getNameFa(
+      targetRegionName = ProvinceNameFormatter.format(
+        MapTopologyRegistry.getNameFa(targetProvince.provinceId, ""),
+        locale,
         targetProvince.provinceId,
-        "",
       );
     } else if (targetNation) {
-      targetRegionName = `خاک اصلی ${targetNation.name}`;
+      targetRegionName =
+        locale === "en"
+          ? `${targetNation.name} Mainland`
+          : `خاک اصلی ${targetNation.name}`;
     }
 
     return {

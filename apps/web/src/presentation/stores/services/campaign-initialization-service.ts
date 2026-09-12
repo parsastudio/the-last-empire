@@ -31,9 +31,7 @@ export class CampaignInitializationService {
         cache: "no-store",
       });
       if (!res.ok) {
-        throw new Error(
-          "امکان خواندن مانیفست استراتژیک اولیه نقشه از سرور وجود ندارد.",
-        );
+        throw new Error("Unable to load strategic map manifest from server.");
       }
       activeManifest = await res.json();
     }
@@ -44,7 +42,7 @@ export class CampaignInitializationService {
       activeManifest.nations.length === 0
     ) {
       throw new Error(
-        "مانیفست استراتژیک نقشه نامعتبر است یا هیچ کشوری در آن تعریف نشده است.",
+        "Map manifest is invalid or contains no sovereign nations.",
       );
     }
 
@@ -58,7 +56,7 @@ export class CampaignInitializationService {
 
     if (!detectedNations.includes(normalizedHumanId)) {
       throw new Error(
-        `کشور انتخاب‌شده (${nationId}) در مانیفست استراتژیک وجود ندارد.`,
+        `Selected nation (${nationId}) does not exist in strategic manifest.`,
       );
     }
 
