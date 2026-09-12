@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Ship, AlertTriangle, ShieldCheck } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NavalDeploymentClamper } from "@geopolitics/game-engine";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface NavalTransportCapacityCardProps {
   navalFleetCount: number;
@@ -16,6 +16,7 @@ export function NavalTransportCapacityCard({
   armorDeployed,
 }: NavalTransportCapacityCardProps) {
   const t = useTranslations("attack.naval");
+  const { toDigits, formatPercent } = useLocaleFormatter();
 
   const maxCapacity = NavalDeploymentClamper.calculateMaxCapacity(
     "NAVAL",
@@ -33,7 +34,7 @@ export function NavalTransportCapacityCard({
 
   return (
     <div
-      className={`p-4 rounded-3xl border transition-all space-y-3 font-sans dir-rtl text-right ${
+      className={`p-4 rounded-3xl border transition-all space-y-3 font-sans text-start ${
         isOverCapacity
           ? "bg-rose-950/30 border-rose-500/50 text-foreground"
           : "bg-cyan-950/20 border-cyan-500/40 text-foreground"
@@ -54,8 +55,8 @@ export function NavalTransportCapacityCard({
             <h4 className="text-xs font-black">{t("monitoringTitle")}</h4>
             <span className="text-[10px] text-muted-foreground font-mono">
               {t("activeFleetSubtitle", {
-                count: PersianNumberFormatter.toPersianDigits(navalFleetCount),
-                max: PersianNumberFormatter.toPersianDigits(maxCapacity),
+                count: toDigits(navalFleetCount),
+                max: toDigits(maxCapacity),
               })}
             </span>
           </div>
@@ -74,8 +75,7 @@ export function NavalTransportCapacityCard({
             <ShieldCheck size={12} />
           )}
           <span>
-            {PersianNumberFormatter.toPersianDigits(loadRequired)} /{" "}
-            {PersianNumberFormatter.toPersianDigits(maxCapacity)}
+            {toDigits(loadRequired)} / {toDigits(maxCapacity)}
           </span>
         </span>
       </div>
@@ -90,7 +90,7 @@ export function NavalTransportCapacityCard({
                 : "text-cyan-300 font-bold"
             }
           >
-            {PersianNumberFormatter.toPersianDigits(utilizationPct)}٪
+            {formatPercent(utilizationPct)}
           </span>
         </div>
         <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/40">

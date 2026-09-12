@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { ShieldAlert, Globe } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ThreatRadarBadgeProps {
   globalReputation: number;
@@ -9,6 +9,8 @@ interface ThreatRadarBadgeProps {
 
 export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
   const t = useTranslations("hud.radar");
+  const { toDigits } = useLocaleFormatter();
+
   const isHighThreat = globalReputation <= -30;
   const isPositive = globalReputation > 0;
 
@@ -37,7 +39,7 @@ export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
         </span>
         <span className="font-bold">
           {globalReputation > 0 ? "+" : ""}
-          {PersianNumberFormatter.toPersianDigits(globalReputation)}
+          {toDigits(globalReputation)}
         </span>
       </div>
     </div>

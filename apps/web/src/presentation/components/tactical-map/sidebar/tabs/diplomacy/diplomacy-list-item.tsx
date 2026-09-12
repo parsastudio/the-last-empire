@@ -1,11 +1,12 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   DiplomaticRelation,
   getAlignmentColor,
   getTensionColor,
 } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DiplomacyListItemProps {
   relation: DiplomaticRelation;
@@ -16,17 +17,19 @@ export function DiplomacyListItem({
   relation,
   onSelect,
 }: DiplomacyListItemProps) {
+  const t = useTranslations("diplomacy.stats");
+  const { toDigits, formatPercent } = useLocaleFormatter();
   const alignColor = getAlignmentColor(relation.alignment);
   const tensionColor = getTensionColor(relation.tension);
   const formattedAlign =
     relation.alignment > 0
-      ? `+${PersianNumberFormatter.toPersianDigits(relation.alignment)}`
-      : PersianNumberFormatter.toPersianDigits(relation.alignment);
+      ? `+${toDigits(relation.alignment)}`
+      : toDigits(relation.alignment);
 
   return (
     <button
       onClick={() => onSelect(relation)}
-      className="w-full bg-background/40 hover:bg-secondary/50 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer dir-rtl"
+      className="w-full bg-background/40 hover:bg-secondary/50 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-start transition-all cursor-pointer"
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2">
@@ -37,7 +40,7 @@ export function DiplomacyListItem({
             {relation.code}
           </span>
           <span className="text-[9px] font-mono bg-amber-500/10 text-amber-500 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
-            #{PersianNumberFormatter.toPersianDigits(relation.rank)}
+            #{toDigits(relation.rank)}
           </span>
         </div>
         <div>
@@ -49,9 +52,11 @@ export function DiplomacyListItem({
           />
         </div>
       </div>
-      <div className="text-left font-sans text-[10px] space-y-0.5">
+      <div className="text-end font-sans text-[10px] space-y-0.5">
         <div className="flex items-center gap-1 justify-end">
-          <span className="text-muted-foreground text-[9px]">همسویی:</span>
+          <span className="text-muted-foreground text-[9px]">
+            {t("internalStability")}
+          </span>
           <span className={`font-bold font-mono ${alignColor}`}>
             {formattedAlign}
           </span>
@@ -59,7 +64,7 @@ export function DiplomacyListItem({
         <div className="flex items-center gap-1 justify-end">
           <span className="text-muted-foreground text-[9px]">تنش:</span>
           <span className={`font-bold font-mono ${tensionColor}`}>
-            {PersianNumberFormatter.toPersianDigits(relation.tension)}٪
+            {formatPercent(relation.tension)}
           </span>
         </div>
       </div>
