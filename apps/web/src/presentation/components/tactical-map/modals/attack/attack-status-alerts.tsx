@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   AlertTriangle,
   ShieldAlert,
@@ -9,10 +9,10 @@ import {
   ShieldCheck,
   Clock,
 } from "lucide-react";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { DiplomaticStance, AppLocale } from "@geopolitics/domain";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { getDiplomaticStanceLabel } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackStatusAlertsProps {
   isLandNeighbor: boolean;
@@ -42,11 +42,18 @@ export function AttackStatusAlerts({
   partnerGuarantorNames = [],
 }: AttackStatusAlertsProps) {
   const t = useTranslations("attack.alerts");
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const { toDigits } = useLocaleFormatter();
+
   const isAccessible = isLandNeighbor || isNavalValid;
-  const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
+  const formattedRegionName = ProvinceNameFormatter.format(
+    targetRegionName,
+    locale,
+  );
 
   return (
-    <div className="space-y-3 dir-rtl text-right font-sans">
+    <div className="space-y-3 text-start font-sans">
       {hasAlreadyAttackedThisTurn && (
         <div className="p-4 bg-amber-500/15 border-2 border-amber-500/50 rounded-2xl flex items-start gap-3 text-xs text-amber-300 font-sans shadow-lg shadow-amber-500/10 animate-fade-smooth">
           <Clock size={20} className="text-amber-400 shrink-0 mt-0.5" />
@@ -137,7 +144,7 @@ export function AttackStatusAlerts({
 
       {isAccessible && !isWarStance && (
         <div className="relative overflow-hidden bg-gradient-to-r from-amber-950/60 via-card to-amber-950/40 border-2 border-amber-500/60 p-4 rounded-2xl shadow-xl shadow-amber-500/10 space-y-2.5 animate-fade-smooth">
-          <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
+          <div className="absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -150,7 +157,7 @@ export function AttackStatusAlerts({
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono block">
                   {t("currentStance", {
-                    stance: getDiplomaticStanceLabel(currentStance),
+                    stance: getDiplomaticStanceLabel(currentStance, locale),
                   })}
                 </span>
               </div>
@@ -159,8 +166,7 @@ export function AttackStatusAlerts({
             <span className="text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1 shrink-0 animate-pulse">
               <Radio size={12} className="animate-ping text-amber-400" />
               {t("reputationPenaltyBadge", {
-                points:
-                  PersianNumberFormatter.toPersianDigits(reputationPenalty),
+                points: toDigits(reputationPenalty),
               })}
             </span>
           </div>
@@ -170,8 +176,7 @@ export function AttackStatusAlerts({
             <span>
               {t("surpriseAttackDesc", {
                 name: targetNationName,
-                points:
-                  PersianNumberFormatter.toPersianDigits(reputationPenalty),
+                points: toDigits(reputationPenalty),
               })}
             </span>
           </div>

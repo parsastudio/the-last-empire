@@ -1,9 +1,9 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { LucideIcon } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UnitDeploymentSliderProps {
   label: string;
@@ -25,6 +25,7 @@ export function UnitDeploymentSlider({
   onChange,
 }: UnitDeploymentSliderProps) {
   const t = useTranslations("attack.slider");
+  const { formatNumber } = useLocaleFormatter();
 
   const handlePercentageSelect = (pct: number) => {
     if (availableCount <= 0) return;
@@ -43,7 +44,7 @@ export function UnitDeploymentSlider({
   };
 
   return (
-    <div className="bg-secondary/40 border border-border/70 p-2.5 md:p-4 rounded-2xl md:rounded-3xl space-y-2 md:space-y-3 font-sans dir-rtl text-right hover:border-primary/40 transition-all shadow-md backdrop-blur-xl relative overflow-hidden group">
+    <div className="bg-secondary/40 border border-border/70 p-2.5 md:p-4 rounded-2xl md:rounded-3xl space-y-2 md:space-y-3 font-sans text-start hover:border-primary/40 transition-all shadow-md backdrop-blur-xl relative overflow-hidden group">
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-2 md:gap-2.5">
           <div className="p-1.5 md:p-2 rounded-xl md:rounded-2xl bg-secondary/90 border border-border/60 shadow-inner">
@@ -56,15 +57,11 @@ export function UnitDeploymentSlider({
 
         <div className="flex items-center gap-1 md:gap-1.5 font-mono text-[10px] md:text-[11px] bg-background/80 border border-border/60 px-2 md:px-3 py-0.5 md:py-1 rounded-lg md:rounded-xl shadow-inner">
           <span className="font-extrabold text-foreground text-[11px] md:text-xs">
-            {PersianNumberFormatter.toPersianDigits(
-              clampedCount.toLocaleString("en-US"),
-            )}
+            {formatNumber(clampedCount)}
           </span>
           <span className="text-muted-foreground text-[9px] md:text-[10px]">
             {t("ofTotal", {
-              total: PersianNumberFormatter.toPersianDigits(
-                availableCount.toLocaleString("en-US"),
-              ),
+              total: formatNumber(availableCount),
               unit: unitName,
             })}
           </span>
@@ -72,7 +69,7 @@ export function UnitDeploymentSlider({
       </div>
 
       <div className="relative flex items-center py-0.5 md:py-1">
-        <div className="absolute left-0 right-0 h-1.5 md:h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
+        <div className="absolute start-0 end-0 h-1.5 md:h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
           <div
             className="h-full bg-gradient-to-r from-primary/70 via-primary to-primary rounded-full transition-all duration-75 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
             style={{ width: `${fillRatio}%` }}

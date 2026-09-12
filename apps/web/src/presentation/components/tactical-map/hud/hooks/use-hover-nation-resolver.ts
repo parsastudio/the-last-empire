@@ -8,14 +8,16 @@ import {
   getNationGdp,
   getProvinceGdp,
 } from "@/domain/nation/gdp-calculator.utility";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CountryRegistry } from "@/domain/data/countries";
 import {
   NationGettersUtility,
   NationRelationResolver,
   DiplomaticStance,
   MapTopologyRegistry,
+  LocaleNumberFormatter,
+  AppLocale,
 } from "@geopolitics/domain";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, ProvinceDynamicState>;
@@ -29,7 +31,8 @@ export function useHoverNationResolver({
   humanNationId,
 }: UseHoverNationResolverProps) {
   const t = useTranslations("map.hud.stances");
-  const locale = useLocale();
+  const currentLocale = useLocale() as AppLocale;
+  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
 
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
@@ -146,9 +149,15 @@ export function useHoverNationResolver({
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
-      const regionName = MapTopologyRegistry.getNameFa(
+      const rawTopologyName = MapTopologyRegistry.getNameFa(
         province.provinceId,
-        t("unknownRegion"),
+        "",
+      );
+
+      const regionName = ProvinceNameFormatter.format(
+        rawTopologyName,
+        locale,
+        province.provinceId,
       );
 
       return {
@@ -161,8 +170,16 @@ export function useHoverNationResolver({
         rawStance,
         isOwnCountry,
         regionName,
-        regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
-        totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
+        regionGdpText: LocaleNumberFormatter.formatCurrency(
+          provinceGdp,
+          true,
+          locale,
+        ),
+        totalGdpText: LocaleNumberFormatter.formatCurrency(
+          realGdp,
+          true,
+          locale,
+        ),
         gdpSharePct,
         hasSecurityGuarantee,
       };

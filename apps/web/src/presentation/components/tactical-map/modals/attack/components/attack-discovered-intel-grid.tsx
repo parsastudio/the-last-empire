@@ -10,9 +10,9 @@ import {
   CheckCircle2,
   Skull,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackDiscoveredIntelGridProps {
   targetNation: Nation;
@@ -32,6 +32,7 @@ export function AttackDiscoveredIntelGrid({
   onAutoOptimizeDeploy,
 }: AttackDiscoveredIntelGridProps) {
   const t = useTranslations("attack.intel");
+  const { formatNumber, formatCurrency, formatLevel } = useLocaleFormatter();
   const aux = forecast.auxiliaryGuarantor;
 
   return (
@@ -66,11 +67,8 @@ export function AttackDiscoveredIntelGrid({
           </div>
           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
             {t("strikeForceBudget", {
-              budget: PersianNumberFormatter.formatCurrency(
-                aux.initialBudgetValuation,
-                true,
-              ),
-              level: PersianNumberFormatter.toPersianDigits(aux.techLevel),
+              budget: formatCurrency(aux.initialBudgetValuation, true),
+              level: formatLevel(aux.techLevel),
             })}
           </span>
         </div>
@@ -83,9 +81,7 @@ export function AttackDiscoveredIntelGrid({
             <span>{t("infantry")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              targetNation.military.infantry || 0,
-            )}
+            {formatNumber(targetNation.military.infantry || 0)}
           </span>
         </div>
 
@@ -95,9 +91,7 @@ export function AttackDiscoveredIntelGrid({
             <span>{t("armor")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              targetNation.military.armor || 0,
-            )}
+            {formatNumber(targetNation.military.armor || 0)}
           </span>
         </div>
 
@@ -107,9 +101,7 @@ export function AttackDiscoveredIntelGrid({
             <span>{t("airDefense")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              targetNation.military.airDefense || 0,
-            )}
+            {formatNumber(targetNation.military.airDefense || 0)}
           </span>
         </div>
 
@@ -119,9 +111,7 @@ export function AttackDiscoveredIntelGrid({
             <span>{t("airForce")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              targetNation.military.airForce || 0,
-            )}
+            {formatNumber(targetNation.military.airForce || 0)}
           </span>
         </div>
 
@@ -131,9 +121,7 @@ export function AttackDiscoveredIntelGrid({
             <span>{t("droneMissile")}</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              targetNation.military.droneMissile || 0,
-            )}
+            {formatNumber(targetNation.military.droneMissile || 0)}
           </span>
         </div>
       </div>

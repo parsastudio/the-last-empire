@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Coins, MapPin, Landmark } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { DiplomaticStance } from "@geopolitics/domain";
 import { HoverStanceBadge } from "./components/hover-stance-badge";
 import { HoverHudPositionUtility } from "./utils/hover-hud-position.utility";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface HoverCountryInfo {
   name: string;
@@ -32,8 +32,7 @@ interface WebGLHoverHudProps {
 
 export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
   const t = useTranslations("map.hud");
-  const locale = useLocale();
-  const isRtl = locale === "fa";
+  const { toDigits, formatPercent } = useLocaleFormatter();
 
   useEffect(() => {
     if (hoverData && hudRef.current) {
@@ -48,9 +47,7 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
   return (
     <div
       ref={hudRef}
-      className={`fixed z-50 pointer-events-none w-80 animate-fade-smooth text-start ${
-        isRtl ? "dir-rtl" : "dir-ltr"
-      }`}
+      className="fixed z-50 pointer-events-none w-80 animate-fade-smooth text-start"
       style={{
         left: HoverHudPositionUtility.getLastLeft(),
         top: HoverHudPositionUtility.getLastTop(),
@@ -77,7 +74,7 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
               </div>
               <span className="text-[9px] font-mono font-bold text-amber-500 block">
                 {t("worldRank", {
-                  rank: PersianNumberFormatter.toPersianDigits(hoverData.rank),
+                  rank: toDigits(hoverData.rank),
                 })}
               </span>
             </div>
@@ -113,9 +110,7 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
                 {hoverData.gdpSharePct !== undefined && (
                   <span className="text-[8px] text-muted-foreground block font-sans">
                     {t("gdpShare", {
-                      pct: PersianNumberFormatter.toPersianDigits(
-                        hoverData.gdpSharePct,
-                      ),
+                      pct: formatPercent(hoverData.gdpSharePct),
                     })}
                   </span>
                 )}
@@ -131,9 +126,7 @@ export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
                 </span>
                 <span className="text-[8px] text-muted-foreground block font-sans">
                   {t("gdpRank", {
-                    rank: PersianNumberFormatter.toPersianDigits(
-                      hoverData.gdpRank ?? hoverData.rank,
-                    ),
+                    rank: toDigits(hoverData.gdpRank ?? hoverData.rank),
                   })}
                 </span>
               </div>

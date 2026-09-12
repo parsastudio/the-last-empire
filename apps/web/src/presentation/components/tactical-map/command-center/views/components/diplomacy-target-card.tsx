@@ -6,7 +6,7 @@ import {
   getAlignmentColor,
   getTensionColor,
 } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DiplomacyTargetCardProps {
   name: string;
@@ -31,16 +31,15 @@ export function DiplomacyTargetCard({
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
 }: DiplomacyTargetCardProps) {
+  const { toDigits, formatPercent } = useLocaleFormatter();
   const flagEmoji = getFlagEmoji(flagCode || code);
   const alignColor = getAlignmentColor(alignment);
   const tensionColor = getTensionColor(tension);
   const formattedAlign =
-    alignment > 0
-      ? `+${PersianNumberFormatter.toPersianDigits(alignment)}`
-      : PersianNumberFormatter.toPersianDigits(alignment);
+    alignment > 0 ? `+${toDigits(alignment)}` : toDigits(alignment);
 
   return (
-    <div className="bg-background/50 border border-border/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm dir-rtl font-sans">
+    <div className="bg-background/50 border border-border/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm text-start font-sans">
       <div className="flex items-center gap-3">
         <span className="text-3xl select-none" role="img" aria-label={name}>
           {flagEmoji}
@@ -56,17 +55,17 @@ export function DiplomacyTargetCard({
       <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
         <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
-            همسویی:
+            Alignment:
           </span>
           <span className={`font-bold ${alignColor}`}>{formattedAlign}</span>
         </div>
 
         <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
-            تنش:
+            Tension:
           </span>
           <span className={`font-bold ${tensionColor}`}>
-            {PersianNumberFormatter.toPersianDigits(tension)}٪
+            {formatPercent(tension)}
           </span>
         </div>
 

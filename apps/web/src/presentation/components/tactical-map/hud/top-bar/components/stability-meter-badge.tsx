@@ -1,15 +1,15 @@
 import React, { useMemo } from "react";
 import { Landmark } from "lucide-react";
-import {
-  PersianNumberFormatter,
-  StabilityBracketUtility,
-} from "@geopolitics/domain";
+import { StabilityBracketUtility } from "@geopolitics/domain";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface StabilityMeterBadgeProps {
   stability: number;
 }
 
 export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
+  const { isRtl, toDigits, formatPercent } = useLocaleFormatter();
+
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(stability),
     [stability],
@@ -17,6 +17,10 @@ export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
 
   const isCrisis = stability < 25;
   const isProsperous = stability >= 75;
+
+  const tooltipText = isRtl
+    ? `ثبات سیاسی: ${toDigits(stability)}% (${bracket.labelFa} • ${bracket.rateTextFa})`
+    : `Political Stability: ${toDigits(stability)}% (${bracket.type})`;
 
   return (
     <div
@@ -27,7 +31,7 @@ export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
             ? "bg-emerald-950/25 border-emerald-500/40"
             : "bg-secondary/60 border-border/80"
       }`}
-      title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}% (${bracket.labelFa} • ${bracket.rateTextFa})`}
+      title={tooltipText}
     >
       <Landmark
         size={14}
@@ -35,7 +39,7 @@ export function StabilityMeterBadge({ stability }: StabilityMeterBadgeProps) {
       />
       <div className="flex items-center gap-2">
         <span className={`font-black ${bracket.textColorClass}`}>
-          {PersianNumberFormatter.toPersianDigits(stability)}%
+          {formatPercent(stability)}
         </span>
         <div className="w-12 h-1.5 bg-background/90 rounded-full overflow-hidden border border-border/60 shadow-inner">
           <div

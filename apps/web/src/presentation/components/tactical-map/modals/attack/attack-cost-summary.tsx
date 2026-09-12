@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Coins, Wallet, Anchor, Swords, ShieldAlert } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackCostSummaryProps {
   totalLogisticsCost: number;
@@ -32,6 +32,8 @@ export function AttackCostSummary({
   onExecute,
 }: AttackCostSummaryProps) {
   const t = useTranslations("attack.summary");
+  const { formatCurrency } = useLocaleFormatter();
+
   const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
     !isAccessible ||
@@ -44,7 +46,7 @@ export function AttackCostSummary({
   const isNaval = attackType === "NAVAL";
 
   return (
-    <div className="space-y-3.5 pt-2 border-t border-border/60 dir-rtl text-right font-sans">
+    <div className="space-y-3.5 pt-2 border-t border-border/60 text-start font-sans">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl space-y-3 font-mono text-xs shadow-sm">
         <div className="flex items-center justify-between pb-2 border-b border-border/50">
           <span className="text-[11px] font-bold text-foreground font-sans flex items-center gap-1.5">
@@ -55,7 +57,7 @@ export function AttackCostSummary({
             <Wallet size={12} className="text-primary" />
             <span>{t("treasury")}</span>
             <span className="font-mono font-bold text-foreground">
-              {PersianNumberFormatter.formatCurrency(currentTreasury)}
+              {formatCurrency(currentTreasury)}
             </span>
           </div>
         </div>
@@ -72,7 +74,7 @@ export function AttackCostSummary({
           <span
             className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
           >
-            {PersianNumberFormatter.formatCurrency(totalLogisticsCost)}
+            {formatCurrency(totalLogisticsCost)}
           </span>
         </div>
       </div>
@@ -112,14 +114,10 @@ export function AttackCostSummary({
                       ? t("insufficientTreasury")
                       : isNaval
                         ? t("executeNaval", {
-                            cost: PersianNumberFormatter.formatCurrency(
-                              totalLogisticsCost,
-                            ),
+                            cost: formatCurrency(totalLogisticsCost),
                           })
                         : t("executeLand", {
-                            cost: PersianNumberFormatter.formatCurrency(
-                              totalLogisticsCost,
-                            ),
+                            cost: formatCurrency(totalLogisticsCost),
                           })}
         </span>
       </button>
