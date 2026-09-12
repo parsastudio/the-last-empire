@@ -13,7 +13,6 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   DiplomaticStance,
-  MapTopologyRegistry,
   LocaleNumberFormatter,
   AppLocale,
 } from "@geopolitics/domain";
@@ -149,15 +148,9 @@ export function useHoverNationResolver({
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
-      const rawTopologyName = MapTopologyRegistry.getNameFa(
-        province.provinceId,
-        "",
-      );
-
       const regionName = ProvinceNameFormatter.format(
-        rawTopologyName,
-        locale,
         province.provinceId,
+        locale,
       );
 
       return {

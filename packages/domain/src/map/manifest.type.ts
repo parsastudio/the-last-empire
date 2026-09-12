@@ -2,6 +2,7 @@ import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 
 export interface FinalManifestProvince {
   provinceId: number;
+  provinceIndex?: number;
   nameFa: string;
   countryId: string;
   originalCountryId?: string;

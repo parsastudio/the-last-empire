@@ -4,7 +4,7 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { MapTopologyRegistry, AppLocale } from "@geopolitics/domain";
+import { AppLocale } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
@@ -43,12 +43,7 @@ export function useContextMenu() {
         ? provincesMap[provinceId.toString()]
         : null;
 
-      const rawTopologyName = MapTopologyRegistry.getNameFa(provinceId, "");
-      const provinceName = ProvinceNameFormatter.format(
-        rawTopologyName,
-        locale,
-        provinceId,
-      );
+      const provinceName = ProvinceNameFormatter.format(provinceId, locale);
 
       const ownerNationId = province ? province.ownerNationId : "";
       const canonicalOwnerId =

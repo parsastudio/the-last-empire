@@ -3,7 +3,10 @@ import { FactoryBatchSchema } from "@/domain/economy/factory-batch.schema";
 
 export const ProvinceStaticTopologySchema = z.object({
   provinceId: z.number().positive(),
+  provinceIndex: z.number().int().positive().optional().default(1),
   nameFa: z.string(),
+  countryId: z.string().optional(),
+  originalCountryId: z.string().optional(),
   pixelCount: z.number().nonnegative(),
   hasSeaAccess: z.boolean(),
   landNeighbors: z.array(z.number()).default([]),
