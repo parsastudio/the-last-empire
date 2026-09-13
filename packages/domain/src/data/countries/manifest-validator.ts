@@ -5,7 +5,6 @@ import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 export const FinalManifestProvinceSchema = z.object({
   provinceId: z.number().positive(),
   provinceIndex: z.number().int().positive().optional().default(1),
-  nameFa: z.string().optional(),
   countryId: z.string().min(1),
   originalCountryId: z.string().optional(),
   pixelCount: z.number().nonnegative(),
@@ -26,8 +25,6 @@ export const FinalManifestNationSchema = z.object({
   id: z.string().min(1),
   code: z.string().min(1),
   flagCode: z.string().min(1),
-  nameFa: z.string().optional(),
-  nameEn: z.string().optional(),
   gdp: z.number().positive(),
   population: z.number().positive(),
   territoryPixelCount: z.number().nonnegative(),

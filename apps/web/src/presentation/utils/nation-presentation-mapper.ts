@@ -3,9 +3,12 @@ import {
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enSelectNation from "@/messages/en/select-nation.json";
-import faSelectNation from "@/messages/fa/select-nation.json";
+
+export type PowerTierKey =
+  | "superpower"
+  | "hegemon"
+  | "transRegional"
+  | "regional";
 
 export interface FormattedNationSummary {
   id: string;
@@ -25,12 +28,11 @@ export class NationPresentationMapper {
     return getFlagEmoji(String(code));
   }
 
-  public static getPowerLabel(gdp: number, locale: AppLocale = "fa"): string {
-    const dict = (locale === "en" ? enSelectNation : faSelectNation).powerTiers;
-    if (gdp >= 10e12) return dict.superpower;
-    if (gdp >= 1e12) return dict.hegemon;
-    if (gdp >= 200e9) return dict.transRegional;
-    return dict.regional;
+  public static getPowerTierKey(gdp: number): PowerTierKey {
+    if (gdp >= 10e12) return "superpower";
+    if (gdp >= 1e12) return "hegemon";
+    if (gdp >= 200e9) return "transRegional";
+    return "regional";
   }
 
   public static formatPopulation(
@@ -47,12 +49,13 @@ export class NationPresentationMapper {
     rank: number,
     gdp: number,
     population: number,
-    treasury?: number,
+    treasury: number | undefined,
+    displayName: string,
+    powerLabel: string,
     locale: AppLocale = "fa",
   ): FormattedNationSummary {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
     const cleanCode = code.toUpperCase();
-    const displayName = NationPresenter.formatName(cleanCode, locale);
 
     return {
       id: cleanCode,
@@ -61,7 +64,7 @@ export class NationPresentationMapper {
       flagCode: (flagCode || cleanCode).toUpperCase(),
       flagEmoji: this.getFlagEmoji(flagCode || cleanCode),
       rank,
-      powerLabel: this.getPowerLabel(gdp, locale),
+      powerLabel,
       gdpText: LocaleNumberFormatter.formatCurrency(gdp, true, locale),
       populationText: this.formatPopulation(population, locale),
       treasuryText: LocaleNumberFormatter.formatCurrency(

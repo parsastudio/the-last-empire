@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useMemo, useRef, useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Nation, ProvinceDynamicState } from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { DiplomaticStampBuilderUtility } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/utils/diplomatic-stamp-builder.utility";
 import { DiplomaticStampVariant } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/types/diplomatic-stamp.types";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface DiplomaticStampsOverlayProps {
   dimensions: { width: number; height: number };
@@ -24,7 +23,6 @@ interface BadgeStyleConfig {
   bg: string;
   border: string;
   text: string;
-  approxWidth: number;
 }
 
 export function DiplomaticStampsOverlay({
@@ -37,8 +35,7 @@ export function DiplomaticStampsOverlay({
 }: DiplomaticStampsOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const t = useTranslations("map.stamps");
-  const locale = useLocale();
-  const isRtl = locale === "fa";
+  const { isRtl, formatCountryName } = useLocaleFormatter();
 
   const badgeConfigs: Record<
     Exclude<DiplomaticStampVariant, "NEUTRAL">,
@@ -51,7 +48,6 @@ export function DiplomaticStampsOverlay({
         bg: "rgba(6, 78, 59, 0.92)",
         border: "rgba(52, 211, 153, 0.8)",
         text: "#a7f3d0",
-        approxWidth: isRtl ? 104 : 110,
       },
       WAR: {
         label: t("war"),
@@ -59,7 +55,6 @@ export function DiplomaticStampsOverlay({
         bg: "rgba(136, 19, 55, 0.92)",
         border: "rgba(244, 63, 94, 0.85)",
         text: "#fecdd3",
-        approxWidth: isRtl ? 88 : 95,
       },
       STRATEGIC_PARTNERSHIP: {
         label: t("partnership"),
@@ -67,7 +62,6 @@ export function DiplomaticStampsOverlay({
         bg: "rgba(8, 51, 68, 0.92)",
         border: "rgba(34, 211, 238, 0.8)",
         text: "#cffafe",
-        approxWidth: isRtl ? 122 : 130,
       },
       NON_AGGRESSION_PACT: {
         label: t("nonAggression"),
@@ -75,7 +69,6 @@ export function DiplomaticStampsOverlay({
         bg: "rgba(69, 26, 3, 0.92)",
         border: "rgba(245, 158, 11, 0.8)",
         text: "#fef3c7",
-        approxWidth: isRtl ? 92 : 115,
       },
       SECURITY_GUARANTEE: {
         label: t("guarantee"),
@@ -83,10 +76,9 @@ export function DiplomaticStampsOverlay({
         bg: "rgba(30, 27, 75, 0.92)",
         border: "rgba(129, 140, 248, 0.8)",
         text: "#e0e7ff",
-        approxWidth: isRtl ? 90 : 125,
       },
     }),
-    [t, isRtl],
+    [t],
   );
 
   const stamps = useMemo(() => {
@@ -201,10 +193,7 @@ export function DiplomaticStampsOverlay({
           continue;
         }
 
-        const displayName = NationPresenter.formatName(
-          item.nationId,
-          locale as AppLocale,
-        );
+        const displayName = formatCountryName(item.nationId);
 
         const baseSize =
           item.territoryPixels >= 50000
@@ -224,8 +213,11 @@ export function DiplomaticStampsOverlay({
         const badgeConfig =
           item.variant !== "NEUTRAL" ? badgeConfigs[item.variant] : null;
 
-        const charWidth = fontSize * 0.58;
-        const textWidth = displayName.length * charWidth;
+        const fontFamily = isRtl ? "Vazirmatn" : "system-ui, sans-serif";
+        ctx.font = `bold ${fontSize}px ${fontFamily}`;
+
+        const measuredText = ctx.measureText(displayName);
+        const textWidth = measuredText.width;
         const totalHeight = badgeConfig ? fontSize * 2 + 14 : fontSize + 4;
 
         const box = {
@@ -255,9 +247,6 @@ export function DiplomaticStampsOverlay({
 
         placedBoxes.push(box);
 
-        const fontFamily = isRtl ? "Vazirmatn" : "system-ui, sans-serif";
-        ctx.font = `bold ${fontSize}px ${fontFamily}`;
-
         const textY = badgeConfig
           ? screenY - Math.round(fontSize * 0.45)
           : screenY;
@@ -277,8 +266,18 @@ export function DiplomaticStampsOverlay({
 
         if (badgeConfig) {
           const badgeFontSize = Math.max(9, Math.round(fontSize * 0.65));
-          const pillScale = badgeFontSize / 11;
-          const pillWidth = Math.round(badgeConfig.approxWidth * pillScale);
+          ctx.font = `bold ${badgeFontSize}px ${fontFamily}`;
+
+          const iconMetrics = ctx.measureText(badgeConfig.icon);
+          const labelMetrics = ctx.measureText(badgeConfig.label);
+          const iconWidth = iconMetrics.width;
+          const labelWidth = labelMetrics.width;
+
+          const gap = 5;
+          const horizontalPadding = 8;
+          const pillWidth = Math.round(
+            iconWidth + gap + labelWidth + horizontalPadding * 2,
+          );
           const pillHeight = Math.max(16, Math.round(badgeFontSize * 1.65));
           const pillRadius = pillHeight / 2;
 
@@ -298,16 +297,29 @@ export function DiplomaticStampsOverlay({
           ctx.strokeStyle = badgeConfig.border;
           ctx.stroke();
 
-          ctx.font = `bold ${badgeFontSize}px ${fontFamily}`;
           const centerY = pillY + pillHeight / 2;
+          ctx.textBaseline = "middle";
 
-          const iconMultiplier = isRtl ? 1 : -1;
-          const iconOffset = pillWidth * 0.35 * iconMultiplier;
-          ctx.fillText(badgeConfig.icon, screenX + iconOffset, centerY);
+          if (isRtl) {
+            const iconX = pillX + pillWidth - horizontalPadding - iconWidth / 2;
+            const labelX = pillX + horizontalPadding + labelWidth / 2;
 
-          ctx.fillStyle = badgeConfig.text;
-          const labelOffset = pillWidth * 0.12 * iconMultiplier;
-          ctx.fillText(badgeConfig.label, screenX - labelOffset, centerY);
+            ctx.textAlign = "center";
+            ctx.fillText(badgeConfig.icon, iconX, centerY);
+
+            ctx.fillStyle = badgeConfig.text;
+            ctx.fillText(badgeConfig.label, labelX, centerY);
+          } else {
+            const iconX = pillX + horizontalPadding + iconWidth / 2;
+            const labelX =
+              pillX + pillWidth - horizontalPadding - labelWidth / 2;
+
+            ctx.textAlign = "center";
+            ctx.fillText(badgeConfig.icon, iconX, centerY);
+
+            ctx.fillStyle = badgeConfig.text;
+            ctx.fillText(badgeConfig.label, labelX, centerY);
+          }
         }
       }
 
@@ -317,7 +329,15 @@ export function DiplomaticStampsOverlay({
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, [stamps, positionRef, scaleRef, dimensions, badgeConfigs, locale, isRtl]);
+  }, [
+    stamps,
+    positionRef,
+    scaleRef,
+    dimensions,
+    badgeConfigs,
+    formatCountryName,
+    isRtl,
+  ]);
 
   return (
     <canvas

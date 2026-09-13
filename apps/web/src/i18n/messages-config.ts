@@ -60,9 +60,18 @@ const NAMESPACE_FILE_MAP: Record<MessageNamespace, string> = {
   selectNation: "select-nation.json",
 };
 
+const messagesMemoryCache = new Map<string, Record<string, unknown>>();
+
 export async function loadLocaleMessages(
   locale: string,
 ): Promise<Record<string, unknown>> {
+  if (process.env.NODE_ENV === "production") {
+    const cached = messagesMemoryCache.get(locale);
+    if (cached) {
+      return cached;
+    }
+  }
+
   const entries = await Promise.all(
     ALL_MESSAGE_NAMESPACES.map(async (ns) => {
       const fileName = NAMESPACE_FILE_MAP[ns];
@@ -75,7 +84,13 @@ export async function loadLocaleMessages(
     }),
   );
 
-  return Object.fromEntries(entries);
+  const merged = Object.fromEntries(entries);
+
+  if (process.env.NODE_ENV === "production") {
+    messagesMemoryCache.set(locale, merged);
+  }
+
+  return merged;
 }
 
 export async function loadNamespaceMessages(

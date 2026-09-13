@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { AmbientTacticalGrid } from "@/presentation/components/main-menu/ambient-tactical-grid";
 import { CommandConsole } from "@/presentation/components/main-menu/command-console";
@@ -12,7 +12,6 @@ import { LanguageSwitcher } from "@/presentation/components/common/language-swit
 
 export function MainMenuView() {
   const t = useTranslations("menu");
-  const locale = useLocale();
   const router = useRouter();
   const [isLoadGameModalOpen, setIsLoadGameModalOpen] = useState(false);
 
@@ -29,10 +28,7 @@ export function MainMenuView() {
   };
 
   return (
-    <div
-      className="w-screen h-screen bg-background overflow-hidden relative flex flex-col justify-between items-center select-none"
-      dir={locale === "fa" ? "rtl" : "ltr"}
-    >
+    <div className="w-screen h-screen bg-background overflow-hidden relative flex flex-col justify-between items-center select-none">
       <AmbientTacticalGrid />
 
       <div className="absolute top-4 end-4 z-30">

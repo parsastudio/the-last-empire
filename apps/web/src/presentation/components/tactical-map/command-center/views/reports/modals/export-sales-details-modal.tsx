@@ -22,7 +22,7 @@ export function ExportSalesDetailsModal({
   onClose,
 }: ExportSalesDetailsModalProps) {
   const t = useTranslations("reports.exportSales");
-  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
+  const { formatCurrency, toDigits, countryTranslator } = useLocaleFormatter();
 
   useEffect(() => {
     if (isOpen) {
@@ -36,7 +36,7 @@ export function ExportSalesDetailsModal({
     const resolved = NationResolverUtility.resolve(
       item.nationId,
       nationsMap,
-      locale,
+      countryTranslator,
     );
     const rank = resolved.nation
       ? NationGettersUtility.getRank(resolved.nation.id, nationsMap)

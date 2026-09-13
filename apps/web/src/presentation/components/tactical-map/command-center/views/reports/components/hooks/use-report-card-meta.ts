@@ -26,14 +26,25 @@ export function useReportCardMeta({
   humanNationId,
   pendingProposals = [],
 }: UseReportCardMetaProps) {
-  const { locale, formatCurrency, toDigits } = useLocaleFormatter();
+  const {
+    locale,
+    formatCurrency,
+    toDigits,
+    countryTranslator,
+    formatCountryName,
+  } = useLocaleFormatter();
   const tEvents = useTranslations("reports.events");
   const tDiplomacy = useTranslations("diplomacy");
   const tDilemmas = useTranslations("dilemmas");
 
   const source = useMemo(
-    () => NationResolverUtility.resolve(log.sourceNationId, nationsMap, locale),
-    [log.sourceNationId, nationsMap, locale],
+    () =>
+      NationResolverUtility.resolve(
+        log.sourceNationId,
+        nationsMap,
+        countryTranslator,
+      ),
+    [log.sourceNationId, nationsMap, countryTranslator],
   );
 
   const target = useMemo(() => {
@@ -41,9 +52,9 @@ export function useReportCardMeta({
     return NationResolverUtility.resolve(
       log.targetNationId,
       nationsMap,
-      locale,
+      countryTranslator,
     );
-  }, [log.targetNationId, nationsMap, locale]);
+  }, [log.targetNationId, nationsMap, countryTranslator]);
 
   const dynamicMessage = useMemo(() => {
     return TurnLogPresenterUtility.format(log, {
@@ -52,6 +63,7 @@ export function useReportCardMeta({
       tDilemmas,
       formatCurrency,
       toDigits,
+      formatCountryName,
       sourceName: source.name,
       targetName: target?.name || "",
       locale,
@@ -65,6 +77,7 @@ export function useReportCardMeta({
     tDilemmas,
     formatCurrency,
     toDigits,
+    formatCountryName,
     locale,
   ]);
 

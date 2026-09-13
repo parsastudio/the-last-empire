@@ -1,13 +1,10 @@
 import { useState, useCallback } from "react";
-import { useLocale } from "next-intl";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -19,8 +16,7 @@ export interface ContextMenuState {
 }
 
 export function useContextMenu() {
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const { formatCountryName, formatProvinceName } = useLocaleFormatter();
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
@@ -44,7 +40,7 @@ export function useContextMenu() {
         ? provincesMap[provinceId.toString()]
         : null;
 
-      const provinceName = ProvinceNameFormatter.format(provinceId, locale);
+      const provinceName = formatProvinceName(provinceId);
 
       const ownerNationId = province ? province.ownerNationId : "";
       const canonicalOwnerId =
@@ -54,10 +50,7 @@ export function useContextMenu() {
           ? nationsMap[canonicalOwnerId] || nationsMap[ownerNationId]
           : null;
 
-      const countryName = NationPresenter.formatName(
-        ownerNation || canonicalOwnerId,
-        locale,
-      );
+      const countryName = formatCountryName(ownerNation || canonicalOwnerId);
 
       const countryCode = ownerNation
         ? ownerNation.id
@@ -77,7 +70,7 @@ export function useContextMenu() {
         isOwnCountry,
       });
     },
-    [locale],
+    [formatCountryName, formatProvinceName],
   );
 
   const closeContextMenu = useCallback(() => {

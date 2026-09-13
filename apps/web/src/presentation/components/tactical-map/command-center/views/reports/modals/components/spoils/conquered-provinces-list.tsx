@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface ConqueredProvincesListProps {
@@ -14,7 +13,7 @@ export function ConqueredProvincesList({
   provincesNames,
 }: ConqueredProvincesListProps) {
   const t = useTranslations("reports.spoils.provinces");
-  const { locale } = useLocaleFormatter();
+  const { formatProvinceName } = useLocaleFormatter();
 
   const hasIds = provinceIds && provinceIds.length > 0;
   const hasNames = provincesNames && provincesNames.length > 0;
@@ -35,7 +34,7 @@ export function ConqueredProvincesList({
                 className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
               >
                 <span>📍</span>
-                <span>{ProvinceNameFormatter.format(id, locale)}</span>
+                <span>{formatProvinceName(id)}</span>
               </span>
             ))
           : provincesNames!.map((name, idx) => (

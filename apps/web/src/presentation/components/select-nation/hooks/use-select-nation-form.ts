@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useToast } from "@/presentation/context/toast-context";
 import {
@@ -16,14 +16,18 @@ import {
   GameDifficulty,
   MapTopologyRegistry,
 } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
-  locale: AppLocale = "fa",
-  dossierTemplate: (values: { name: string; rank: number }) => string,
+  tDossier: (values: { name: string; rank: number }) => string,
+  tPowerTiers: (key: string) => string,
+  formatCountryName: (code: string) => string,
+  formatNumber: (val: number | string) => string,
+  formatPopulation: (val: number) => string,
+  formatCurrency: (val: number, compact?: boolean) => string,
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -38,6 +42,10 @@ function mapManifestToNationDetails(
       const rank = idx + 1;
       const gov = p.startingGovernment || "PLURALIST_PARLIAMENTARY";
 
+      const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
+      const powerLabel = tPowerTiers(powerTierKey);
+      const displayName = formatCountryName(p.code);
+
       const summary = NationPresentationMapper.formatNationSummary(
         p.code,
         p.code,
@@ -46,10 +54,11 @@ function mapManifestToNationDetails(
         gdp,
         pop,
         treasury,
-        locale,
+        displayName,
+        powerLabel,
       );
 
-      const desc = dossierTemplate({ name: summary.name, rank });
+      const desc = tDossier({ name: summary.name, rank });
 
       return {
         id: p.code,
@@ -85,6 +94,10 @@ function mapManifestToNationDetails(
       profile?.startingGovernment ||
       "PLURALIST_PARLIAMENTARY";
 
+    const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
+    const powerLabel = tPowerTiers(powerTierKey);
+    const displayName = formatCountryName(canonicalId);
+
     const summary = NationPresentationMapper.formatNationSummary(
       canonicalId,
       item.code || canonicalId,
@@ -93,10 +106,11 @@ function mapManifestToNationDetails(
       gdp,
       population,
       treasury,
-      locale,
+      displayName,
+      powerLabel,
     );
 
-    const desc = dossierTemplate({ name: summary.name, rank });
+    const desc = tDossier({ name: summary.name, rank });
 
     return {
       id: canonicalId,
@@ -115,12 +129,14 @@ function mapManifestToNationDetails(
 
 export function useSelectNationForm() {
   const router = useRouter();
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
   const tDossier = useTranslations("selectNation.dossier");
+  const tPowerTiers = useTranslations("selectNation.powerTiers");
   const tErrors = useTranslations("common.errors");
   const { showToast } = useToast();
   const createCampaignStore = useGameStore((state) => state.createCampaign);
+
+  const { formatCountryName, formatNumber, formatPopulation, formatCurrency } =
+    useLocaleFormatter();
 
   const [manifest, setManifest] = useState<FinalMapManifest | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,10 +183,24 @@ export function useSelectNationForm() {
 
   const allNations = useMemo(
     () =>
-      mapManifestToNationDetails(manifest, locale, (values) =>
-        tDossier("template", values),
+      mapManifestToNationDetails(
+        manifest,
+        (values) => tDossier("template", values),
+        (key) => tPowerTiers(key),
+        formatCountryName,
+        formatNumber,
+        formatPopulation,
+        formatCurrency,
       ),
-    [manifest, locale, tDossier],
+    [
+      manifest,
+      tDossier,
+      tPowerTiers,
+      formatCountryName,
+      formatNumber,
+      formatPopulation,
+      formatCurrency,
+    ],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {

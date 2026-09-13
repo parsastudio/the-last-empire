@@ -57,11 +57,10 @@ export function CountryProfileStats({
   );
 
   const resolvedGovernmentLabel = useMemo(() => {
-    try {
-      return tGovernments(`${data.governmentType}.name`);
-    } catch {
-      return data.governmentType;
-    }
+    const govKey = `${data.governmentType}.name`;
+    return tGovernments.has(govKey)
+      ? tGovernments(govKey)
+      : data.governmentType;
   }, [data.governmentType, tGovernments]);
 
   return (

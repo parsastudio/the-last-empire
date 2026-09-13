@@ -18,12 +18,7 @@ import {
   NavalDeploymentClamper,
   EspionageCalculator,
 } from "@geopolitics/game-engine";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enAttack from "@/messages/en/attack.json";
-import faAttack from "@/messages/fa/attack.json";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
@@ -31,8 +26,6 @@ export interface DirectAttackReachEvaluation {
   isLandNeighbor: boolean;
   isNavalValid: boolean;
   attackType: "LAND" | "NAVAL";
-  originRegionName: string;
-  targetRegionName: string;
 }
 
 export interface DirectAttackPenaltyEvaluation {
@@ -41,10 +34,10 @@ export interface DirectAttackPenaltyEvaluation {
   reputationPenalty: number;
 }
 
-export interface DirectAttackGuarantorsEvaluation {
-  activeGuarantorNames: string[];
-  mutualGuarantorNames: string[];
-  partnerGuarantorNames: string[];
+export interface DirectAttackGuarantorIdsEvaluation {
+  activeGuarantorIds: string[];
+  mutualGuarantorIds: string[];
+  partnerGuarantorIds: string[];
 }
 
 export interface DirectAttackLogisticsEvaluation {
@@ -65,10 +58,8 @@ export interface DirectAttackReconEvaluation {
 export class DirectAttackSelector {
   public static selectReach(
     humanNation: Nation | null,
-    targetNation: Nation | null,
     targetProvinceId: number | null,
     gameState: GameState | null,
-    locale: AppLocale = "fa",
   ): DirectAttackReachEvaluation {
     const targetProvince =
       gameState && targetProvinceId
@@ -97,32 +88,12 @@ export class DirectAttackSelector {
       !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
-    const attackerDisplayName = NationPresenter.formatName(humanNation, locale);
-    const targetDisplayName = NationPresenter.formatName(targetNation, locale);
-    const attackDict = (locale === "en" ? enAttack : faAttack).regions;
-
-    const originRegionName = humanNation
-      ? attackDict.territoryOf.replace("{name}", attackerDisplayName)
-      : attackDict.mainland;
-
-    let targetRegionName = "";
-    if (targetProvinceId) {
-      targetRegionName = ProvinceNameFormatter.format(targetProvinceId, locale);
-    } else if (targetNation) {
-      targetRegionName = attackDict.mainlandOf.replace(
-        "{name}",
-        targetDisplayName,
-      );
-    }
-
     return {
       targetProvince,
       targetProvinceId,
       isLandNeighbor,
       isNavalValid,
       attackType,
-      originRegionName,
-      targetRegionName,
     };
   }
 
@@ -165,28 +136,27 @@ export class DirectAttackSelector {
     targetNation: Nation | null,
     gameState: GameState | null,
     isWarStance: boolean,
-    locale: AppLocale = "fa",
-  ): DirectAttackGuarantorsEvaluation {
+  ): DirectAttackGuarantorIdsEvaluation {
     if (!targetNation || !gameState || !humanNation || isWarStance) {
       return {
-        activeGuarantorNames: [],
-        mutualGuarantorNames: [],
-        partnerGuarantorNames: [],
+        activeGuarantorIds: [],
+        mutualGuarantorIds: [],
+        partnerGuarantorIds: [],
       };
     }
 
     const relWithHuman = humanNation.relations?.[targetNation.id];
     if (relWithHuman?.isIntervener) {
       return {
-        activeGuarantorNames: [],
-        mutualGuarantorNames: [],
-        partnerGuarantorNames: [],
+        activeGuarantorIds: [],
+        mutualGuarantorIds: [],
+        partnerGuarantorIds: [],
       };
     }
 
-    const activeGuarantorNames: string[] = [];
-    const mutualGuarantorNames: string[] = [];
-    const partnerGuarantorNames: string[] = [];
+    const activeGuarantorIds: string[] = [];
+    const mutualGuarantorIds: string[] = [];
+    const partnerGuarantorIds: string[] = [];
 
     const targetGuarantors = targetNation.defenseGuarantorIds || [];
     const humanGuarantors = humanNation.defenseGuarantorIds || [];
@@ -198,14 +168,12 @@ export class DirectAttackSelector {
 
       if (!gNation || !gNation.isAlive) continue;
 
-      const gDisplayName = NationPresenter.formatName(gNation, locale);
-
       const isMutual = humanGuarantors.some(
         (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,
       );
 
       if (isMutual) {
-        mutualGuarantorNames.push(gDisplayName);
+        mutualGuarantorIds.push(canonicalG);
         continue;
       }
 
@@ -214,17 +182,17 @@ export class DirectAttackSelector {
         humanNation.relations?.[canonicalG];
 
       if (rel?.stance === "STRATEGIC_PARTNERSHIP") {
-        partnerGuarantorNames.push(gDisplayName);
+        partnerGuarantorIds.push(canonicalG);
         continue;
       }
 
-      activeGuarantorNames.push(gDisplayName);
+      activeGuarantorIds.push(canonicalG);
     }
 
     return {
-      activeGuarantorNames,
-      mutualGuarantorNames,
-      partnerGuarantorNames,
+      activeGuarantorIds,
+      mutualGuarantorIds,
+      partnerGuarantorIds,
     };
   }
 

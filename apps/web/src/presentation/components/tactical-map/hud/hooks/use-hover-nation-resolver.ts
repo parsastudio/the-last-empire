@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
@@ -14,12 +14,8 @@ import {
   NationRelationResolver,
   DiplomaticStance,
 } from "@geopolitics/domain";
-import {
-  LocaleNumberFormatter,
-  AppLocale,
-} from "@/presentation/utils/locale-number-formatter";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, ProvinceDynamicState>;
@@ -33,8 +29,12 @@ export function useHoverNationResolver({
   humanNationId,
 }: UseHoverNationResolverProps) {
   const t = useTranslations("map.hud.stances");
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const {
+    formatCountryName,
+    formatProvinceName,
+    formatCurrency,
+    countryTranslator,
+  } = useLocaleFormatter();
 
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
@@ -58,7 +58,7 @@ export function useHoverNationResolver({
       const presented = NationPresenter.present(
         ownerNation || canonicalOwnerId,
         nationsMap,
-        locale,
+        countryTranslator,
         t("unknownCountry"),
       );
 
@@ -150,10 +150,7 @@ export function useHoverNationResolver({
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
-      const regionName = ProvinceNameFormatter.format(
-        province.provinceId,
-        locale,
-      );
+      const regionName = formatProvinceName(province.provinceId);
 
       return {
         name: presented.name,
@@ -165,21 +162,21 @@ export function useHoverNationResolver({
         rawStance,
         isOwnCountry,
         regionName,
-        regionGdpText: LocaleNumberFormatter.formatCurrency(
-          provinceGdp,
-          true,
-          locale,
-        ),
-        totalGdpText: LocaleNumberFormatter.formatCurrency(
-          realGdp,
-          true,
-          locale,
-        ),
+        regionGdpText: formatCurrency(provinceGdp, true),
+        totalGdpText: formatCurrency(realGdp, true),
         gdpSharePct,
         hasSecurityGuarantee,
       };
     },
-    [provincesMap, nationsMap, humanNationId, locale, t],
+    [
+      provincesMap,
+      nationsMap,
+      humanNationId,
+      countryTranslator,
+      formatCurrency,
+      formatProvinceName,
+      t,
+    ],
   );
 
   return { resolveHoverInfo };

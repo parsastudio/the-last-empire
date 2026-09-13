@@ -9,8 +9,6 @@ export interface CountryProfile {
   domesticTechLevel: number;
   equipmentTechLevel: number;
   industrialLevel: number;
-  nameEn?: string;
-  nameFa?: string;
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
   aiDoctrine?: AiDoctrineType;

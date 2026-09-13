@@ -36,7 +36,8 @@ export function useDirectAttackForm({
   onClose,
 }: UseDirectAttackFormProps) {
   const tAlerts = useTranslations("attack.alerts");
-  const { locale } = useLocaleFormatter();
+  const tAttack = useTranslations("attack");
+  const { formatCountryName, formatProvinceName } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const { showToast } = useToast();
   const openModal = useUiStore((state) => state.openModal);
@@ -82,12 +83,33 @@ export function useDirectAttackForm({
   const reach = useMemo(() => {
     return DirectAttackSelector.selectReach(
       humanNation,
-      targetNation,
       targetProvinceId,
       gameState,
-      locale,
     );
-  }, [humanNation, targetNation, targetProvinceId, gameState, locale]);
+  }, [humanNation, targetProvinceId, gameState]);
+
+  const originRegionName = useMemo(() => {
+    const attackerName = formatCountryName(humanNation);
+    return humanNation
+      ? tAttack("regions.territoryOf", { name: attackerName })
+      : tAttack("regions.mainland");
+  }, [humanNation, formatCountryName, tAttack]);
+
+  const targetRegionName = useMemo(() => {
+    if (targetProvinceId) {
+      return formatProvinceName(targetProvinceId);
+    }
+    const defenderName = formatCountryName(targetNation);
+    return targetNation
+      ? tAttack("regions.mainlandOf", { name: defenderName })
+      : "";
+  }, [
+    targetProvinceId,
+    targetNation,
+    formatProvinceName,
+    formatCountryName,
+    tAttack,
+  ]);
 
   useEffect(() => {
     if (isOpen && humanNation) {
@@ -109,15 +131,29 @@ export function useDirectAttackForm({
     return DirectAttackSelector.selectPenalty(humanNation, targetNation);
   }, [humanNation, targetNation]);
 
-  const guarantors = useMemo(() => {
+  const guarantorIds = useMemo(() => {
     return DirectAttackSelector.selectGuarantors(
       humanNation,
       targetNation,
       gameState,
       penalty.isWarStance,
-      locale,
     );
-  }, [humanNation, targetNation, gameState, penalty.isWarStance, locale]);
+  }, [humanNation, targetNation, gameState, penalty.isWarStance]);
+
+  const activeGuarantorNames = useMemo(
+    () => guarantorIds.activeGuarantorIds.map((id) => formatCountryName(id)),
+    [guarantorIds.activeGuarantorIds, formatCountryName],
+  );
+
+  const mutualGuarantorNames = useMemo(
+    () => guarantorIds.mutualGuarantorIds.map((id) => formatCountryName(id)),
+    [guarantorIds.mutualGuarantorIds, formatCountryName],
+  );
+
+  const partnerGuarantorNames = useMemo(
+    () => guarantorIds.partnerGuarantorIds.map((id) => formatCountryName(id)),
+    [guarantorIds.partnerGuarantorIds, formatCountryName],
+  );
 
   const logistics = useMemo(() => {
     return DirectAttackSelector.selectLogistics(
@@ -297,14 +333,14 @@ export function useDirectAttackForm({
     isLandNeighbor: reach.isLandNeighbor,
     isNavalValid: reach.isNavalValid,
     attackType: reach.attackType,
-    originRegionName: reach.originRegionName,
-    targetRegionName: reach.targetRegionName,
+    originRegionName,
+    targetRegionName,
     currentStance: penalty.currentStance,
     isWarStance: penalty.isWarStance,
     reputationPenalty: penalty.reputationPenalty,
-    activeGuarantorNames: guarantors.activeGuarantorNames,
-    mutualGuarantorNames: guarantors.mutualGuarantorNames,
-    partnerGuarantorNames: guarantors.partnerGuarantorNames,
+    activeGuarantorNames,
+    mutualGuarantorNames,
+    partnerGuarantorNames,
     navalFleetCount: logistics.navalFleetCount,
     hasNavalCapacity: logistics.hasNavalCapacity,
     totalLogisticsCost: logistics.totalLogisticsCost,

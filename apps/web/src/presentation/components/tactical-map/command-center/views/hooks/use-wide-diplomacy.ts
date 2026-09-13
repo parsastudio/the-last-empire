@@ -9,6 +9,7 @@ import {
 } from "@geopolitics/domain";
 import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UseWideDiplomacyProps {
   selectedTargetCode?: string | null;
@@ -25,6 +26,7 @@ export function useWideDiplomacy({
 }: UseWideDiplomacyProps) {
   const currentLocale = useLocale() as AppLocale;
   const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const { countryTranslator } = useLocaleFormatter();
   const [searchQuery, setSearchQuery] = useState("");
   const activeHumanId = CountryRegistry.resolveCanonicalId(
     humanNationId || "USA",
@@ -50,12 +52,20 @@ export function useWideDiplomacy({
         humanNation,
         nationsMap,
         provincesMap,
+        countryTranslator,
         locale,
       );
     });
 
     return list.sort((a, b) => a.rank - b.rank);
-  }, [liveNationsList, humanNation, nationsMap, provincesMap, locale]);
+  }, [
+    liveNationsList,
+    humanNation,
+    nationsMap,
+    provincesMap,
+    countryTranslator,
+    locale,
+  ]);
 
   const defaultCode = relationsList[0]?.code || "";
   const [userSelectedCode, setUserSelectedCode] = useState<string | null>(null);
@@ -84,6 +94,7 @@ export function useWideDiplomacy({
       humanNation,
       nationsMap,
       provincesMap,
+      countryTranslator,
       locale,
     );
   }, [
@@ -92,6 +103,7 @@ export function useWideDiplomacy({
     humanNation,
     nationsMap,
     provincesMap,
+    countryTranslator,
     locale,
   ]);
 

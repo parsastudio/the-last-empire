@@ -18,7 +18,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 const WebGLMapCanvas = dynamic(
   () =>
@@ -44,7 +44,6 @@ export function WebGLTacticalWorkspace({
 }: WebGLTacticalWorkspaceProps) {
   const t = useTranslations("common");
   const tHud = useTranslations("map.hud");
-  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
@@ -56,6 +55,8 @@ export function WebGLTacticalWorkspace({
   const openModal = useUiStore((state) => state.openModal);
   const openCommandCenter = useUiStore((state) => state.openCommandCenter);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
+
+  const { countryTranslator } = useLocaleFormatter();
 
   const {
     gameState: effectiveGameState,
@@ -118,7 +119,7 @@ export function WebGLTacticalWorkspace({
           const resolvedTargetName = targetNation
             ? NationPresenter.formatName(
                 targetNation,
-                locale as AppLocale,
+                countryTranslator,
                 fallbackName,
               )
             : fallbackName;
@@ -144,7 +145,7 @@ export function WebGLTacticalWorkspace({
     isProcessingTurn,
     openCommandCenter,
     openModal,
-    locale,
+    countryTranslator,
     tHud,
   ]);
 
@@ -157,7 +158,6 @@ export function WebGLTacticalWorkspace({
     <div
       ref={containerRef}
       className="w-screen h-screen bg-background overflow-hidden relative"
-      dir={locale === "fa" ? "rtl" : "ltr"}
     >
       <WebGLMapCanvas
         provincesMap={effectiveGameState?.provinces}
