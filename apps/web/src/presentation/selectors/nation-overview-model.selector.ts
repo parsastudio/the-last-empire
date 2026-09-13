@@ -8,7 +8,6 @@ import {
 
 export interface NationOverviewViewModel {
   id: string;
-  name: string;
   flagCode: string;
   governmentType: string;
   rank: number;
@@ -46,7 +45,6 @@ export function selectNationOverviewViewModel(
 
   return {
     id: nation.id,
-    name: nation.name,
     flagCode: nation.flagCode,
     governmentType: nation.government.type,
     rank: NationGettersUtility.getRank(nation.id, nationsMap, provincesMap),

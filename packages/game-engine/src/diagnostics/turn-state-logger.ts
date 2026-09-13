@@ -32,6 +32,7 @@ export class TurnStateLogger {
 
     const nations: NationTurnSnapshot[] = allNationsList.map((nation) => {
       const canonicalCode = CountryRegistry.resolveCanonicalId(nation.id);
+      const profile = CountryRegistry.getCountry(canonicalCode);
       const ownedProvinces = NationGettersUtility.getOwnedProvinces(
         nation.id,
         state.provinces,
@@ -46,7 +47,7 @@ export class TurnStateLogger {
 
       return {
         code: canonicalCode,
-        name: nation.name,
+        name: profile?.nameFa ?? canonicalCode,
         isAlive: nation.isAlive,
         provincesCount,
         gdp,

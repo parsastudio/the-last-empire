@@ -150,7 +150,7 @@ export class AIEmergencyDefenseManager {
       newState: nextState,
       defenseEvent: {
         type: "PURCHASED",
-        sellerName: bestSeller.name,
+        sellerName: bestSeller.id,
         sellerFlagCode: bestSeller.flagCode,
         cost: finalCost,
         quantity: actualQuantity,

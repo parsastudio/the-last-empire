@@ -56,7 +56,7 @@ export class GuarantorInterventionCalculator {
 
     const auxiliaryGuarantor: AuxiliaryGuarantorDefense = {
       guarantorId: guarantorNation.id,
-      guarantorName: guarantorNation.name,
+      guarantorName: guarantorNation.id,
       guarantorFlagCode: guarantorNation.flagCode,
       techLevel: guarantorNation.military.techLevel,
       isEmergencyProtectorate: true,

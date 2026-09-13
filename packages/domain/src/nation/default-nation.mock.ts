@@ -2,7 +2,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 export const DEFAULT_NATION_MOCK: Nation = {
   id: "IRN",
-  name: "IRN",
   isAi: false,
   isAlive: true,
   flagCode: "IR",

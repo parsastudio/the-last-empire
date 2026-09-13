@@ -37,7 +37,7 @@ export class ReconTierExecutor {
       if (guarantor && guarantor.isAlive) {
         const guarantorGdp = getNationGdp(guarantor, provincesMap);
         guarantorNationId = guarantor.id;
-        guarantorName = guarantor.name;
+        guarantorName = guarantor.id;
         guarantorFlagCode = guarantor.flagCode;
         guarantorTechLevel = guarantor.military.techLevel;
         guarantorAuxiliaryValuation =
@@ -57,7 +57,7 @@ export class ReconTierExecutor {
         const gId = target.defenseGuarantorIds[i]!;
         const gNation = NationGettersUtility.resolveNation(gId, allNations);
         if (gNation && gNation.isAlive) {
-          gNames.push(gNation.name);
+          gNames.push(gNation.id);
           if (gNation.military.techLevel > maxTech) {
             maxTech = gNation.military.techLevel;
             primaryFlag = gNation.flagCode;
@@ -68,7 +68,7 @@ export class ReconTierExecutor {
 
       if (gNames.length > 0) {
         guarantorNationId = primaryId;
-        guarantorName = gNames.join(" و ");
+        guarantorName = gNames.join(" - ");
         guarantorFlagCode = primaryFlag;
         guarantorTechLevel = maxTech;
         guarantorAuxiliaryValuation = 0;
@@ -94,7 +94,7 @@ export class ReconTierExecutor {
       guarantorAuxiliaryValuation,
     };
 
-    const message = `شنود ماهواره‌ای کامل با موفقیت ۱۰۰٪ انجام شد. تمام مختصات نظامی و خزانه‌داری ${target.name} بدون هیچ ردیابی آشکار گردید.`;
+    const message = `شنود ماهواره‌ای کامل با موفقیت ۱۰۰٪ انجام شد. تمام مختصات نظامی و خزانه‌داری کشور هدف بدون هیچ ردیابی آشکار گردید.`;
 
     return { reconData, message };
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ShoppingCart, ShieldCheck, Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -9,6 +9,8 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@geopolitics/domain";
 import { MachinerySellerCard } from "./components/machinery-seller-card";
 import { MachineryImportCountryView } from "./components/machinery-import-country-view";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 
 interface IndustryImportTabProps {
   nation: Nation;
@@ -22,6 +24,7 @@ export function IndustryImportTab({
   provincesMap,
 }: IndustryImportTabProps) {
   const t = useTranslations("industry.imports");
+  const locale = useLocale() as AppLocale;
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -58,13 +61,15 @@ export function IndustryImportTab({
   const filteredSellers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return sellers;
-    return sellers.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
+    return sellers.filter((s) => {
+      const localizedName = NationPresenter.formatName(s, locale).toLowerCase();
+      return (
+        localizedName.includes(q) ||
         s.id.toLowerCase().includes(q) ||
-        s.flagCode.toLowerCase().includes(q),
-    );
-  }, [sellers, searchQuery]);
+        s.flagCode.toLowerCase().includes(q)
+      );
+    });
+  }, [sellers, searchQuery, locale]);
 
   const selectedSeller = useMemo(() => {
     if (!selectedSellerId || !nationsMap) return null;

@@ -29,7 +29,7 @@ export class WarDeclarationExecutor {
     if (!canReach) {
       throw new GameError(
         "GEOPOLITICAL_REACH_DENIED",
-        `امکان اعلان جنگ به کشور ${receiver.name} وجود ندارد: عدم وجود مرز زمینی مشترک یا دسترسی دریایی با حداقل ۱ ناوگان فعال.`,
+        `امکان اعلان جنگ به کشور ${receiver.id} وجود ندارد: عدم وجود مرز زمینی مشترک یا دسترسی دریایی با حداقل ۱ ناوگان فعال.`,
       );
     }
 
@@ -115,7 +115,7 @@ export class WarDeclarationExecutor {
         proposalType: "DECLARE_WAR",
         accepted: true,
         targetNationId: receiver.id,
-        targetName: receiver.name,
+        targetName: receiver.id,
         targetFlagCode: receiver.flagCode,
         defenseEvent,
         retaliatingGuarantors: retaliationResult.retaliatingGuarantors,

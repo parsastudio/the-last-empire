@@ -11,6 +11,7 @@ import {
 } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-seller-card";
 import { AlliedUnitBuyGrid } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-grid";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface MilitaryAlliedProcurementTabProps {
   nation: Nation;
@@ -62,15 +63,10 @@ export function MilitaryAlliedProcurementTab({
       })
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
-        const profile = CountryRegistry.getCountry(canonical);
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const tension = rel ? (rel.tension ?? 10) : 10;
         const rank = rankLookup.get(canonical) ?? 99;
-
-        const name =
-          locale === "en"
-            ? profile?.nameEn || n.name
-            : n.name || profile?.nameFa || canonical;
+        const name = NationPresenter.formatName(n, locale);
 
         return {
           id: canonical,

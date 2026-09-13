@@ -7,6 +7,7 @@ import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map
 import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface AlliedUnitBuyGridProps {
   buyerNation: Nation;
@@ -24,7 +25,7 @@ export function AlliedUnitBuyGrid({
   onBack,
 }: AlliedUnitBuyGridProps) {
   const t = useTranslations("military.alliesGrid");
-  const { formatCurrency, toDigits } = useLocaleFormatter();
+  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
 
   const {
     batchList,
@@ -40,6 +41,7 @@ export function AlliedUnitBuyGrid({
   });
 
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
+  const sellerDisplayName = NationPresenter.formatName(sellerNation, locale);
   const surchargeRate = Math.round((techMultiplier - 1.0) * 100);
 
   return (
@@ -58,7 +60,7 @@ export function AlliedUnitBuyGrid({
             <span className="text-2xl select-none">{sellerFlag}</span>
             <div className="flex items-center gap-2">
               <h4 className="text-xs font-black text-foreground">
-                {t("title", { name: sellerNation.name })}
+                {t("title", { name: sellerDisplayName })}
               </h4>
               <span className="text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                 <Award size={11} />

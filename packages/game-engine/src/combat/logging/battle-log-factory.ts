@@ -63,38 +63,23 @@ export class BattleLogFactory {
       CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
-    const resolvedNameFa = targetProvince
-      ? MapTopologyRegistry.getNameFa(targetProvince.provinceId, "")
-      : "";
-
-    const provinceLabel = resolvedNameFa
-      ? `استان ${resolvedNameFa}`
-      : "منطقه مرزی";
-
-    let humanHeadline = "";
     let outcome = "DEFEAT";
 
     if (isAttackerHuman) {
       if (isDefenderAnnexed) {
         outcome = "CAPITULATION";
-        humanHeadline = `سقوط آخرین سنگر و انحلال کامل حاکمیت ${defender.name}`;
       } else if (calcResult.isAttackerVictory) {
         outcome = "VICTORY";
-        humanHeadline = `پیروزی ارتش و فتح ${provinceLabel} در نبرد با ${defender.name}`;
       } else {
         outcome = "DEFEAT";
-        humanHeadline = `شکست عملیات تهاجمی و عقب‌نشینی از ${provinceLabel} مقابل ${defender.name}`;
       }
     } else if (isDefenderHuman) {
       if (isDefenderAnnexed) {
         outcome = "CAPITULATION";
-        humanHeadline = `سقوط آخرین سنگر و فروپاشی کامل کشور توسط ارتش ${attacker.name}`;
       } else if (!calcResult.isAttackerVictory) {
         outcome = "DEFENDED";
-        humanHeadline = `دفاع جانانه و حفظ تمامیت ارضی ${provinceLabel} در برابر ${attacker.name}`;
       } else {
         outcome = "DEFEAT";
-        humanHeadline = `شکست سنگرها و واگذاری ${provinceLabel} به ارتش ${attacker.name}`;
       }
     }
 
@@ -125,7 +110,6 @@ export class BattleLogFactory {
           "BATTLE_TACTICAL_REPORT",
           {
             outcome,
-            humanHeadline,
             ratio: calcResult.valuationRatio,
             betrayalPenalty: betrayalPenaltyText
               ? Number(betrayalPenaltyText)

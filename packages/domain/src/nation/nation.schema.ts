@@ -35,7 +35,6 @@ export const DEFAULT_NATION_TURN_ACTIVITY: NationTurnActivity = Object.freeze({
 
 export const NationSchema = z.object({
   id: z.string(),
-  name: z.string().optional().default(""),
   isAi: z.boolean(),
   isAlive: z.boolean(),
   flagCode: z.string(),

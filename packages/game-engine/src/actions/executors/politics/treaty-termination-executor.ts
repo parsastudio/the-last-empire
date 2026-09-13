@@ -47,9 +47,9 @@ export class TreatyTerminationExecutor {
         proposalType: "CANCEL_SECURITY_GUARANTEE",
         accepted: true,
         targetNationId: receiver.id,
-        targetName: receiver.name,
+        targetName: receiver.id,
         targetFlagCode: receiver.flagCode,
-        message: `پیمان دفاعی با کشور ${receiver.name} فسخ گردید.`,
+        message: `پیمان دفاعی با کشور ${receiver.id} فسخ گردید.`,
       }),
     };
   }
@@ -113,7 +113,7 @@ export class TreatyTerminationExecutor {
         proposalType: "CANCEL_TREATY",
         accepted: true,
         targetNationId: receiver.id,
-        targetName: receiver.name,
+        targetName: receiver.id,
         targetFlagCode: receiver.flagCode,
         reputationChange: -2,
       }),
