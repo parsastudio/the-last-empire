@@ -3,6 +3,7 @@ import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 export interface FinalManifestProvince {
   provinceId: number;
   provinceIndex?: number;
+  nameFa?: string;
   countryId: string;
   originalCountryId?: string;
   pixelCount: number;
@@ -20,6 +21,8 @@ export interface FinalManifestNation {
   id: string;
   code: string;
   flagCode: string;
+  nameFa?: string;
+  nameEn?: string;
   gdp: number;
   population: number;
   territoryPixelCount: number;

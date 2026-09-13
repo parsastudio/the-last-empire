@@ -1,10 +1,10 @@
 import { Nation, CountryRegistry, CountryProfile } from "@geopolitics/domain";
 import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import enCountries from "../../../messages/en/countries.json";
-import faCountries from "../../../messages/fa/countries.json";
-import enCommon from "../../../messages/en/common.json";
-import faCommon from "../../../messages/fa/common.json";
+import enCountries from "@/messages/en/countries.json";
+import faCountries from "@/messages/fa/countries.json";
+import enCommon from "@/messages/en/common.json";
+import faCommon from "@/messages/fa/common.json";
 
 export interface PresentedNation {
   id: string;

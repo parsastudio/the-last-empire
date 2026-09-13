@@ -19,7 +19,7 @@ import {
   getPostureBadgeClass,
   getAlignmentColor,
   getTensionColor,
-} from "./relation-appearance.utility";
+} from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 export { getPostureBadgeClass, getAlignmentColor, getTensionColor };
 
@@ -59,7 +59,6 @@ export function resolveProfileRelation(
     liveNation || code,
     allNations,
     locale,
-    fallback.nameFa,
   );
 
   const techLevel = liveNation

@@ -4,8 +4,8 @@ import {
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enMap from "../../../messages/en/map.json";
-import faMap from "../../../messages/fa/map.json";
+import enMap from "@/messages/en/map.json";
+import faMap from "@/messages/fa/map.json";
 
 export class ProvinceNameFormatter {
   public static format(

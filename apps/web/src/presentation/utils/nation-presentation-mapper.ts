@@ -4,8 +4,8 @@ import {
 } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enSelectNation from "../../../messages/en/select-nation.json";
-import faSelectNation from "../../../messages/fa/select-nation.json";
+import enSelectNation from "@/messages/en/select-nation.json";
+import faSelectNation from "@/messages/fa/select-nation.json";
 
 export interface FormattedNationSummary {
   id: string;

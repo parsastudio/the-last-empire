@@ -22,8 +22,8 @@ import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enAttack from "../../../messages/en/attack.json";
-import faAttack from "../../../messages/fa/attack.json";
+import enAttack from "@/messages/en/attack.json";
+import faAttack from "@/messages/fa/attack.json";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
