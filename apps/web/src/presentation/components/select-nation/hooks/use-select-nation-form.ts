@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useToast } from "@/presentation/context/toast-context";

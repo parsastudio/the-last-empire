@@ -1,5 +1,7 @@
 import React from "react";
-import { setRequestLocale } from "next-intl/server";
+import { setRequestLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { pickMessages } from "@/i18n/pick-messages";
 import { SelectNationView } from "@/presentation/components/select-nation/select-nation-view";
 
 interface PageProps {
@@ -10,5 +12,17 @@ export default async function SelectNationPage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <SelectNationView />;
+  const messages = await getMessages();
+  const pageMessages = pickMessages(messages, [
+    "common",
+    "selectNation",
+    "countries",
+    "governments",
+  ]);
+
+  return (
+    <NextIntlClientProvider messages={pageMessages}>
+      <SelectNationView />
+    </NextIntlClientProvider>
+  );
 }
