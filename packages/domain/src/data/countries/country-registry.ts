@@ -37,8 +37,6 @@ function composeAllCountryProfiles(): CountryProfile[] {
 
     return {
       code,
-      nameEn: idInfo.nameEn || code,
-      nameFa: idInfo.nameFa || code,
       flagCode: idInfo.flagCode,
       startingGovernment: idInfo.startingGovernment,
       gdp,

@@ -1,9 +1,9 @@
-import { CountryRegistry } from "@/domain/data/countries";
 import {
   LocaleNumberFormatter,
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface FormattedNationSummary {
   id: string;
@@ -46,7 +46,6 @@ export class NationPresentationMapper {
 
   public static formatNationSummary(
     id: string,
-    nameFa: string,
     code: string,
     flagCode: string,
     rank: number,
@@ -57,12 +56,7 @@ export class NationPresentationMapper {
   ): FormattedNationSummary {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
     const cleanCode = code.toUpperCase();
-    const profile = CountryRegistry.getCountry(cleanCode);
-
-    const displayName =
-      locale === "en"
-        ? profile?.nameEn || cleanCode
-        : nameFa || profile?.nameFa || cleanCode;
+    const displayName = NationPresenter.formatName(cleanCode, locale);
 
     return {
       id: cleanCode,

@@ -8,8 +8,6 @@ import { AFRICA_IDENTITY_MAP } from "@/domain/data/countries/sources/identity/af
 export interface CountryIdentityInfo {
   flagCode: string;
   startingGovernment: GovernmentType;
-  nameEn?: string;
-  nameFa?: string;
 }
 
 export const COUNTRY_IDENTITY_MAP: Record<string, CountryIdentityInfo> = {
