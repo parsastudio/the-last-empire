@@ -9,7 +9,6 @@ interface AttackCostSummaryProps {
   canAfford: boolean;
   hasSelectedInfantry: boolean;
   isSubmitting: boolean;
-  targetRegionName: string;
   isLandNeighbor: boolean;
   isNavalValid?: boolean;
   hasNavalCapacity?: boolean;

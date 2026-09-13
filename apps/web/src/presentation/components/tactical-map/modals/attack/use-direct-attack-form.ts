@@ -88,13 +88,6 @@ export function useDirectAttackForm({
     );
   }, [humanNation, targetProvinceId, gameState]);
 
-  const originRegionName = useMemo(() => {
-    const attackerName = formatCountryName(humanNation);
-    return humanNation
-      ? tAttack("regions.territoryOf", { name: attackerName })
-      : tAttack("regions.mainland");
-  }, [humanNation, formatCountryName, tAttack]);
-
   const targetRegionName = useMemo(() => {
     if (targetProvinceId) {
       return formatProvinceName(targetProvinceId);
@@ -333,7 +326,6 @@ export function useDirectAttackForm({
     isLandNeighbor: reach.isLandNeighbor,
     isNavalValid: reach.isNavalValid,
     attackType: reach.attackType,
-    originRegionName,
     targetRegionName,
     currentStance: penalty.currentStance,
     isWarStance: penalty.isWarStance,

@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";

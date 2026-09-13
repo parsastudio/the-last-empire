@@ -47,8 +47,7 @@ export function useFactoryTierProcurement({
   const t = useTranslations("industry.tiers.feedbacks");
   const { formatNumber } = useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
-  const { feedbacks, triggerFeedback, getFeedbacksFor } =
-    useFloatingFeedback<number>();
+  const { feedbacks, triggerFeedback } = useFloatingFeedback<number>();
 
   const consolidatedBatches = useMemo(() => {
     if (batches && batches.length > 0) {
@@ -151,7 +150,6 @@ export function useFactoryTierProcurement({
   return {
     tierUpgradeItems,
     feedbacks,
-    getFeedbacksFor,
     isSubmitting,
     handleUpgradeTier,
   };

@@ -15,7 +15,6 @@ export interface HoverCountryInfo {
   flagCode: string;
   rank: number;
   gdpRank?: number;
-  stance: string;
   rawStance?: DiplomaticStance;
   isOwnCountry: boolean;
   regionName?: string;

@@ -23,9 +23,7 @@ export interface NationAllyDetail {
   rank: number;
   gdpFormatted: string;
   militaryTech: number;
-  industrialTech: number;
   isHuman: boolean;
-  role: "GUARANTOR";
 }
 
 export class DiplomacyAlliesResolver {
@@ -59,9 +57,7 @@ export class DiplomacyAlliesResolver {
       rank,
       gdpFormatted,
       militaryTech: Number(nation.military.techLevel.toFixed(1)),
-      industrialTech: Number(nation.industrialLevel.toFixed(1)),
       isHuman: presented.canonicalId === canonicalHuman,
-      role: "GUARANTOR",
     };
   }
 

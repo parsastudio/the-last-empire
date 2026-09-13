@@ -65,7 +65,6 @@ export function DirectAttackModal({
           defenderName={defenderDisplayName}
           defenderCode={form.targetNation.id}
           defenderFlagCode={form.targetNation.flagCode || form.targetNation.id}
-          originRegionName={form.originRegionName}
           targetRegionName={form.targetRegionName}
           targetProvinceId={form.targetProvinceId}
           attackType={form.attackType}
@@ -159,7 +158,6 @@ export function DirectAttackModal({
           canAfford={form.canAfford}
           hasSelectedInfantry={form.hasSelectedInfantry}
           isSubmitting={form.isSubmitting}
-          targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.isNavalValid}
           hasNavalCapacity={form.hasNavalCapacity}

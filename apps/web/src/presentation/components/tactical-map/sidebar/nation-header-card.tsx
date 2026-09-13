@@ -7,7 +7,6 @@ import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficult
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface NationHeaderCardProps {
-  name: string;
   code: string;
   flagCode: string;
   governmentType: string;

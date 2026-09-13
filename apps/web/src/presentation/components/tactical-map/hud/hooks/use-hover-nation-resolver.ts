@@ -29,12 +29,8 @@ export function useHoverNationResolver({
   humanNationId,
 }: UseHoverNationResolverProps) {
   const t = useTranslations("map.hud.stances");
-  const {
-    formatCountryName,
-    formatProvinceName,
-    formatCurrency,
-    countryTranslator,
-  } = useLocaleFormatter();
+  const { formatProvinceName, formatCurrency, countryTranslator } =
+    useLocaleFormatter();
 
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
@@ -79,7 +75,6 @@ export function useHoverNationResolver({
         ownerNation?.equipmentTechLevel ?? 1.0,
       );
 
-      let stanceLabel = t("normalDiplomacy");
       let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
       let isOwnCountry = false;
       let hasSecurityGuarantee = false;
@@ -88,22 +83,14 @@ export function useHoverNationResolver({
         const canonicalHuman =
           CountryRegistry.resolveCanonicalId(humanNationId);
         if (canonicalOwnerId === canonicalHuman) {
-          stanceLabel = t("yourEmpire");
           isOwnCountry = true;
         } else {
           const humanNation =
             nationsMap[canonicalHuman] || nationsMap[humanNationId];
-          const stance = NationRelationResolver.getStance(
+          rawStance = NationRelationResolver.getStance(
             humanNation?.relations,
             canonicalOwnerId,
           );
-          rawStance = stance;
-          if (stance === "WAR") stanceLabel = t("warState");
-          else if (stance === "STRATEGIC_PARTNERSHIP")
-            stanceLabel = t("strategicPartnership");
-          else if (stance === "NON_AGGRESSION_PACT")
-            stanceLabel = t("nonAggression");
-          else stanceLabel = t("normalDiplomacy");
 
           const isEmergencyGuarantorOfHuman =
             Boolean(humanNation?.securityGuarantorId) &&
@@ -131,17 +118,12 @@ export function useHoverNationResolver({
             (id) => CountryRegistry.resolveCanonicalId(id) === canonicalHuman,
           );
 
-          if (isEmergencyGuarantorOfHuman) {
-            stanceLabel = t("underSuperpowerProtectorate");
-            hasSecurityGuarantee = true;
-          } else if (isHumanEmergencyGuarantorOfTarget) {
-            stanceLabel = t("targetUnderYourProtectorate");
-            hasSecurityGuarantee = true;
-          } else if (isDefenseGuarantorOfHuman) {
-            stanceLabel = t("defenseGuarantorOfHuman");
-            hasSecurityGuarantee = true;
-          } else if (isHumanDefenseGuarantorOfTarget) {
-            stanceLabel = t("humanDefenseGuarantorOfTarget");
+          if (
+            isEmergencyGuarantorOfHuman ||
+            isHumanEmergencyGuarantorOfTarget ||
+            isDefenseGuarantorOfHuman ||
+            isHumanDefenseGuarantorOfTarget
+          ) {
             hasSecurityGuarantee = true;
           }
         }
@@ -158,7 +140,6 @@ export function useHoverNationResolver({
         flagCode: presented.flagCode,
         rank: realRank,
         gdpRank: realGdpRank,
-        stance: stanceLabel,
         rawStance,
         isOwnCountry,
         regionName,
