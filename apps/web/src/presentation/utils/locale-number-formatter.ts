@@ -1,21 +1,21 @@
 export type AppLocale = "fa" | "en";
 
 export class LocaleNumberFormatter {
-  private static readonly faDigitFormatter = new Intl.NumberFormat("fa-IR", {
-    useGrouping: false,
-  });
+  private static readonly formatters = new Map<string, Intl.NumberFormat>();
 
-  private static readonly enDigitFormatter = new Intl.NumberFormat("en-US", {
-    useGrouping: false,
-  });
-
-  private static readonly faCommaFormatter = new Intl.NumberFormat("fa-IR", {
-    useGrouping: true,
-  });
-
-  private static readonly enCommaFormatter = new Intl.NumberFormat("en-US", {
-    useGrouping: true,
-  });
+  private static getFormatter(
+    locale: AppLocale,
+    options: Intl.NumberFormatOptions,
+  ): Intl.NumberFormat {
+    const key = `${locale}_${JSON.stringify(options)}`;
+    let formatter = this.formatters.get(key);
+    if (!formatter) {
+      const bcp47 = locale === "fa" ? "fa-IR" : "en-US";
+      formatter = new Intl.NumberFormat(bcp47, options);
+      this.formatters.set(key, formatter);
+    }
+    return formatter;
+  }
 
   public static toDigits(
     input: number | string,
@@ -24,18 +24,15 @@ export class LocaleNumberFormatter {
     if (input === null || input === undefined) {
       return locale === "fa" ? "۰" : "0";
     }
-    if (locale === "fa") {
-      if (typeof input === "number") {
-        return this.faDigitFormatter.format(input);
+    const num = typeof input === "string" ? Number(input) : input;
+    if (isNaN(num)) {
+      if (locale === "fa") {
+        const faDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+        return String(input).replace(/\d/g, (d) => faDigits[Number(d)] ?? d);
       }
-      return input.replace(/\d/g, (d) =>
-        this.faDigitFormatter.format(Number(d)),
-      );
+      return String(input);
     }
-    if (typeof input === "number") {
-      return this.enDigitFormatter.format(input);
-    }
-    return String(input);
+    return this.getFormatter(locale, { useGrouping: false }).format(num);
   }
 
   public static formatNumberWithCommas(
@@ -49,9 +46,7 @@ export class LocaleNumberFormatter {
     if (isNaN(num)) {
       return this.toDigits(value, locale);
     }
-    return locale === "fa"
-      ? this.faCommaFormatter.format(num)
-      : this.enCommaFormatter.format(num);
+    return this.getFormatter(locale, { useGrouping: true }).format(num);
   }
 
   public static formatCompactNumber(
@@ -61,48 +56,11 @@ export class LocaleNumberFormatter {
     if (isNaN(value) || value === null) {
       return locale === "fa" ? "۰" : "0";
     }
-
-    const absValue = Math.abs(value);
-    const sign = value < 0 ? "-" : "";
-
-    if (locale === "en") {
-      if (absValue >= 1e12) {
-        const formatted = (absValue / 1e12).toFixed(1).replace(/\.0$/, "");
-        return `${sign}${formatted}T`;
-      }
-      if (absValue >= 1e9) {
-        const formatted = (absValue / 1e9).toFixed(1).replace(/\.0$/, "");
-        return `${sign}${formatted}B`;
-      }
-      if (absValue >= 1e6) {
-        const formatted = (absValue / 1e6).toFixed(1).replace(/\.0$/, "");
-        return `${sign}${formatted}M`;
-      }
-      if (absValue >= 1e3) {
-        const formatted = (absValue / 1e3).toFixed(1).replace(/\.0$/, "");
-        return `${sign}${formatted}K`;
-      }
-      return `${sign}${Math.round(absValue)}`;
-    }
-
-    if (absValue >= 1e12) {
-      const formatted = (absValue / 1e12).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toDigits(formatted, "fa")} تریلیارد`;
-    }
-    if (absValue >= 1e9) {
-      const formatted = (absValue / 1e9).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toDigits(formatted, "fa")} میلیارد`;
-    }
-    if (absValue >= 1e6) {
-      const formatted = (absValue / 1e6).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toDigits(formatted, "fa")} میلیون`;
-    }
-    if (absValue >= 1e3) {
-      const formatted = (absValue / 1e3).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toDigits(formatted, "fa")} هزار`;
-    }
-
-    return `${sign}${this.toDigits(Math.round(absValue), "fa")}`;
+    return this.getFormatter(locale, {
+      notation: "compact",
+      compactDisplay: "short",
+      maximumFractionDigits: 1,
+    }).format(value);
   }
 
   public static formatCurrency(
@@ -110,18 +68,16 @@ export class LocaleNumberFormatter {
     compact = true,
     locale: AppLocale = "fa",
   ): string {
-    if (compact) {
-      const compactText = this.formatCompactNumber(value, locale);
-      return locale === "fa" ? `${compactText} دلار` : `$${compactText}`;
+    if (isNaN(value) || value === null) {
+      return locale === "fa" ? "۰ دلار" : "$0";
     }
-
-    const formattedWithCommas = this.formatNumberWithCommas(
-      Math.round(value),
-      locale,
-    );
-    return locale === "fa"
-      ? `${formattedWithCommas} دلار`
-      : `$${formattedWithCommas}`;
+    return this.getFormatter(locale, {
+      style: "currency",
+      currency: "USD",
+      notation: compact ? "compact" : "standard",
+      compactDisplay: "short",
+      maximumFractionDigits: compact ? 1 : 0,
+    }).format(value);
   }
 
   public static formatSignedIncome(
@@ -129,18 +85,17 @@ export class LocaleNumberFormatter {
     compact = true,
     locale: AppLocale = "fa",
   ): string {
-    const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-    const abs = Math.abs(value);
-    if (compact) {
-      const compactText = this.formatCompactNumber(abs, locale);
-      return locale === "fa"
-        ? `${sign}${compactText} دلار`
-        : `${sign}$${compactText}`;
+    if (isNaN(value) || value === null) {
+      return locale === "fa" ? "۰ دلار" : "$0";
     }
-    const formatted = this.formatNumberWithCommas(Math.round(abs), locale);
-    return locale === "fa"
-      ? `${sign}${formatted} دلار`
-      : `${sign}$${formatted}`;
+    return this.getFormatter(locale, {
+      style: "currency",
+      currency: "USD",
+      notation: compact ? "compact" : "standard",
+      compactDisplay: "short",
+      signDisplay: "always",
+      maximumFractionDigits: compact ? 1 : 0,
+    }).format(value);
   }
 
   public static formatPercent(
@@ -151,10 +106,12 @@ export class LocaleNumberFormatter {
     if (isNaN(value) || value === null) {
       return locale === "fa" ? "۰٪" : "0%";
     }
-    const formattedNum =
-      decimals > 0 ? value.toFixed(decimals) : Math.round(value);
-    const digitString = this.toDigits(formattedNum, locale);
-    return locale === "fa" ? `${digitString}٪` : `${digitString}%`;
+    const ratio = value > 1 || value < -1 ? value / 100 : value;
+    return this.getFormatter(locale, {
+      style: "percent",
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(ratio);
   }
 
   public static formatLevel(
@@ -163,8 +120,11 @@ export class LocaleNumberFormatter {
     decimals = 1,
   ): string {
     const safeLevel = Math.max(1, level);
-    const digitString = this.toDigits(safeLevel.toFixed(decimals), locale);
-    return locale === "fa" ? `سطح ${digitString}` : `Level ${digitString}`;
+    const formattedNum = this.getFormatter(locale, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(safeLevel);
+    return locale === "fa" ? `سطح ${formattedNum}` : `Level ${formattedNum}`;
   }
 
   public static formatPopulation(
