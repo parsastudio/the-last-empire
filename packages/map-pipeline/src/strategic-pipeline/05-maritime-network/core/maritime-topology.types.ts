@@ -11,7 +11,6 @@ export interface MaritimeDistancePair {
 
 export interface ProvinceMaritimeResolution {
   provinceId: number;
-  nameFa: string;
   countryId: string;
   tier1Neighbors: MaritimeDistancePair[];
   tier2Neighbors: MaritimeDistancePair[];

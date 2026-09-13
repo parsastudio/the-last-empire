@@ -131,7 +131,6 @@ export class StrategicManifestBuilder {
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
           provinceIndex: pIndex + 1,
-          nameFa: profile.nameFa ?? "",
           countryId,
           originalCountryId: countryId,
           pixelCount: pInfo.pixelCount,
@@ -161,8 +160,6 @@ export class StrategicManifestBuilder {
         id: countryId,
         code: profile.code,
         flagCode: profile.flagCode,
-        nameFa: profile.nameFa,
-        nameEn: profile.nameEn,
         gdp,
         population,
         territoryPixelCount: totalCountryPixels,

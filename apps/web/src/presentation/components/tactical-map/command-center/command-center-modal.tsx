@@ -1,13 +1,12 @@
 import React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CommandCenterTabRouter } from "@/presentation/components/tactical-map/command-center/command-center-tab-router";
 import { Nation } from "@geopolitics/domain";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { CommandBreadcrumb } from "@/presentation/components/tactical-map/navigation/command-breadcrumb";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
@@ -33,13 +32,13 @@ export function CommandCenterModal({
   onNavigateTab,
 }: CommandCenterModalProps) {
   const t = useTranslations("hud");
-  const locale = useLocale() as AppLocale;
+  const { formatCountryName } = useLocaleFormatter();
 
   if (!activeTab || !nation) return null;
 
   const tabTitle = t(`rail.tabs.${activeTab}`);
   const warRoomTitle = t("rail.warRoom");
-  const nationDisplayName = NationPresenter.formatName(nation, locale);
+  const nationDisplayName = formatCountryName(nation);
   const modalSubtitle = `${warRoomTitle} • ${nationDisplayName}`;
 
   return (

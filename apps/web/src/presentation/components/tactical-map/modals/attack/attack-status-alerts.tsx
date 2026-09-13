@@ -10,7 +10,6 @@ import {
   Clock,
 } from "lucide-react";
 import { DiplomaticStance } from "@geopolitics/domain";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackStatusAlertsProps {
@@ -44,11 +43,11 @@ export function AttackStatusAlerts({
 }: AttackStatusAlertsProps) {
   const t = useTranslations("attack.alerts");
   const tDiplomacy = useTranslations("diplomacy.stances");
-  const { locale, toDigits } = useLocaleFormatter();
+  const { formatProvinceName, toDigits } = useLocaleFormatter();
 
   const isAccessible = isLandNeighbor || isNavalValid;
   const formattedRegionName = targetProvinceId
-    ? ProvinceNameFormatter.format(targetProvinceId, locale)
+    ? formatProvinceName(targetProvinceId)
     : targetRegionName;
 
   const stanceLabel = tDiplomacy(currentStance);
@@ -98,7 +97,7 @@ export function AttackStatusAlerts({
               {t("guarantorWarBadge")}
             </span>
           </div>
-          <p className="text-[11px] text-foreground/90 leading-relaxed font-medium">
+          <p className="text-[11px] text-foreground/90 leading-relaxed font-sans font-medium">
             {t("guarantorWarDesc", {
               name: targetNationName,
               guarantors: activeGuarantorNames.join(" - "),

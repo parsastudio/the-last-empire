@@ -2,7 +2,6 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { Swords, Anchor } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface AttackHeaderProps {
@@ -30,12 +29,12 @@ export function AttackHeader({
   attackType = "LAND",
 }: AttackHeaderProps) {
   const t = useTranslations("attack.header");
-  const { locale } = useLocaleFormatter();
+  const { formatProvinceName } = useLocaleFormatter();
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
 
   const displayTarget = targetProvinceId
-    ? ProvinceNameFormatter.format(targetProvinceId, locale)
+    ? formatProvinceName(targetProvinceId)
     : targetRegionName;
 
   const isNaval = attackType === "NAVAL";

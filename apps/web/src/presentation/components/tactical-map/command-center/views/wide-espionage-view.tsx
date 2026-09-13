@@ -10,7 +10,6 @@ import { EspionageResultBanner } from "@/presentation/components/tactical-map/co
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
 import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface WideEspionageViewProps {
   nation: Nation;
@@ -28,7 +27,7 @@ export function WideEspionageView({
   turnActivity,
 }: WideEspionageViewProps) {
   const t = useTranslations("espionage");
-  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
+  const { formatCurrency, toDigits, formatCountryName } = useLocaleFormatter();
 
   const form = useWideEspionageForm({
     nation,
@@ -47,7 +46,7 @@ export function WideEspionageView({
     : 99;
 
   const targetDisplayName = form.selectedTargetNation
-    ? NationPresenter.formatName(form.selectedTargetNation, locale)
+    ? formatCountryName(form.selectedTargetNation)
     : "";
 
   const tier3Subtitle = useMemo(() => {

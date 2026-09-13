@@ -1,13 +1,12 @@
 import { useMemo } from "react";
-import { useLocale } from "next-intl";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface LiveNationItem {
   id: string;
@@ -37,8 +36,7 @@ export function useLiveNations({
   excludeNationId,
   searchQuery = "",
 }: UseLiveNationsProps) {
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const { countryTranslator } = useLocaleFormatter();
 
   const allLiveNations = useMemo<LiveNationItem[]>(() => {
     if (!nationsMap) return [];
@@ -60,7 +58,11 @@ export function useLiveNations({
         return canonical !== canonicalExclude && n.id !== excludeNationId;
       })
       .map((n) => {
-        const presented = NationPresenter.present(n, nationsMap, locale);
+        const presented = NationPresenter.present(
+          n,
+          nationsMap,
+          countryTranslator,
+        );
 
         const isReachable = sourceNation
           ? GeopoliticalReachResolver.canInitiateDiplomacy(
@@ -92,7 +94,7 @@ export function useLiveNations({
           rawNation: n,
         };
       });
-  }, [nationsMap, provincesMap, excludeNationId, locale]);
+  }, [nationsMap, provincesMap, excludeNationId, countryTranslator]);
 
   const filteredNations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
