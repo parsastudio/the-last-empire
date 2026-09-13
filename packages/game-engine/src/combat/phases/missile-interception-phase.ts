@@ -9,7 +9,6 @@ export interface MissilePhaseInput {
 export interface MissilePhaseOutput {
   rawDefAirDefenseLost: number;
   defAirDefenseRemainingRaw: number;
-  defAirDefenseRemainingEff: number;
   destroyedFactories: number;
   interceptedMissiles: number;
 }
@@ -20,7 +19,6 @@ export class MissileInterceptionPhase {
       return {
         rawDefAirDefenseLost: 0,
         defAirDefenseRemainingRaw: input.defAirDefense,
-        defAirDefenseRemainingEff: input.defAirDefense * input.defAdMult,
         destroyedFactories: 0,
         interceptedMissiles: 0,
       };
@@ -45,7 +43,6 @@ export class MissileInterceptionPhase {
       return {
         rawDefAirDefenseLost: 0,
         defAirDefenseRemainingRaw: 0,
-        defAirDefenseRemainingEff: 0,
         destroyedFactories,
         interceptedMissiles: autoIntercepted,
       };
@@ -87,8 +84,6 @@ export class MissileInterceptionPhase {
       0,
       input.defAirDefense - rawDefAirDefenseLost,
     );
-    const defAirDefenseRemainingEff =
-      defAirDefenseRemainingRaw * input.defAdMult;
 
     const rawSurplusMissiles = Math.max(
       0,
@@ -103,7 +98,6 @@ export class MissileInterceptionPhase {
     return {
       rawDefAirDefenseLost,
       defAirDefenseRemainingRaw,
-      defAirDefenseRemainingEff,
       destroyedFactories,
       interceptedMissiles: rawIntercepted,
     };

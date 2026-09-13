@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useLocale } from "next-intl";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import {
   Nation,
@@ -7,7 +6,6 @@ import {
   getNationGdp,
   Province,
 } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -24,9 +22,7 @@ export function useWideDiplomacy({
   humanNationId,
   provincesMap,
 }: UseWideDiplomacyProps) {
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
-  const { countryTranslator } = useLocaleFormatter();
+  const { countryTranslator, locale } = useLocaleFormatter();
   const [searchQuery, setSearchQuery] = useState("");
   const activeHumanId = CountryRegistry.resolveCanonicalId(
     humanNationId || "USA",
@@ -34,7 +30,6 @@ export function useWideDiplomacy({
 
   const { filteredNations: liveNationsList } = useLiveNations({
     nationsMap,
-    provincesMap,
     excludeNationId: activeHumanId,
     searchQuery,
   });

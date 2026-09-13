@@ -23,7 +23,6 @@ export class BattleLogFactory {
       attackerId: attacker.id,
       defenderId: defender.id,
       targetProvinceId: targetProvince?.provinceId,
-      targetProvinceName: undefined,
       attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation,

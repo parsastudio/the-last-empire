@@ -186,16 +186,6 @@ export class NationGettersUtility {
     );
   }
 
-  public static calculateGdpRankMap(
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, ProvinceDynamicState>,
-  ): Map<string, number> {
-    return NationRankCalculatorUtility.calculateGdpRankMap(
-      allNations,
-      provincesMap,
-    );
-  }
-
   public static calculateRankMapFromCandidates(
     candidates: NationRankCandidateInput[],
   ): Map<string, number> {

@@ -135,24 +135,4 @@ export class ReachableTargetsResolver {
 
     return Array.from(reachableMap.values());
   }
-
-  public static canInitiateDiplomacy(
-    source: Nation,
-    target: Nation,
-    allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, ProvinceDynamicState>,
-    rankMap?: Map<string, number>,
-  ): boolean {
-    if (!allNations) return true;
-    const reachable = this.getReachableTargets(
-      source,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
-    const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
-    return reachable.some(
-      (r) => CountryRegistry.resolveCanonicalId(r.id) === targetCanonical,
-    );
-  }
 }

@@ -18,7 +18,6 @@ export interface DiplomaticProposalFeedbackData {
   targetNationId: string;
   targetName: string;
   targetFlagCode?: string;
-  message?: string;
 }
 
 interface TreatyResponseFeedbackContentProps {

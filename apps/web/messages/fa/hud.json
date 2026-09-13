@@ -29,8 +29,7 @@
     }
   },
   "breadcrumb": {
-    "command": "فرماندهی",
-    "defaultTitle": "اتاق فرماندهی"
+    "command": "فرماندهی"
   },
   "orientation": {
     "title": "لطفاً گوشی را ۹۰ درجه بچرخانید",

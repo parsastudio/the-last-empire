@@ -44,7 +44,7 @@ function RailTabButton({
       title={isCollapsed ? label : undefined}
     >
       {isActive && (
-        <div className="absolute end-0 top-1.5 bottom-1.5 md:top-2 md:bottom-2 w-1 bg-white rounded-s-full animate-laser-glow" />
+        <div className="absolute start-0 top-1.5 bottom-1.5 md:top-2 md:bottom-2 w-1 bg-white rounded-e-full animate-laser-glow" />
       )}
 
       <Icon
@@ -58,7 +58,7 @@ function RailTabButton({
       )}
 
       {isCollapsed && (
-        <span className="absolute end-full me-3 px-3 py-1.5 bg-card/95 border border-border/80 text-foreground text-[10px] rounded-xl shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap font-sans font-bold backdrop-blur-xl ring-1 ring-white/5">
+        <span className="absolute start-full ms-3 px-3 py-1.5 bg-card/95 border border-border/80 text-foreground text-[10px] rounded-xl shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap font-sans font-bold backdrop-blur-xl ring-1 ring-white/5">
           {label}
         </span>
       )}
@@ -91,7 +91,7 @@ function RailToggleButton({
       <ChevronLeft
         size={15}
         className={`transition-transform duration-200 ${
-          isCollapsed ? "rtl:rotate-0 rotate-180" : "rtl:rotate-180 rotate-0"
+          isCollapsed ? "rotate-180 rtl:rotate-0" : "rotate-0 rtl:rotate-180"
         }`}
       />
     </button>
@@ -130,7 +130,8 @@ export function CommandRail({
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        insetInlineEnd: "max(0.75rem, env(safe-area-inset-right))",
+        insetInlineStart:
+          "max(0.75rem, max(env(safe-area-inset-left), env(safe-area-inset-right)))",
         top: "max(0.5rem, env(safe-area-inset-top))",
         bottom: "max(0.5rem, env(safe-area-inset-bottom))",
       }}

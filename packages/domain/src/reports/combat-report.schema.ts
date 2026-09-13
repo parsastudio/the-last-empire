@@ -83,7 +83,6 @@ export const BattleFullReportDataSchema = z.object({
   attackerId: z.string(),
   defenderId: z.string(),
   targetProvinceId: z.number().positive().optional(),
-  targetProvinceName: z.string().optional(),
   attackType: z.enum(["LAND", "NAVAL"]).default("LAND"),
   isAttackerVictory: z.boolean(),
   isFullCapitulation: z.boolean(),

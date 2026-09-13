@@ -16,13 +16,6 @@
   "requestedAmount": "مقدار درخواستی:",
   "actionUnavailable": "امکان انجام این عملیات با شرایط فعلی وجود ندارد.",
   "unknown": "نامشخص",
-  "units": {
-    "billion": "میلیارد دلار",
-    "million": "میلیون دلار",
-    "citizens": "نفر",
-    "facilities": "سوله",
-    "level": "سطح {level}"
-  },
   "errors": {
     "campaignCreateFailed": "خطا در ایجاد کمپین جدید بازی",
     "campaignSaveFailed": "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",

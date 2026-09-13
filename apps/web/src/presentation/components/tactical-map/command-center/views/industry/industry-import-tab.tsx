@@ -131,7 +131,6 @@ export function IndustryImportTab({
             <MachinerySellerCard
               key={seller.id}
               seller={seller}
-              isSelected={false}
               onSelect={setSelectedSellerId}
             />
           ))}

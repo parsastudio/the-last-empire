@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Coins, Volume2, VolumeX } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
@@ -19,9 +19,11 @@ interface TopHudBarProps {
 export function TopHudBar({ metrics }: TopHudBarProps) {
   const t = useTranslations("hud.topBar");
   const { formatCurrency, formatSignedIncome, toDigits } = useLocaleFormatter();
-  const [isMuted, setIsMuted] = useState<boolean>(() =>
-    TacticalSound.isMuted(),
-  );
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsMuted(TacticalSound.isMuted());
+  }, []);
 
   const handleToggleMute = () => {
     const nextMuted = TacticalSound.toggleMute();

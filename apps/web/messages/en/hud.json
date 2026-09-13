@@ -29,8 +29,7 @@
     }
   },
   "breadcrumb": {
-    "command": "Command",
-    "defaultTitle": "War Room"
+    "command": "Command"
   },
   "orientation": {
     "title": "Please Rotate Your Device 90°",

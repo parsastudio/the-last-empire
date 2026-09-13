@@ -75,31 +75,13 @@
     "sendForeignAid": "Disburse Foreign Aid Package ({cost})",
     "sendForeignAidDesc": "Instantly yields +25 Alignment, -15 Tension, and +1 Global Reputation."
   },
-  "umbrella": {
-    "protectorateActive": "Active Protectorate Treaty (50% GDP Taskforce)",
-    "protectorateTribute": "{cost} / turn (5% Tribute)",
-    "protectorateDesc": "Full deployment of superpower military into your redoubts in exchange for 5% turn tribute.",
-    "revokeProtectorate": "Revoke Protectorate & Restore Full Sovereignty",
-    "defensePactActive": "Mutual Territorial Defense Pact Active",
-    "defensePactIntervention": "Direct Military Intervention",
-    "defensePactDesc": "If attacked, {name} armed forces will formally intervene against the aggressor.",
-    "revokeDefensePact": "Voluntary Termination of Defense Pact",
-    "openDefenseModal": "Mutual Defense & Territorial Security Pact",
-    "openDefenseModalBadge": "1% Guarantor GDP • Review Criteria",
-    "openDefenseModalDesc": "Commitment of guarantor armed forces to enter war if invaded (max 2 concurrent pacts).",
-    "openProtectorateModal": "Protectorate Treaty & Sovereign Submission",
-    "openProtectorateModalBadge": "5% Tribute • 50% GDP Taskforce",
-    "openProtectorateModalDesc": "Full superpower military garrison in exchange for ongoing tribute and prestige loss."
-  },
   "alliesBox": {
     "noAlliesTitle": "Defense Guarantors: Zero Active Defense Pacts",
     "noAlliesDesc": "If this sovereign territory is invaded, no third-party realm will enter combat in its defense.",
     "safeToAttack": "Safe Target for Incursion",
     "warningTitle": "Defense Guarantors Alert (Direct Belligerents if Invaded)",
     "warningDesc": "If you launch an offensive against this realm, the armed forces of these guarantor states will immediately enter combat against you:",
-    "committedAlliesCount": "{count} Committed Guarantors",
-    "committedAllyLabel": "Committed Defense Guarantor (Direct War Intervention)",
-    "level": "Level {level}"
+    "committedAlliesCount": "{count} Committed Guarantors"
   },
   "allyPopover": {
     "warInterventionSubtitle": "Direct Combat Intervention upon Incursion",

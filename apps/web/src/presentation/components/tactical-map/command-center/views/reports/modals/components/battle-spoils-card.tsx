@@ -63,10 +63,7 @@ export function BattleSpoilsCard({
 
       <BattleSpoilsMetricsGrid spoils={spoils} />
 
-      <ConqueredProvincesList
-        provinceIds={spoils?.conqueredProvinceIds}
-        provincesNames={spoils?.conqueredProvincesNames}
-      />
+      <ConqueredProvincesList provinceIds={spoils?.conqueredProvinceIds} />
     </div>
   );
 }

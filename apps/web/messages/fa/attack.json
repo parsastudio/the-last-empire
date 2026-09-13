@@ -7,8 +7,6 @@
     "landVector": "LAND VECTOR"
   },
   "regions": {
-    "territoryOf": "خاک {name}",
-    "mainland": "خاک اصلی کشور",
     "mainlandOf": "خاک اصلی {name}"
   },
   "naval": {

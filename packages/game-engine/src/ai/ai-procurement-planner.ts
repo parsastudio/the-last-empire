@@ -26,9 +26,6 @@ export interface RecruitmentPlanResult {
 }
 
 export class AIProcurementPlanner {
-  public static readonly MAX_VALUATION_GDP_RATIO =
-    MilitaryPricingCalculator.MAX_ARMY_VALUATION_GDP_RATIO;
-
   public static planRecruitment(
     nation: Nation,
     context: TurnContext,
