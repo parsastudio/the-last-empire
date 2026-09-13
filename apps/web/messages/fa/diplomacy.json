@@ -214,6 +214,7 @@
     "noTechSup": "عدم برتری فناوری",
     "governmentType": "نظام سیاسی",
     "internalStability": "ثبات سیاسی داخلی:",
+    "alignmentLabel": "همسویی:",
     "tensionLabel": "تنش:",
     "level": "سطح {level}"
   },

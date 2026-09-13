@@ -23,7 +23,7 @@ import { TacticalSound } from "@/presentation/utils/tactical-sound";
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
   locale: AppLocale = "fa",
-  dossierTemplate?: (values: { name: string; rank: number }) => string,
+  dossierTemplate: (values: { name: string; rank: number }) => string,
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -49,11 +49,7 @@ function mapManifestToNationDetails(
         locale,
       );
 
-      const desc = dossierTemplate
-        ? dossierTemplate({ name: summary.name, rank })
-        : locale === "en"
-          ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
-          : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
+      const desc = dossierTemplate({ name: summary.name, rank });
 
       return {
         id: p.code,
@@ -100,11 +96,7 @@ function mapManifestToNationDetails(
       locale,
     );
 
-    const desc = dossierTemplate
-      ? dossierTemplate({ name: summary.name, rank })
-      : locale === "en"
-        ? `Official strategic dossier of ${summary.name} with global rank #${rank}.`
-        : `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`;
+    const desc = dossierTemplate({ name: summary.name, rank });
 
     return {
       id: canonicalId,

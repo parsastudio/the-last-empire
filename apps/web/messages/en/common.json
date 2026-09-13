@@ -15,6 +15,7 @@
   "maxLimit": "Maximum Permitted Limit:",
   "requestedAmount": "Requested Amount:",
   "actionUnavailable": "Action unavailable under current conditions.",
+  "unknown": "Unknown",
   "units": {
     "billion": "Billion USD",
     "million": "Million USD",

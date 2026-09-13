@@ -6,6 +6,11 @@
     "navalVector": "NAVAL VECTOR",
     "landVector": "LAND VECTOR"
   },
+  "regions": {
+    "territoryOf": "خاک {name}",
+    "mainland": "خاک اصلی کشور",
+    "mainlandOf": "خاک اصلی {name}"
+  },
   "naval": {
     "monitoringTitle": "پایش ظرفیت ترابری ناوگان دریایی",
     "activeFleetSubtitle": "تعداد ناوگان فعال: {count} فروند (سقف حمل: {max} واحد)",

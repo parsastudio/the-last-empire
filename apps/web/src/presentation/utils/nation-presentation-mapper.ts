@@ -4,6 +4,8 @@ import {
 } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import enSelectNation from "../../../messages/en/select-nation.json";
+import faSelectNation from "../../../messages/fa/select-nation.json";
 
 export interface FormattedNationSummary {
   id: string;
@@ -24,17 +26,11 @@ export class NationPresentationMapper {
   }
 
   public static getPowerLabel(gdp: number, locale: AppLocale = "fa"): string {
-    if (locale === "en") {
-      if (gdp >= 10e12) return "Global Superpower";
-      if (gdp >= 1e12) return "Leading Industrial Hegemon";
-      if (gdp >= 200e9) return "Trans-Regional Power";
-      return "Regional Power";
-    }
-
-    if (gdp >= 10e12) return "ابرقدرت جهانی";
-    if (gdp >= 1e12) return "قدرت برتر صنعتی";
-    if (gdp >= 200e9) return "قدرت فرامنطقه‌ای";
-    return "قدرت منطقه‌ای";
+    const dict = (locale === "en" ? enSelectNation : faSelectNation).powerTiers;
+    if (gdp >= 10e12) return dict.superpower;
+    if (gdp >= 1e12) return dict.hegemon;
+    if (gdp >= 200e9) return dict.transRegional;
+    return dict.regional;
   }
 
   public static formatPopulation(

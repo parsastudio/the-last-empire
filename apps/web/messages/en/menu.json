@@ -15,7 +15,129 @@
     "loadCampaign": "Open Archived Dossier"
   },
   "briefing": {
-    "title": "Live Command Feed"
+    "title": "Live Command Feed",
+    "feed": [
+      {
+        "id": "1",
+        "type": "info",
+        "text": "Fresh arms shipment delivered to frontline garrison depots.",
+        "time": "Just now"
+      },
+      {
+        "id": "2",
+        "type": "danger",
+        "text": "Crisis report: High inflation sparks labor strikes across capital.",
+        "time": "2 min ago"
+      },
+      {
+        "id": "3",
+        "type": "warning",
+        "text": "Infrastructure alert: Industrial slot saturation in central provinces.",
+        "time": "5 min ago"
+      },
+      {
+        "id": "4",
+        "type": "info",
+        "text": "Intel surveillance: Military convoys tracked near shared border.",
+        "time": "8 min ago"
+      },
+      {
+        "id": "5",
+        "type": "info",
+        "text": "Air wing patrol: Persistent fighter sorties launched over perimeter.",
+        "time": "12 min ago"
+      },
+      {
+        "id": "6",
+        "type": "warning",
+        "text": "Fiscal warning: National budget deficit nearing external credit limit.",
+        "time": "15 min ago"
+      },
+      {
+        "id": "7",
+        "type": "info",
+        "text": "Official proposal received from neighbor for Non-Aggression Pact.",
+        "time": "20 min ago"
+      },
+      {
+        "id": "8",
+        "type": "danger",
+        "text": "Security Code Red: Civil unrest triggers sharp drop in regime stability.",
+        "time": "25 min ago"
+      },
+      {
+        "id": "9",
+        "type": "warning",
+        "text": "Budget pressure: Armed forces payroll maintenance burdens treasury.",
+        "time": "30 min ago"
+      },
+      {
+        "id": "10",
+        "type": "info",
+        "text": "General Staff: Combat readiness audits finalized across all commands.",
+        "time": "35 min ago"
+      },
+      {
+        "id": "11",
+        "type": "info",
+        "text": "Industrial milestone: Heavy manufacturing modernization phase complete.",
+        "time": "40 min ago"
+      },
+      {
+        "id": "12",
+        "type": "danger",
+        "text": "Demographic contraction recorded amid civil friction and unrest.",
+        "time": "45 min ago"
+      },
+      {
+        "id": "13",
+        "type": "warning",
+        "text": "World Bank ultimatum: Overdue interest settlement notice delivered.",
+        "time": "50 min ago"
+      },
+      {
+        "id": "14",
+        "type": "info",
+        "text": "Labor output boom: Positive productivity index across facilities.",
+        "time": "1 hour ago"
+      },
+      {
+        "id": "15",
+        "type": "info",
+        "text": "Border checkpoint report: Trade corridors secure and flowing.",
+        "time": "1 hour ago"
+      },
+      {
+        "id": "16",
+        "type": "danger",
+        "text": "Counter-intel alert: Infiltration ring neutralized inside ministries.",
+        "time": "1 hour ago"
+      },
+      {
+        "id": "17",
+        "type": "warning",
+        "text": "Merchant protests erupt following border tariff adjustments.",
+        "time": "2 hours ago"
+      },
+      {
+        "id": "18",
+        "type": "info",
+        "text": "Air Defense directive drafted for immediate missile dome upgrade.",
+        "time": "2 hours ago"
+      },
+      {
+        "id": "19",
+        "type": "danger",
+        "text": "Covert black ops: Sabotage team disabled adversary radar network.",
+        "time": "3 hours ago"
+      },
+      {
+        "id": "20",
+        "type": "info",
+        "text": "National Golden Age: Steadfast governance solidifies civic stability.",
+        "time": "3 hours ago"
+      }
+    ]
   },
   "ticker": {
     "radar": "Air Defense Radar Online 100%",

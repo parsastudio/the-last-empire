@@ -3,6 +3,8 @@ import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import enCountries from "../../../messages/en/countries.json";
 import faCountries from "../../../messages/fa/countries.json";
+import enCommon from "../../../messages/en/common.json";
+import faCommon from "../../../messages/fa/common.json";
 
 export interface PresentedNation {
   id: string;
@@ -34,9 +36,9 @@ export class NationPresenter {
     locale: AppLocale = "fa",
     fallback?: string,
   ): string {
+    const unknownText = locale === "en" ? enCommon.unknown : faCommon.unknown;
     if (!nationOrId) {
-      if (fallback) return fallback;
-      return locale === "en" ? "Unknown" : "نامشخص";
+      return fallback || unknownText;
     }
 
     const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
@@ -48,7 +50,7 @@ export class NationPresenter {
       return localizedName;
     }
 
-    return fallback || canonicalId || (locale === "en" ? "Unknown" : "نامشخص");
+    return fallback || canonicalId || unknownText;
   }
 
   public static resolveFlagCode(
@@ -78,11 +80,12 @@ export class NationPresenter {
     locale: AppLocale = "fa",
     fallbackName?: string,
   ): PresentedNation {
+    const unknownText = locale === "en" ? enCommon.unknown : faCommon.unknown;
     if (!target) {
       return {
         id: "",
         canonicalId: "",
-        name: fallbackName || (locale === "en" ? "Unknown" : "نامشخص"),
+        name: fallbackName || unknownText,
         flagCode: "IR",
         flagEmoji: "🌐",
         nation: null,

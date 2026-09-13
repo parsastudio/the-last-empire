@@ -22,6 +22,8 @@ import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import enAttack from "../../../messages/en/attack.json";
+import faAttack from "../../../messages/fa/attack.json";
 
 export interface DirectAttackReachEvaluation {
   targetProvince: ProvinceDynamicState | null;
@@ -97,23 +99,20 @@ export class DirectAttackSelector {
 
     const attackerDisplayName = NationPresenter.formatName(humanNation, locale);
     const targetDisplayName = NationPresenter.formatName(targetNation, locale);
+    const attackDict = (locale === "en" ? enAttack : faAttack).regions;
 
     const originRegionName = humanNation
-      ? locale === "en"
-        ? `${attackerDisplayName} Territory`
-        : `خاک ${attackerDisplayName}`
-      : locale === "en"
-        ? "Sovereign Mainland"
-        : "خاک اصلی کشور";
+      ? attackDict.territoryOf.replace("{name}", attackerDisplayName)
+      : attackDict.mainland;
 
     let targetRegionName = "";
     if (targetProvinceId) {
       targetRegionName = ProvinceNameFormatter.format(targetProvinceId, locale);
     } else if (targetNation) {
-      targetRegionName =
-        locale === "en"
-          ? `${targetDisplayName} Mainland`
-          : `خاک اصلی ${targetDisplayName}`;
+      targetRegionName = attackDict.mainlandOf.replace(
+        "{name}",
+        targetDisplayName,
+      );
     }
 
     return {

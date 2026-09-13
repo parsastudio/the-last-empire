@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Zap, LucideIcon } from "lucide-react";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
@@ -42,13 +43,14 @@ export function AmountActionForm({
   icon: Icon = Zap,
   infoRows = [],
   warningText,
-  emptyStateText = "Action unavailable under current conditions.",
-  submittingText = "Submitting order...",
-  ceilingLabel = "Maximum Permitted Limit:",
-  requestedLabel = "Requested Amount:",
+  emptyStateText,
+  submittingText,
+  ceilingLabel,
+  requestedLabel,
   onClose,
   onConfirm,
 }: AmountActionFormProps) {
+  const t = useTranslations("common");
   const { formatNumber } = useLocaleFormatter();
   const safeMax = Math.max(0, maxAmount);
   const initialAmount =
@@ -64,6 +66,11 @@ export function AmountActionForm({
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
   const fillRatio = safeMax > 0 ? (currentAmount / safeMax) * 100 : 0;
+
+  const resolvedEmptyStateText = emptyStateText || t("actionUnavailable");
+  const resolvedSubmittingText = submittingText || t("submittingOrder");
+  const resolvedCeilingLabel = ceilingLabel || t("maxLimit");
+  const resolvedRequestedLabel = requestedLabel || t("requestedAmount");
 
   const handlePercentageSelect = (pct: number) => {
     if (safeMax <= 0) return;
@@ -90,7 +97,7 @@ export function AmountActionForm({
       <div className="space-y-3 font-mono text-xs">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground font-sans text-[11px]">
-            {ceilingLabel}
+            {resolvedCeilingLabel}
           </span>
           <span className="font-bold text-foreground text-xs font-mono">
             {formatNumber(safeMax)} {unitLabel}
@@ -100,7 +107,7 @@ export function AmountActionForm({
         <div className="space-y-2.5 bg-background/40 p-4 rounded-3xl border border-border/60 shadow-inner">
           <div className="flex justify-between items-center text-xs">
             <span className="text-muted-foreground font-sans">
-              {requestedLabel}
+              {resolvedRequestedLabel}
             </span>
             <span className="font-extrabold text-foreground text-sm font-mono bg-secondary/80 px-3 py-1 rounded-xl border border-border/60 shadow-sm">
               {formatNumber(currentAmount)} {unitLabel}
@@ -169,9 +176,9 @@ export function AmountActionForm({
         <Icon size={15} />
         <span>
           {safeMax === 0
-            ? emptyStateText
+            ? resolvedEmptyStateText
             : isSubmitting
-              ? submittingText
+              ? resolvedSubmittingText
               : `${confirmLabel} (${formatNumber(currentAmount)} ${unitLabel})`}
         </span>
       </button>

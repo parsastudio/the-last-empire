@@ -214,6 +214,7 @@
     "noTechSup": "No Tech Disparity",
     "governmentType": "Governance Regime",
     "internalStability": "Domestic Political Stability:",
+    "alignmentLabel": "Alignment:",
     "tensionLabel": "Tension:",
     "level": "Level {level}"
   },

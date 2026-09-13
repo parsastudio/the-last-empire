@@ -6,6 +6,11 @@
     "navalVector": "NAVAL VECTOR",
     "landVector": "LAND VECTOR"
   },
+  "regions": {
+    "territoryOf": "{name} Territory",
+    "mainland": "Sovereign Mainland",
+    "mainlandOf": "{name} Mainland"
+  },
   "naval": {
     "monitoringTitle": "Naval Fleet Transport Capacity Monitor",
     "activeFleetSubtitle": "Active Naval Fleets: {count} (Capacity Ceiling: {max} Units)",
