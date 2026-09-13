@@ -13,7 +13,6 @@ import {
 import { Nation } from "@geopolitics/domain";
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface AttackDiscoveredIntelGridProps {
   targetNation: Nation;
@@ -33,10 +32,10 @@ export function AttackDiscoveredIntelGrid({
   onAutoOptimizeDeploy,
 }: AttackDiscoveredIntelGridProps) {
   const t = useTranslations("attack.intel");
-  const { formatNumber, formatCurrency, formatLevel, locale } =
+  const { formatNumber, formatCurrency, formatLevel, formatCountryName } =
     useLocaleFormatter();
   const aux = forecast.auxiliaryGuarantor;
-  const targetDisplayName = NationPresenter.formatName(targetNation, locale);
+  const targetDisplayName = formatCountryName(targetNation);
 
   return (
     <div className="bg-gradient-to-r from-emerald-950/25 via-card to-cyan-950/20 border border-emerald-500/40 p-3.5 rounded-3xl space-y-3 shadow-lg backdrop-blur-xl text-start font-sans">

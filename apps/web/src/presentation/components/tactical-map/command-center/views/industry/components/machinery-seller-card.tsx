@@ -4,7 +4,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface MachinerySellerCardProps {
   seller: Nation;
@@ -17,10 +16,10 @@ export function MachinerySellerCard({
   isSelected,
   onSelect,
 }: MachinerySellerCardProps) {
-  const { formatLevel, locale } = useLocaleFormatter();
+  const { formatLevel, formatCountryName } = useLocaleFormatter();
   const flag = getFlagEmoji(seller.flagCode || seller.id);
   const canonicalId = CountryRegistry.resolveCanonicalId(seller.id);
-  const displayName = NationPresenter.formatName(seller, locale);
+  const displayName = formatCountryName(seller);
 
   return (
     <button

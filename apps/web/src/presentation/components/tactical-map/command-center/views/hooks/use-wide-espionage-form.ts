@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback } from "react";
-import { useLocale } from "next-intl";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -13,9 +12,9 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
 import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface UseWideEspionageFormProps {
   nation: Nation;
@@ -32,8 +31,7 @@ export function useWideEspionageForm({
   selectedTargetCode,
   turnActivity,
 }: UseWideEspionageFormProps) {
-  const currentLocale = useLocale() as AppLocale;
-  const locale: AppLocale = currentLocale === "en" ? "en" : "fa";
+  const { countryTranslator } = useLocaleFormatter();
   const [searchQuery, setSearchQuery] = useState("");
   const [lastResult, setLastResult] = useState<EspionageExecutionResult | null>(
     null,
@@ -53,7 +51,7 @@ export function useWideEspionageForm({
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const rank = rankLookup.get(canonical) ?? 99;
-        const name = NationPresenter.formatName(n, locale);
+        const name = NationPresenter.formatName(n, countryTranslator);
 
         return {
           id: canonical,
@@ -72,7 +70,7 @@ export function useWideEspionageForm({
           c.flagCode.toLowerCase().includes(query),
       )
       .sort((a, b) => b.gdp - a.gdp);
-  }, [nationsMap, provincesMap, nation.id, searchQuery, locale]);
+  }, [nationsMap, provincesMap, nation.id, searchQuery, countryTranslator]);
 
   const defaultTarget = useMemo(() => {
     if (selectedTargetCode) {

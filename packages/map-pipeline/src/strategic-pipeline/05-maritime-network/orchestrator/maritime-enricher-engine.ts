@@ -114,7 +114,6 @@ export class MaritimeEnricherEngine {
 
       resolutions.push({
         provinceId: province.provinceId,
-        nameFa: province.nameFa ?? "",
         countryId: province.countryId,
         tier1Neighbors,
         tier2Neighbors,

@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { CountryRegistry } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export interface SavedCampaignMeta {
@@ -16,7 +14,7 @@ export interface SavedCampaignMeta {
 
 export function useSavedCampaigns() {
   const t = useTranslations("menu.saves");
-  const { locale } = useLocaleFormatter();
+  const { locale, formatCountryName } = useLocaleFormatter();
   const [saves, setSaves] = useState<SavedCampaignMeta[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -36,10 +34,7 @@ export function useSavedCampaigns() {
         const humanNation =
           state.nations[canonicalHuman] || state.nations[state.humanNationId];
 
-        const nationName = NationPresenter.formatName(
-          humanNation || canonicalHuman,
-          locale as AppLocale,
-        );
+        const nationName = formatCountryName(humanNation || canonicalHuman);
 
         const saveDate = new Date(rec.timestamp);
         const dateLocale = locale === "en" ? "en-US" : "fa-IR";
@@ -66,7 +61,7 @@ export function useSavedCampaigns() {
     } finally {
       setLoading(false);
     }
-  }, [locale, t]);
+  }, [locale, t, formatCountryName]);
 
   useEffect(() => {
     let active = true;

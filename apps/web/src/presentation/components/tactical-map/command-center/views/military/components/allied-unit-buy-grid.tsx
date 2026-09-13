@@ -7,7 +7,6 @@ import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map
 import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface AlliedUnitBuyGridProps {
   buyerNation: Nation;
@@ -25,7 +24,7 @@ export function AlliedUnitBuyGrid({
   onBack,
 }: AlliedUnitBuyGridProps) {
   const t = useTranslations("military.alliesGrid");
-  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
+  const { formatCurrency, toDigits, formatCountryName } = useLocaleFormatter();
 
   const {
     batchList,
@@ -41,7 +40,7 @@ export function AlliedUnitBuyGrid({
   });
 
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
-  const sellerDisplayName = NationPresenter.formatName(sellerNation, locale);
+  const sellerDisplayName = formatCountryName(sellerNation);
   const surchargeRate = Math.round((techMultiplier - 1.0) * 100);
 
   return (

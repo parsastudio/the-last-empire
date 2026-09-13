@@ -20,7 +20,6 @@ import { BattleCasualtyTable } from "./components/battle-casualty-table";
 import { BattleSpoilsCard } from "./components/battle-spoils-card";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface BattleDebriefModalProps {
   isOpen: boolean;
@@ -38,7 +37,7 @@ export function BattleDebriefModal({
   onClose,
 }: BattleDebriefModalProps) {
   const t = useTranslations("reports.debrief");
-  const { locale } = useLocaleFormatter();
+  const { formatCountryName } = useLocaleFormatter();
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   const isAttackerWin = reportData?.isAttackerVictory ?? false;
@@ -60,14 +59,8 @@ export function BattleDebriefModal({
   const attacker = nationsMap?.[reportData.attackerId];
   const defender = nationsMap?.[reportData.defenderId];
 
-  const attackerName = NationPresenter.formatName(
-    attacker || reportData.attackerId,
-    locale,
-  );
-  const defenderName = NationPresenter.formatName(
-    defender || reportData.defenderId,
-    locale,
-  );
+  const attackerName = formatCountryName(attacker || reportData.attackerId);
+  const defenderName = formatCountryName(defender || reportData.defenderId);
 
   const attackerFlag = getFlagEmoji(
     attacker?.flagCode || reportData.attackerId,

@@ -11,7 +11,6 @@ import { NavalTransportCapacityCard } from "@/presentation/components/tactical-m
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -32,7 +31,7 @@ export function DirectAttackModal({
 }: DirectAttackModalProps) {
   const t = useTranslations("attack");
   const tMil = useTranslations("military");
-  const { locale } = useLocaleFormatter();
+  const { formatCountryName } = useLocaleFormatter();
 
   const form = useDirectAttackForm({
     targetNationId,
@@ -48,11 +47,8 @@ export function DirectAttackModal({
   const modalTitle =
     form.attackType === "NAVAL" ? t("modalTitleNaval") : t("modalTitleLand");
 
-  const attackerDisplayName = NationPresenter.formatName(humanNation, locale);
-  const defenderDisplayName = NationPresenter.formatName(
-    form.targetNation,
-    locale,
-  );
+  const attackerDisplayName = formatCountryName(humanNation);
+  const defenderDisplayName = formatCountryName(form.targetNation);
 
   return (
     <UnifiedModalShell

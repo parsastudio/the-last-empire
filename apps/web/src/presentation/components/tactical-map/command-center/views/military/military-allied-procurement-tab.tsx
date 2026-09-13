@@ -11,7 +11,6 @@ import {
 } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-seller-card";
 import { AlliedUnitBuyGrid } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-grid";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface MilitaryAlliedProcurementTabProps {
   nation: Nation;
@@ -27,7 +26,7 @@ export function MilitaryAlliedProcurementTab({
   selectedTargetCode,
 }: MilitaryAlliedProcurementTabProps) {
   const t = useTranslations("military.alliesTab");
-  const { locale } = useLocaleFormatter();
+  const { formatCountryName } = useLocaleFormatter();
 
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(
     selectedTargetCode
@@ -66,7 +65,7 @@ export function MilitaryAlliedProcurementTab({
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const tension = rel ? (rel.tension ?? 10) : 10;
         const rank = rankLookup.get(canonical) ?? 99;
-        const name = NationPresenter.formatName(n, locale);
+        const name = formatCountryName(n);
 
         return {
           id: canonical,
@@ -87,7 +86,7 @@ export function MilitaryAlliedProcurementTab({
     nation.id,
     nation.relations,
     nation.military.techLevel,
-    locale,
+    formatCountryName,
   ]);
 
   const filteredSellers = useMemo(() => {

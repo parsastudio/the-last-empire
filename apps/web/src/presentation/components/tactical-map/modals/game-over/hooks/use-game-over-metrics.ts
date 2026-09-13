@@ -8,7 +8,6 @@ import {
   VICTORY_CONFIG,
 } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface GameOverMetricsResult {
   isVictory: boolean;
@@ -27,8 +26,13 @@ export function useGameOverMetrics(
   gameState: GameState | null,
 ): GameOverMetricsResult | null {
   const t = useTranslations("gameOver");
-  const { formatCurrency, formatPopulation, formatNumber, toDigits, locale } =
-    useLocaleFormatter();
+  const {
+    formatCurrency,
+    formatPopulation,
+    formatNumber,
+    toDigits,
+    formatCountryName,
+  } = useLocaleFormatter();
 
   return useMemo(() => {
     if (!gameState || !gameState.isGameOver) {
@@ -87,7 +91,7 @@ export function useGameOverMetrics(
         humanCanonical;
 
     const winnerDisplayName = effectiveWinnerNation
-      ? NationPresenter.formatName(effectiveWinnerNation, locale)
+      ? formatCountryName(effectiveWinnerNation)
       : isPlayerDefeated
         ? t("reasons.fallbacks.rivalSuperpowers")
         : t("reasons.fallbacks.supremeGlobalPower");
@@ -200,6 +204,6 @@ export function useGameOverMetrics(
     formatPopulation,
     formatNumber,
     toDigits,
-    locale,
+    formatCountryName,
   ]);
 }
