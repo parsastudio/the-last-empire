@@ -17,7 +17,7 @@ export class ArmsMarketManager {
     quantity: number,
   ): GameState {
     if (quantity <= 0) {
-      throw new GameError("INVALID_ACTION", "تعداد سفارش خرید باید مثبت باشد.");
+      throw new GameError("INVALID_QUANTITY");
     }
 
     const canonicalBuyerId = CountryRegistry.resolveCanonicalId(buyerId);
@@ -27,17 +27,14 @@ export class ArmsMarketManager {
     const seller = state.nations[canonicalSellerId] || state.nations[sellerId];
 
     if (!buyer || !buyer.isAlive) {
-      throw new GameError("NATION_NOT_FOUND", "کشور خریدار فعال نیست.");
+      throw new GameError("BUYER_NOT_FOUND");
     }
     if (!seller || !seller.isAlive) {
-      throw new GameError("NATION_NOT_FOUND", "کشور فروشنده یافت نشد.");
+      throw new GameError("SELLER_NOT_FOUND");
     }
 
     if (seller.military.techLevel <= buyer.military.techLevel) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `سطح فناوری نظامی کشور ${seller.id} (${seller.military.techLevel.toFixed(1)}) از فناوری نظامی شما (${buyer.military.techLevel.toFixed(1)}) بالاتر نیست.`,
-      );
+      throw new GameError("TECH_NOT_SUPERIOR");
     }
 
     const rel =
@@ -46,10 +43,7 @@ export class ArmsMarketManager {
     const tension = rel ? (rel.tension ?? 10) : 10;
 
     if (stance === "WAR" || tension >= 50) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `کشور ${seller.id} به دلیل وضعیت جنگی یا تنش امنیتی بالا (۵۰٪ یا بیشتر) حاضر به فروش تسلیحات نیست.`,
-      );
+      throw new GameError("DIPLOMATIC_TENSION");
     }
 
     const baseUnitPrice =
@@ -63,10 +57,7 @@ export class ArmsMarketManager {
     const totalCost = marketPricePerUnit * quantity;
 
     if (buyer.treasury < totalCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای خرید این محموله تسلیحاتی کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const buyerGdp = getNationGdp(buyer, state.provinces);
@@ -76,10 +67,7 @@ export class ArmsMarketManager {
     const addedValuation = baseUnitPrice * quantity;
 
     if (currentValuation + addedValuation > maxValuation) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",
-      );
+      throw new GameError("ARMY_CAP_EXCEEDED");
     }
 
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
@@ -89,10 +77,7 @@ export class ArmsMarketManager {
     const q = quotas[unitType];
 
     if (q.remainingRoom < quantity) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `سقف مجاز سهمیه ${unitType} در ارتش شما تکمیل شده است.`,
-      );
+      throw new GameError("QUOTA_REACHED");
     }
 
     const sellerProfit =

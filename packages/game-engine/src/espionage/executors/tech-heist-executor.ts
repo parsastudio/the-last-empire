@@ -26,7 +26,7 @@ export class TechHeistExecutor {
       return {
         updatedSource: source,
         updatedTarget: target,
-        message: `نفوذ به سرورهای محرمانه ${target.id} شکست خورد و ردپای هکرها شناسایی گردید (-۷۵ همسویی، -۱۰ اعتبار جهانی).`,
+        message: "TECH_HEIST_FAILED",
       };
     }
 
@@ -63,20 +63,11 @@ export class TechHeistExecutor {
       totalPointsGained: superiority.totalAvailablePoints,
     };
 
-    let message = "";
-    if (superiority.heistMode === "DUAL") {
-      message = `سرقت فوق‌محرمانه با موفقیت ۱۰۰٪ و بدون ردپا انجام شد! دانشمندان شما ۰.۵ لول فناوری نظامی و ۰.۵ لول دانش صنعتی (R&D) از ${target.id} استخراج و بومی‌سازی کردند.`;
-    } else if (superiority.heistMode === "MILITARY_ONLY") {
-      message = `سرقت فوق‌محرمانه با موفقیت انجام شد! ${milGain} لول فناوری نظامی و رمزنگاری پیشرفته از زرادخانه ${target.id} استخراج و به ارتش کشور اضافه گردید.`;
-    } else {
-      message = `سرقت فوق‌محرمانه با موفقیت انجام شد! ${indGain} لول فناوری صنعتی و نقشه‌های مهندسی ساخت خطوط تولید از ${target.id} استخراج شد.`;
-    }
-
     return {
       updatedSource,
       updatedTarget: target,
       techTheftData,
-      message,
+      message: "TECH_HEIST_SUCCESS",
     };
   }
 }

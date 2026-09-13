@@ -16,7 +16,7 @@ export class SabotageTierExecutor {
     if (!isSuccess) {
       return {
         updatedTarget: target,
-        message: `عملیات خرابکاری توسط ضدجاسوسی ${target.id} خنثی شد و هویت تیم نفوذی لو رفت (-۵۰ همسویی، -۷ اعتبار جهانی).`,
+        message: "SABOTAGE_OPERATION_FAILED",
       };
     }
 
@@ -50,8 +50,10 @@ export class SabotageTierExecutor {
       droneMissileDestroyed: drLost,
     };
 
-    const message = `عملیات خرابکاری در پایگاه‌های ${target.id} با انهدام موفق ادوات و پدافند به پایان رسید. هیچ ردی به جا نماند.`;
-
-    return { updatedTarget, sabotageData, message };
+    return {
+      updatedTarget,
+      sabotageData,
+      message: "SABOTAGE_OPERATION_SUCCESS",
+    };
   }
 }

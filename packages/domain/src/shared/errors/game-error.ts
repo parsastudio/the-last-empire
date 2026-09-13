@@ -2,12 +2,43 @@ export type GameErrorCode =
   | "INSUFFICIENT_FUNDS"
   | "INSUFFICIENT_RESOURCES"
   | "INVALID_ACTION"
+  | "INVALID_QUANTITY"
+  | "INVALID_AMOUNT"
+  | "INVALID_CHOICE"
   | "NATION_NOT_FOUND"
+  | "TARGET_NOT_FOUND"
+  | "BUYER_NOT_FOUND"
+  | "SELLER_NOT_FOUND"
   | "PROVINCE_NOT_FOUND"
   | "UNAUTHORIZED"
-  | "SELLER_NOT_FOUND"
   | "DIPLOMATIC_TENSION"
   | "GEOPOLITICAL_REACH_DENIED"
+  | "CANNOT_ATTACK_SELF"
+  | "ALREADY_ATTACKED_THIS_TURN"
+  | "AID_ALREADY_SENT_THIS_TURN"
+  | "POST_WAR_COOLDOWN"
+  | "WAR_FIRST_TURN_COOLDOWN"
+  | "INSUFFICIENT_NAVAL_CAPACITY"
+  | "INFANTRY_REQUIRED"
+  | "INSUFFICIENT_SLOTS"
+  | "NO_ACTIVE_FACTORIES"
+  | "TIER_ALREADY_MAXED"
+  | "NO_FACTORIES_IN_TIER"
+  | "ALL_FACTORIES_MAXED"
+  | "NO_SEA_ACCESS"
+  | "NO_DEBT"
+  | "DEBT_LIMIT_EXCEEDED"
+  | "TECH_NOT_SUPERIOR"
+  | "TECH_DISPARITY_INSUFFICIENT"
+  | "TIER_ALREADY_EXECUTED_THIS_TURN"
+  | "ARMY_CAP_EXCEEDED"
+  | "QUOTA_REACHED"
+  | "EVENT_NOT_FOUND"
+  | "PROJECT_NOT_FOUND"
+  | "PROJECT_ALREADY_COMPLETED"
+  | "PROJECT_ALREADY_BOOSTED_THIS_TURN"
+  | "MAX_PROJECT_BOOSTS_REACHED"
+  | "NON_AGGRESSION_PACT_REQUIRED"
   | "GAME_OVER"
   | "EXECUTION_FAILED"
   | "UNKNOWN_ACTION";
@@ -15,8 +46,8 @@ export type GameErrorCode =
 export class GameError extends Error {
   public readonly code: GameErrorCode;
 
-  constructor(code: GameErrorCode, message: string) {
-    super(message);
+  constructor(code: GameErrorCode, message?: string) {
+    super(message || code);
     this.name = "GameError";
     this.code = code;
     Object.setPrototypeOf(this, GameError.prototype);

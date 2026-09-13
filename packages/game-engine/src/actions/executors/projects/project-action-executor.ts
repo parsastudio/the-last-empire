@@ -27,41 +27,29 @@ export class ProjectActionExecutor {
       action.projectId,
     );
     if (!config) {
-      throw new GameError("INVALID_ACTION", "پروژه مورد نظر یافت نشد.");
+      throw new GameError("PROJECT_NOT_FOUND");
     }
 
     const completedIds = nation.completedProjectIds || [];
     if (completedIds.includes(config.id)) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "این پروژه قبلاً با موفقیت تکمیل و بهره‌برداری شده است.",
-      );
+      throw new GameError("PROJECT_ALREADY_COMPLETED");
     }
 
     const boostedThisTurn =
       state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
     if (boostedThisTurn.includes(config.id)) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "در هر نوبت حداکثر ۱ بار امکان تزریق بودجه به این پروژه وجود دارد.",
-      );
+      throw new GameError("PROJECT_ALREADY_BOOSTED_THIS_TURN");
     }
 
     if (
       boostedThisTurn.length >=
       NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN
     ) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "سقف مجاز پژوهش در این نوبت (۲ پروژه در هر دست) تکمیل شده است.",
-      );
+      throw new GameError("MAX_PROJECT_BOOSTS_REACHED");
     }
 
     if (nation.treasury < config.costPerStep) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای پرداخت هزینه این گام پژوهشی کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const currentSteps = nation.projectProgressSteps?.[config.id] || 0;
@@ -110,10 +98,6 @@ export class ProjectActionExecutor {
 
     const newLogs = [];
     if (isCompleted) {
-      const message = isSilentBreakthrough
-        ? `جهش علمی و دستاورد زودهنگام: دانشمندان کشور با کشف فرمول جدید، پروژه راهبردی «${config.id}» را پیش از موعد به بهره‌برداری رساندند!`
-        : `تکمیل برنامه راهبردی: پروژه «${config.id}» با موفقیت ۱۰۰٪ به پایان رسید و امتیازات آن فعال شد.`;
-
       newLogs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,
@@ -122,14 +106,12 @@ export class ProjectActionExecutor {
           "INFO",
           "GENERIC_EVENT",
           {
-            projectTitle: config.id,
-            eventTitle: isSilentBreakthrough
-              ? "دستاورد زودهنگام ملی"
-              : "تکمیل پروژه راهبردی",
-            choiceLabel: message,
+            projectId: config.id,
+            isEarlyBreakthrough: isSilentBreakthrough,
+            eventCode: isSilentBreakthrough
+              ? "EARLY_BREAKTHROUGH"
+              : "PROJECT_COMPLETED",
           },
-          undefined,
-          message,
         ),
       );
     }

@@ -34,10 +34,7 @@ export class BuildFactoryExecutor {
     const totalCost = Math.floor(baseCost * projectDiscount);
 
     if (nation.treasury < totalCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای احداث این تعداد کارخانه کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
@@ -47,10 +44,7 @@ export class BuildFactoryExecutor {
     );
 
     if (ownedProvinces.length === 0) {
-      throw new GameError(
-        "PROVINCE_NOT_FOUND",
-        "هیچ استانی در قلمرو این کشور یافت نشد.",
-      );
+      throw new GameError("PROVINCE_NOT_FOUND");
     }
 
     const slotExpansionRatio =
@@ -69,22 +63,16 @@ export class BuildFactoryExecutor {
     if (action.provinceId) {
       const prov = state.provinces[action.provinceId.toString()];
       if (!prov) {
-        throw new GameError("PROVINCE_NOT_FOUND", "استان مورد نظر یافت نشد.");
+        throw new GameError("PROVINCE_NOT_FOUND");
       }
       const provOwner = CountryRegistry.resolveCanonicalId(prov.ownerNationId);
       if (provOwner !== canonicalNation) {
-        throw new GameError(
-          "UNAUTHORIZED",
-          "این استان تحت حاکمیت کشور شما قرار ندارد.",
-        );
+        throw new GameError("UNAUTHORIZED");
       }
       const effectiveMaxSlots = getEffectiveMaxSlots(prov.provinceId);
       const emptySlots = Math.max(0, effectiveMaxSlots - prov.factoriesCount);
       if (emptySlots < quantity) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "اسلات خالی کافی در این استان برای احداث این تعداد کارخانه وجود ندارد.",
-        );
+        throw new GameError("INSUFFICIENT_SLOTS");
       }
       distribution.set(prov.provinceId, quantity);
     } else {
@@ -105,10 +93,7 @@ export class BuildFactoryExecutor {
       }
 
       if (allocatedCount < quantity) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "مجموع اسلات‌های خالی در سراسر کشور برای احداث این تعداد کارخانه کافی نیست.",
-        );
+        throw new GameError("INSUFFICIENT_SLOTS");
       }
 
       for (const [pId, added] of calculatedDist.entries()) {

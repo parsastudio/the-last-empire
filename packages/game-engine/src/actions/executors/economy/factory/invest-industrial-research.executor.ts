@@ -15,10 +15,7 @@ export class InvestIndustrialResearchExecutor {
       nation.government?.type,
     );
     if (nation.treasury < cost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای پژوهش صنعتی بومی کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const nextIndustrialLevel = Number(

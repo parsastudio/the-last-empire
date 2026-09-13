@@ -22,10 +22,7 @@ export class EconomyActionExecutor {
       state.nations[action.nationId];
 
     if (!nation) {
-      throw new GameError(
-        "NATION_NOT_FOUND",
-        `کشور صادرکننده دستور (${action.nationId}) یافت نشد.`,
-      );
+      throw new GameError("NATION_NOT_FOUND");
     }
 
     const buyerKey = state.nations[canonicalId] ? canonicalId : nation.id;

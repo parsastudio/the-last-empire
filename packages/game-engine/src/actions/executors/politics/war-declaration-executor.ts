@@ -27,10 +27,7 @@ export class WarDeclarationExecutor {
     );
 
     if (!canReach) {
-      throw new GameError(
-        "GEOPOLITICAL_REACH_DENIED",
-        `امکان اعلان جنگ به کشور ${receiver.id} وجود ندارد: عدم وجود مرز زمینی مشترک یا دسترسی دریایی با حداقل ۱ ناوگان فعال.`,
-      );
+      throw new GameError("GEOPOLITICAL_REACH_DENIED");
     }
 
     const updatedSenderRel: RelationProfile = {

@@ -22,12 +22,12 @@ export class DilemmaActionExecutor {
   }> {
     const event = CORE_DILEMMA_EVENTS.find((e) => e.id === action.eventId);
     if (!event) {
-      throw new GameError("INVALID_ACTION", "رویداد مورد نظر یافت نشد.");
+      throw new GameError("EVENT_NOT_FOUND");
     }
 
     const choice = event.choices.find((c) => c.id === action.choiceId);
     if (!choice) {
-      throw new GameError("INVALID_ACTION", "گزینه انتخابی نامعتبر است.");
+      throw new GameError("INVALID_CHOICE");
     }
 
     const effect = choice.effect;
