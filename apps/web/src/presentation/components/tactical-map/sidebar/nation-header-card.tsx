@@ -19,7 +19,6 @@ interface NationHeaderCardProps {
 }
 
 export function NationHeaderCard({
-  name,
   code,
   flagCode,
   governmentType,
@@ -37,7 +36,6 @@ export function NationHeaderCard({
   const formatted = useMemo(() => {
     const summary = NationPresentationMapper.formatNationSummary(
       code,
-      name,
       code,
       flagCode,
       rank,
@@ -63,7 +61,6 @@ export function NationHeaderCard({
   }, [
     code,
     flagCode,
-    name,
     population,
     rank,
     governmentType,

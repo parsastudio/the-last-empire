@@ -1,6 +1,7 @@
 export type MessageNamespace =
   | "attack"
   | "common"
+  | "countries"
   | "dilemmas"
   | "diplomacy"
   | "espionage"
@@ -20,6 +21,7 @@ export type MessageNamespace =
 export const ALL_MESSAGE_NAMESPACES: readonly MessageNamespace[] = [
   "attack",
   "common",
+  "countries",
   "dilemmas",
   "diplomacy",
   "espionage",
@@ -40,6 +42,7 @@ export const ALL_MESSAGE_NAMESPACES: readonly MessageNamespace[] = [
 const NAMESPACE_FILE_MAP: Record<MessageNamespace, string> = {
   attack: "attack.json",
   common: "common.json",
+  countries: "countries.json",
   dilemmas: "dilemmas.json",
   diplomacy: "diplomacy.json",
   espionage: "espionage.json",

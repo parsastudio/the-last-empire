@@ -47,8 +47,6 @@ export class ManifestProfileLoader {
 
       const dynamicProfile: CountryProfile = {
         code: iso3,
-        nameEn: item.nameEn || iso3,
-        nameFa: item.nameFa || iso3,
         gdp: item.gdp,
         population: item.population,
         flagCode: String(item.flagCode || iso3.slice(0, 2)).toUpperCase(),

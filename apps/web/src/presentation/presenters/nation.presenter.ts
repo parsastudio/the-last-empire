@@ -1,7 +1,8 @@
 import { Nation, CountryRegistry, CountryProfile } from "@geopolitics/domain";
 import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { COUNTRY_NAMES_DATA } from "@/presentation/resources/country-names.data";
+import enCountries from "../../../messages/en/countries.json";
+import faCountries from "../../../messages/fa/countries.json";
 
 export interface PresentedNation {
   id: string;
@@ -12,6 +13,11 @@ export interface PresentedNation {
   nation: Nation | null;
   profile: CountryProfile | null;
 }
+
+const COUNTRIES_DICTIONARIES: Record<AppLocale, Record<string, string>> = {
+  en: enCountries,
+  fa: faCountries,
+};
 
 export class NationPresenter {
   public static resolveCanonicalId(identifier: unknown): string {
@@ -35,16 +41,11 @@ export class NationPresenter {
 
     const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
     const canonicalId = this.resolveCanonicalId(rawId);
-    const localizedEntry = COUNTRY_NAMES_DATA[canonicalId];
+    const dict = COUNTRIES_DICTIONARIES[locale] || faCountries;
+    const localizedName = dict[canonicalId];
 
-    if (localizedEntry) {
-      return locale === "en" ? localizedEntry.en : localizedEntry.fa;
-    }
-
-    const profile = CountryRegistry.getCountry(canonicalId);
-    if (profile) {
-      if (locale === "en" && profile.nameEn) return profile.nameEn;
-      if (locale === "fa" && profile.nameFa) return profile.nameFa;
+    if (localizedName) {
+      return localizedName;
     }
 
     return fallback || canonicalId || (locale === "en" ? "Unknown" : "نامشخص");

@@ -4,8 +4,6 @@ import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
 
 export interface NormalizedCountryFallback {
-  nameFa: string;
-  nameEn: string;
   code: string;
   flagCode: string;
   gdp: number;
@@ -35,8 +33,6 @@ export class CountryDefaultsUtility {
         : "IRN";
     const cleanCode = str.trim().toUpperCase() || "IRN";
 
-    const nameFa = profile?.nameFa ?? `کشور ${cleanCode}`;
-    const nameEn = profile?.nameEn ?? cleanCode;
     const code = profile?.code ?? cleanCode;
     const flagCode =
       profile?.flagCode ?? (code.length >= 2 ? code.slice(0, 2) : "UN");
@@ -65,8 +61,6 @@ export class CountryDefaultsUtility {
       );
 
     return {
-      nameFa,
-      nameEn,
       code,
       flagCode,
       gdp,

@@ -40,7 +40,6 @@ function mapManifestToNationDetails(
 
       const summary = NationPresentationMapper.formatNationSummary(
         p.code,
-        p.nameFa,
         p.code,
         p.flagCode,
         rank,
@@ -92,7 +91,6 @@ function mapManifestToNationDetails(
 
     const summary = NationPresentationMapper.formatNationSummary(
       canonicalId,
-      item.nameFa || profile?.nameFa || canonicalId,
       item.code || canonicalId,
       item.flagCode || profile?.flagCode || canonicalId,
       rank,

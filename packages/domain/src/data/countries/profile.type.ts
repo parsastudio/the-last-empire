@@ -3,8 +3,6 @@ import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 
 export interface CountryProfile {
   code: string;
-  nameEn: string;
-  nameFa: string;
   gdp: number;
   population: number;
   flagCode: string;
