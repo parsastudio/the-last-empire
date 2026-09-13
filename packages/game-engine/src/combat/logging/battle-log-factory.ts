@@ -4,7 +4,6 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
-import { MapTopologyRegistry } from "@geopolitics/domain";
 import {
   BattleSpoilsDetails,
   BattleFullReportData,
@@ -20,14 +19,11 @@ export class BattleLogFactory {
     isFullCapitulation: boolean,
     spoilsData?: BattleSpoilsDetails,
   ): BattleFullReportData {
-    const targetProvinceName = targetProvince
-      ? MapTopologyRegistry.getNameFa(targetProvince.provinceId, undefined)
-      : undefined;
-
     return {
       attackerId: attacker.id,
       defenderId: defender.id,
-      targetProvinceName,
+      targetProvinceId: targetProvince?.provinceId,
+      targetProvinceName: undefined,
       attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation,

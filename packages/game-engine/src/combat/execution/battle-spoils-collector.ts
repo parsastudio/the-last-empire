@@ -10,9 +10,7 @@ export class BattleSpoilsCollector {
   ): BattleSpoilsDetails {
     const conqueredProvs = conquestResult.conqueredProvincesList || [];
     const conqueredProvincesCount = conqueredProvs.length;
-    const conqueredProvincesNames = conqueredProvs.map((p) =>
-      MapTopologyRegistry.getNameFa(p.provinceId, ""),
-    );
+    const conqueredProvinceIds = conqueredProvs.map((p) => p.provinceId);
     const conqueredPixels = conquestResult.conqueredPixels;
     const gainedGdp = conquestResult.conqueredProvincesGdp;
 
@@ -27,7 +25,8 @@ export class BattleSpoilsCollector {
     return {
       conqueredPixels,
       conqueredProvincesCount,
-      conqueredProvincesNames,
+      conqueredProvinceIds,
+      conqueredProvincesNames: [],
       gainedPopulation,
       gainedGdp,
       lootedTreasury: calcResult.treasuryLooted || 0,

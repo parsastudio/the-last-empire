@@ -10,8 +10,8 @@ import {
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
-import enDiplomacy from "../../../../../../messages/en/diplomacy.json";
-import faDiplomacy from "../../../../../../messages/fa/diplomacy.json";
+import enDiplomacy from "@/messages/en/diplomacy.json";
+import faDiplomacy from "@/messages/fa/diplomacy.json";
 
 export interface NationAllyDetail {
   id: string;

@@ -12,6 +12,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
+      "@/messages/*": ["./messages/*"],
       "@/domain/*": ["../../packages/domain/src/*"],
       "@/engine/*": ["../../packages/game-engine/src/*"],
       "@/infrastructure/*": ["./src/infrastructure/*"],
@@ -24,6 +25,7 @@
   "include": [
     "next-env.d.ts",
     "src/**/*",
+    "messages/**/*",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",

@@ -131,7 +131,7 @@ export class StrategicManifestBuilder {
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
           provinceIndex: pIndex + 1,
-          nameFa: `استان ${profile.nameFa} (${pIndex + 1})`,
+          nameFa: profile.nameFa ?? "",
           countryId,
           originalCountryId: countryId,
           pixelCount: pInfo.pixelCount,
@@ -146,7 +146,8 @@ export class StrategicManifestBuilder {
         });
       }
 
-      const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
+      const defaultGov =
+        profile.startingGovernment ?? "PLURALIST_PARLIAMENTARY";
       const startingStability = 50;
       const hasSeaAccess = provList.some((p) => p.hasSeaAccess);
 
