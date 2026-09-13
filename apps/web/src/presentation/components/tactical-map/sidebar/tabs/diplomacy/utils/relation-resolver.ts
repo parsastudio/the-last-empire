@@ -14,7 +14,10 @@ import {
 } from "@/presentation/utils/locale-number-formatter";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import {
+  NationPresenter,
+  CountryNameTranslator,
+} from "@/presentation/presenters/nation.presenter";
 import {
   getPostureBadgeClass,
   getAlignmentColor,
@@ -43,6 +46,7 @@ export function resolveProfileRelation(
   humanNation?: Nation | null,
   allNations?: Record<string, Nation>,
   provincesMap?: Record<string, Province>,
+  translator?: CountryNameTranslator,
   locale: AppLocale = "fa",
 ): DiplomaticRelation {
   const profile = CountryRegistry.getCountry(code);
@@ -58,7 +62,7 @@ export function resolveProfileRelation(
   const presented = NationPresenter.present(
     liveNation || code,
     allNations,
-    locale,
+    translator,
   );
 
   const techLevel = liveNation
@@ -132,7 +136,7 @@ export function resolveProfileRelation(
         : null;
 
   const guarantorName = guarantorNation
-    ? NationPresenter.formatName(guarantorNation, locale)
+    ? NationPresenter.formatName(guarantorNation, translator)
     : undefined;
 
   const humanTech = humanNation?.military.techLevel ?? 1.0;

@@ -1,10 +1,7 @@
 import { Nation, CountryRegistry, CountryProfile } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import enCountries from "@/messages/en/countries.json";
-import faCountries from "@/messages/fa/countries.json";
-import enCommon from "@/messages/en/common.json";
-import faCommon from "@/messages/fa/common.json";
+
+export type CountryNameTranslator = (countryCode: string) => string;
 
 export interface PresentedNation {
   id: string;
@@ -15,11 +12,6 @@ export interface PresentedNation {
   nation: Nation | null;
   profile: CountryProfile | null;
 }
-
-const COUNTRIES_DICTIONARIES: Record<AppLocale, Record<string, string>> = {
-  en: enCountries,
-  fa: faCountries,
-};
 
 export class NationPresenter {
   public static resolveCanonicalId(identifier: unknown): string {
@@ -33,24 +25,24 @@ export class NationPresenter {
 
   public static formatName(
     nationOrId: Nation | string | null | undefined,
-    locale: AppLocale = "fa",
+    translator?: CountryNameTranslator,
     fallback?: string,
   ): string {
-    const unknownText = locale === "en" ? enCommon.unknown : faCommon.unknown;
     if (!nationOrId) {
-      return fallback || unknownText;
+      return fallback || "";
     }
 
     const rawId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
     const canonicalId = this.resolveCanonicalId(rawId);
-    const dict = COUNTRIES_DICTIONARIES[locale] || faCountries;
-    const localizedName = dict[canonicalId];
 
-    if (localizedName) {
-      return localizedName;
+    if (translator) {
+      const translated = translator(canonicalId);
+      if (translated && translated !== canonicalId) {
+        return translated;
+      }
     }
 
-    return fallback || canonicalId || unknownText;
+    return fallback || canonicalId || "";
   }
 
   public static resolveFlagCode(
@@ -77,15 +69,14 @@ export class NationPresenter {
   public static present(
     target: Nation | string | null | undefined,
     nationsMap?: Record<string, Nation>,
-    locale: AppLocale = "fa",
+    translator?: CountryNameTranslator,
     fallbackName?: string,
   ): PresentedNation {
-    const unknownText = locale === "en" ? enCommon.unknown : faCommon.unknown;
     if (!target) {
       return {
         id: "",
         canonicalId: "",
-        name: fallbackName || unknownText,
+        name: fallbackName || "",
         flagCode: "IR",
         flagEmoji: "🌐",
         nation: null,
@@ -104,7 +95,11 @@ export class NationPresenter {
           : null;
 
     const profile = CountryRegistry.getCountry(canonicalId) || null;
-    const name = this.formatName(nation || canonicalId, locale, fallbackName);
+    const name = this.formatName(
+      nation || canonicalId,
+      translator,
+      fallbackName,
+    );
     const flagCode = this.resolveFlagCode(nation || canonicalId);
     const flagEmoji = getFlagEmoji(flagCode);
 

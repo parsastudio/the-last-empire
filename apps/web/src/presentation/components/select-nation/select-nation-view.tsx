@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
@@ -11,7 +11,6 @@ import { useSelectNationForm } from "@/presentation/components/select-nation/hoo
 
 export function SelectNationView() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("selectNation");
   const form = useSelectNationForm();
 
@@ -27,10 +26,7 @@ export function SelectNationView() {
   }
 
   return (
-    <div
-      className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none"
-      dir={locale === "fa" ? "rtl" : "ltr"}
-    >
+    <div className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none">
       <SelectNationHeader onBack={() => router.push("/")} />
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-2.5 sm:p-4 md:p-6 grid grid-cols-12 gap-2.5 sm:gap-4 md:gap-6 overflow-hidden min-h-0">

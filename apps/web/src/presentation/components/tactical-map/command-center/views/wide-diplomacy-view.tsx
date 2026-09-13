@@ -36,7 +36,7 @@ export function WideDiplomacyView({
   onNavigateTab,
 }: WideDiplomacyViewProps) {
   const t = useTranslations("diplomacy.view");
-  const { toDigits } = useLocaleFormatter();
+  const { toDigits, countryTranslator, locale } = useLocaleFormatter();
   const [mobileTab, setMobileTab] = useState<"list" | "details">("details");
 
   const activeHumanId = CountryRegistry.resolveCanonicalId(
@@ -66,8 +66,17 @@ export function WideDiplomacyView({
       nationsMap,
       provincesMap,
       activeHumanId,
+      countryTranslator,
+      locale,
     );
-  }, [diplomacy.selectedTargetNation, nationsMap, provincesMap, activeHumanId]);
+  }, [
+    diplomacy.selectedTargetNation,
+    nationsMap,
+    provincesMap,
+    activeHumanId,
+    countryTranslator,
+    locale,
+  ]);
 
   const handleOpenEspionage = () => {
     if (onNavigateTab) {

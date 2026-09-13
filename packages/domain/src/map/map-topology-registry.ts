@@ -40,7 +40,6 @@ export class MapTopologyRegistry {
     const topology: ProvinceStaticTopology = {
       provinceId: p.provinceId,
       provinceIndex: p.provinceIndex ?? 1,
-      nameFa: p.nameFa ?? "",
       countryId: p.countryId,
       originalCountryId: p.originalCountryId ?? p.countryId,
       pixelCount: p.pixelCount,
@@ -60,10 +59,6 @@ export class MapTopologyRegistry {
     provinceId: number,
   ): ProvinceStaticTopology | undefined {
     return this.topologyMap.get(provinceId);
-  }
-
-  public static getNameFa(provinceId: number, fallback = ""): string {
-    return this.topologyMap.get(provinceId)?.nameFa ?? fallback;
   }
 
   public static getCountryId(provinceId: number, fallback = ""): string {

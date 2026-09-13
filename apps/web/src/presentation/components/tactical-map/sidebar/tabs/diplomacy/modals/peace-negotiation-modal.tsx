@@ -25,8 +25,6 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
@@ -48,7 +46,8 @@ export function PeaceNegotiationModal({
   onClose,
 }: PeaceNegotiationModalProps) {
   const t = useTranslations("diplomacy.peaceModal");
-  const { formatCurrency, toDigits, locale } = useLocaleFormatter();
+  const { formatCurrency, toDigits, formatCountryName, formatProvinceName } =
+    useLocaleFormatter();
   const { dispatchAction, isSubmitting } = useGameActions();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -75,8 +74,8 @@ export function PeaceNegotiationModal({
 
   const humanFlag = getFlagEmoji(humanNation.flagCode || humanNation.id);
   const targetFlag = getFlagEmoji(targetNation.flagCode || targetNation.id);
-  const humanDisplayName = NationPresenter.formatName(humanNation, locale);
-  const targetDisplayName = NationPresenter.formatName(targetNation, locale);
+  const humanDisplayName = formatCountryName(humanNation);
+  const targetDisplayName = formatCountryName(targetNation);
 
   const isDominantAi = terms.statusCode === "AI_DOMINANT_REFUSAL";
   const isCrushedAi = terms.statusCode === "AI_DESPERATE_CAPITULATION";
@@ -249,7 +248,7 @@ export function PeaceNegotiationModal({
                 </span>
                 <span className="font-black text-foreground text-xs block truncate font-sans">
                   {terms.concededProvinceIds
-                    .map((id) => ProvinceNameFormatter.format(id, locale))
+                    .map((id) => formatProvinceName(id))
                     .join(", ")}
                 </span>
               </div>

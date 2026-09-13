@@ -1,6 +1,5 @@
 import { TurnLogEntry } from "@geopolitics/domain";
 import { AppLocale } from "@/presentation/utils/locale-number-formatter";
-import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 export interface TurnLogPresenterOptions {
   tEvents: (key: string, values?: Record<string, string | number>) => string;
@@ -8,6 +7,7 @@ export interface TurnLogPresenterOptions {
   tDilemmas?: (key: string, values?: Record<string, string | number>) => string;
   formatCurrency: (value: number, compact?: boolean) => string;
   toDigits: (value: number | string) => string;
+  formatCountryName: (code: string) => string;
   sourceName: string;
   targetName: string;
   locale?: AppLocale;
@@ -25,19 +25,16 @@ export class TurnLogPresenterUtility {
       tDilemmas,
       formatCurrency,
       toDigits,
+      formatCountryName,
       sourceName,
       targetName,
-      locale = "fa",
     } = options;
 
     switch (log.eventCode) {
       case "WAR_DECLARED": {
         if (params["isRetaliation"]) {
           const protectedTarget = params["protectedTargetId"]
-            ? NationPresenter.formatName(
-                String(params["protectedTargetId"]),
-                locale,
-              )
+            ? formatCountryName(String(params["protectedTargetId"]))
             : String(params["protectedTargetName"] || targetName);
 
           return tEvents("WAR_DECLARED_RETALIATION", {

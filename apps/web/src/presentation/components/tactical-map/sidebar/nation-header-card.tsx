@@ -31,9 +31,15 @@ export function NationHeaderCard({
   const t = useTranslations("overview.header");
   const tGov = useTranslations("governments");
   const tDiff = useTranslations("selectNation.difficulty");
-  const { locale, toDigits, formatLevel } = useLocaleFormatter();
+  const tPowerTiers = useTranslations("selectNation.powerTiers");
+  const { locale, toDigits, formatLevel, formatCountryName } =
+    useLocaleFormatter();
 
   const formatted = useMemo(() => {
+    const powerTierKey = NationPresentationMapper.getPowerTierKey(0);
+    const powerLabel = tPowerTiers(powerTierKey);
+    const displayName = formatCountryName(code);
+
     const summary = NationPresentationMapper.formatNationSummary(
       code,
       code,
@@ -42,13 +48,13 @@ export function NationHeaderCard({
       0,
       population,
       0,
+      displayName,
+      powerLabel,
       locale,
     );
 
-    let governmentLabel = governmentType;
-    try {
-      governmentLabel = tGov(`${governmentType}.name`);
-    } catch {}
+    const govKey = `${governmentType}.name`;
+    const governmentLabel = tGov.has(govKey) ? tGov(govKey) : governmentType;
 
     return {
       flagEmoji: summary.flagEmoji,
@@ -68,7 +74,9 @@ export function NationHeaderCard({
     industrialLevel,
     locale,
     formatLevel,
+    formatCountryName,
     tGov,
+    tPowerTiers,
   ]);
 
   const diffVisual =
