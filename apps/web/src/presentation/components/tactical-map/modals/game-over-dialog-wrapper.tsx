@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { GameOverModal } from "./game-over-modal";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useGameStore } from "@/presentation/stores/use-game-store";

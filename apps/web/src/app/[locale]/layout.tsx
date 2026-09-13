@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { pickMessages } from "@/i18n/pick-messages";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -56,12 +57,13 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const layoutMessages = pickMessages(messages, ["common", "hud"]);
   const dir = locale === "fa" ? "rtl" : "ltr";
 
   return (
     <html lang={locale} dir={dir} className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground select-none overflow-hidden">
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={layoutMessages}>
           <ToastProvider>
             {children}
             <StrategicToastContainer />
