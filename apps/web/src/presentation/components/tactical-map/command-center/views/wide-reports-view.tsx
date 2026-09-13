@@ -43,7 +43,7 @@ export function WideReportsView({
     setSelectedScope,
     setSelectedTurn,
     setSearchQuery,
-  } = useWideReports({ logs, currentTurn, humanNationId, nationsMap, gameId });
+  } = useWideReports({ logs, currentTurn, humanNationId, gameId });
 
   const turnLabel =
     selectedTurn === "ALL"

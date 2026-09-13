@@ -4,7 +4,6 @@ export const PeaceSettlementTypeSchema = z.enum([
   "WHITE_PEACE",
   "INDEMNITY",
   "TERRITORY_CONCESSION",
-  "FULL_CAPITULATION",
 ]);
 
 export const PeaceTermsPackageSchema = z.object({

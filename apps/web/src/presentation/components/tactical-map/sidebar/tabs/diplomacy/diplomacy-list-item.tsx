@@ -55,7 +55,7 @@ export function DiplomacyListItem({
       <div className="text-end font-sans text-[10px] space-y-0.5">
         <div className="flex items-center gap-1 justify-end">
           <span className="text-muted-foreground text-[9px]">
-            {t("internalStability")}
+            {t("alignmentLabel")}
           </span>
           <span className={`font-bold font-mono ${alignColor}`}>
             {formattedAlign}

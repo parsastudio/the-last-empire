@@ -19,12 +19,11 @@ import {
   CountryNameTranslator,
 } from "@/presentation/presenters/nation.presenter";
 import {
-  getPostureBadgeClass,
   getAlignmentColor,
   getTensionColor,
 } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
-export { getPostureBadgeClass, getAlignmentColor, getTensionColor };
+export { getAlignmentColor, getTensionColor };
 
 export interface DiplomaticRelation {
   code: string;

@@ -61,14 +61,6 @@ export class MapTopologyRegistry {
     return this.topologyMap.get(provinceId);
   }
 
-  public static getCountryId(provinceId: number, fallback = ""): string {
-    return this.topologyMap.get(provinceId)?.countryId ?? fallback;
-  }
-
-  public static getProvinceIndex(provinceId: number, fallback = 1): number {
-    return this.topologyMap.get(provinceId)?.provinceIndex ?? fallback;
-  }
-
   public static getCountryProvinceCount(countryId: string): number {
     const canonical = CountryRegistry.resolveCanonicalId(countryId);
     return this.countryProvinceCountMap.get(canonical) ?? 1;

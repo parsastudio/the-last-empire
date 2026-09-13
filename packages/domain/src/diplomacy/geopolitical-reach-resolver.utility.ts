@@ -98,20 +98,4 @@ export class GeopoliticalReachResolver {
       provincesByOwnerMap,
     );
   }
-
-  public static canInitiateDiplomacy(
-    source: Nation,
-    target: Nation,
-    allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, ProvinceDynamicState>,
-    rankMap?: Map<string, number>,
-  ): boolean {
-    return ReachableTargetsResolver.canInitiateDiplomacy(
-      source,
-      target,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
-  }
 }

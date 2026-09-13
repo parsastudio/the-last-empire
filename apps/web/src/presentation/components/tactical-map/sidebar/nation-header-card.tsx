@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Trophy, Swords, Cpu, Users } from "lucide-react";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { GameDifficulty } from "@geopolitics/domain";
 import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface NationHeaderCardProps {
   code: string;
@@ -30,35 +30,21 @@ export function NationHeaderCard({
   const t = useTranslations("overview.header");
   const tGov = useTranslations("governments");
   const tDiff = useTranslations("selectNation.difficulty");
-  const tPowerTiers = useTranslations("selectNation.powerTiers");
-  const { locale, toDigits, formatLevel, formatCountryName } =
+  const { toDigits, formatLevel, formatCountryName, formatPopulation } =
     useLocaleFormatter();
 
   const formatted = useMemo(() => {
-    const powerTierKey = NationPresentationMapper.getPowerTierKey(0);
-    const powerLabel = tPowerTiers(powerTierKey);
     const displayName = formatCountryName(code);
-
-    const summary = NationPresentationMapper.formatNationSummary(
-      code,
-      code,
-      flagCode,
-      rank,
-      0,
-      population,
-      0,
-      displayName,
-      powerLabel,
-      locale,
-    );
+    const flagEmoji = getFlagEmoji(flagCode || code);
+    const formattedPopulation = formatPopulation(population);
 
     const govKey = `${governmentType}.name`;
     const governmentLabel = tGov.has(govKey) ? tGov(govKey) : governmentType;
 
     return {
-      flagEmoji: summary.flagEmoji,
-      displayName: summary.name,
-      formattedPopulation: summary.populationText,
+      flagEmoji,
+      displayName,
+      formattedPopulation,
       governmentLabel,
       militaryTechFormatted: formatLevel(militaryTechLevel),
       industrialTechFormatted: formatLevel(industrialLevel),
@@ -67,15 +53,13 @@ export function NationHeaderCard({
     code,
     flagCode,
     population,
-    rank,
     governmentType,
     militaryTechLevel,
     industrialLevel,
-    locale,
     formatLevel,
     formatCountryName,
+    formatPopulation,
     tGov,
-    tPowerTiers,
   ]);
 
   const diffVisual =

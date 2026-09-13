@@ -16,13 +16,6 @@
   "requestedAmount": "Requested Amount:",
   "actionUnavailable": "Action unavailable under current conditions.",
   "unknown": "Unknown",
-  "units": {
-    "billion": "Billion USD",
-    "million": "Million USD",
-    "citizens": "citizens",
-    "facilities": "facilities",
-    "level": "Level {level}"
-  },
   "errors": {
     "campaignCreateFailed": "Failed to initialize new game campaign.",
     "campaignSaveFailed": "Unable to save new campaign record in local storage.",

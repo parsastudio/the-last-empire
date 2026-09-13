@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   TurnLogEntry,
   TurnLogScope,
-  Nation,
   CountryRegistry,
 } from "@geopolitics/domain";
 import {
@@ -16,7 +15,6 @@ interface UseWideReportsProps {
   logs?: TurnLogEntry[];
   currentTurn?: number;
   humanNationId?: string;
-  nationsMap?: Record<string, Nation>;
   gameId?: string;
 }
 
@@ -24,7 +22,6 @@ export function useWideReports({
   logs = [],
   currentTurn = 1,
   humanNationId,
-  nationsMap,
   gameId = "default_game",
 }: UseWideReportsProps) {
   const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");

@@ -32,7 +32,11 @@ export class LocaleNumberFormatter {
       }
       return String(input);
     }
-    return this.getFormatter(locale, { useGrouping: false }).format(num);
+    return this.getFormatter(locale, {
+      useGrouping: false,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
   }
 
   public static formatNumberWithCommas(
@@ -56,9 +60,13 @@ export class LocaleNumberFormatter {
     if (isNaN(value) || value === null) {
       return locale === "fa" ? "۰" : "0";
     }
+    if (value === 0) {
+      return locale === "fa" ? "۰" : "0";
+    }
     return this.getFormatter(locale, {
       notation: "compact",
       compactDisplay: "short",
+      minimumFractionDigits: 0,
       maximumFractionDigits: 1,
     }).format(value);
   }
@@ -71,11 +79,15 @@ export class LocaleNumberFormatter {
     if (isNaN(value) || value === null) {
       return locale === "fa" ? "۰ دلار" : "$0";
     }
+    if (value === 0) {
+      return locale === "fa" ? "۰ دلار" : "$0";
+    }
     return this.getFormatter(locale, {
       style: "currency",
       currency: "USD",
       notation: compact ? "compact" : "standard",
       compactDisplay: "short",
+      minimumFractionDigits: 0,
       maximumFractionDigits: compact ? 1 : 0,
     }).format(value);
   }
@@ -88,12 +100,16 @@ export class LocaleNumberFormatter {
     if (isNaN(value) || value === null) {
       return locale === "fa" ? "۰ دلار" : "$0";
     }
+    if (value === 0) {
+      return locale === "fa" ? "+۰ دلار" : "+$0";
+    }
     return this.getFormatter(locale, {
       style: "currency",
       currency: "USD",
       notation: compact ? "compact" : "standard",
       compactDisplay: "short",
       signDisplay: "always",
+      minimumFractionDigits: 0,
       maximumFractionDigits: compact ? 1 : 0,
     }).format(value);
   }

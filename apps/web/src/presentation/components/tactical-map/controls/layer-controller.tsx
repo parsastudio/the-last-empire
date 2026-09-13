@@ -44,7 +44,8 @@ export function LayerController({
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        insetInlineStart: "max(0.75rem, env(safe-area-inset-left))",
+        insetInlineEnd:
+          "max(0.75rem, max(env(safe-area-inset-left), env(safe-area-inset-right)))",
         bottom: "max(0.75rem, env(safe-area-inset-bottom))",
       }}
       className="fixed z-40 flex flex-col gap-2 pointer-events-auto"

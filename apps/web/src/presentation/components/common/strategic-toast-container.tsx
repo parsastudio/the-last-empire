@@ -86,7 +86,7 @@ export function StrategicToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-20 start-6 z-50 flex flex-col gap-3 pointer-events-auto">
+    <div className="fixed bottom-20 end-6 z-50 flex flex-col gap-3 pointer-events-auto">
       {toasts.map((toast) => (
         <StrategicToastItem
           key={toast.id}

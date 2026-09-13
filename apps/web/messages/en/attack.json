@@ -7,8 +7,6 @@
     "landVector": "LAND VECTOR"
   },
   "regions": {
-    "territoryOf": "{name} Territory",
-    "mainland": "Sovereign Mainland",
     "mainlandOf": "{name} Mainland"
   },
   "naval": {

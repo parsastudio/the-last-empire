@@ -1,8 +1,4 @@
-import {
-  DiplomaticStance,
-  DiplomaticPosture,
-  DiplomaticProposalType,
-} from "@geopolitics/domain";
+import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 
 export function getPostureBadgeClass(posture: DiplomaticPosture): string {
   switch (posture) {

@@ -12,7 +12,6 @@ import { AiProcurementWeightsUtility } from "@/engine/ai/procurement/ai-procurem
 export interface ArmsImportPlanResult {
   actions: GameAction[];
   spentMoney: number;
-  spentValuation: number;
   remainingImportBudget: number;
   remainingGlobalValuation: number;
 }
@@ -33,7 +32,6 @@ export class AIArmsImportPlanner {
       return {
         actions,
         spentMoney: 0,
-        spentValuation: 0,
         remainingImportBudget: 0,
         remainingGlobalValuation: initialGlobalValuation,
       };
@@ -48,7 +46,6 @@ export class AIArmsImportPlanner {
       return {
         actions,
         spentMoney: 0,
-        spentValuation: 0,
         remainingImportBudget: initialImportBudget,
         remainingGlobalValuation: initialGlobalValuation,
       };
@@ -60,7 +57,6 @@ export class AIArmsImportPlanner {
     );
     let remainingGlobalValuation = initialGlobalValuation;
     let spentMoney = 0;
-    let spentValuation = 0;
     let remainingBudget = initialImportBudget;
 
     for (let sIdx = 0; sIdx < eligibleSellers.length; sIdx++) {
@@ -117,7 +113,6 @@ export class AIArmsImportPlanner {
           sellerBudget -= cost;
           remainingBudget -= cost;
           spentMoney += cost;
-          spentValuation += valuationCost;
           remainingGlobalValuation -= valuationCost;
           q.remainingRoom -= allowedUnits;
         }
@@ -127,7 +122,6 @@ export class AIArmsImportPlanner {
     return {
       actions,
       spentMoney,
-      spentValuation,
       remainingImportBudget: Math.max(0, remainingBudget),
       remainingGlobalValuation,
     };

@@ -7,13 +7,11 @@ import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-forma
 
 interface MachinerySellerCardProps {
   seller: Nation;
-  isSelected: boolean;
   onSelect: (sellerId: string) => void;
 }
 
 export function MachinerySellerCard({
   seller,
-  isSelected,
   onSelect,
 }: MachinerySellerCardProps) {
   const { formatLevel, formatCountryName } = useLocaleFormatter();
@@ -25,11 +23,7 @@ export function MachinerySellerCard({
     <button
       type="button"
       onClick={() => onSelect(seller.id)}
-      className={`p-3.5 rounded-2xl border text-start transition-all cursor-pointer flex items-center justify-between gap-3 ${
-        isSelected
-          ? "bg-primary/15 border-primary shadow-md ring-1 ring-primary/40"
-          : "bg-secondary/40 border-border/60 hover:bg-secondary/70 hover:border-border"
-      }`}
+      className="p-3.5 rounded-2xl border text-start transition-all cursor-pointer flex items-center justify-between gap-3 bg-secondary/40 border-border/60 hover:bg-secondary/70 hover:border-border"
     >
       <div className="flex items-center gap-3">
         <span className="text-2xl select-none">{flag}</span>
