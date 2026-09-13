@@ -17,10 +17,7 @@ export class NationalDebtExecutor {
     buyerKey: string,
   ): ExecutionResult<{ loanAmount: number; currentDebt: number }> {
     if (action.amount <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "مبلغ وام باید بزرگتر از صفر باشد.",
-      );
+      throw new GameError("INVALID_AMOUNT");
     }
 
     const gdp = getNationGdp(nation, state.provinces);
@@ -31,10 +28,7 @@ export class NationalDebtExecutor {
         gdp,
       )
     ) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "سقف مجاز وام دستی (۳۰٪ تولید ناخالص داخلی) تکمیل شده است.",
-      );
+      throw new GameError("DEBT_LIMIT_EXCEEDED");
     }
 
     const nextDebt = nation.nationalDebt + action.amount;
@@ -66,16 +60,13 @@ export class NationalDebtExecutor {
     buyerKey: string,
   ): ExecutionResult<{ repaidAmount: number; remainingDebt: number }> {
     if (action.amount <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "مبلغ تسویه باید بزرگتر از صفر باشد.",
-      );
+      throw new GameError("INVALID_AMOUNT");
     }
     if (nation.nationalDebt <= 0) {
-      throw new GameError("INVALID_ACTION", "هیچ بدهی معوقی وجود ندارد.");
+      throw new GameError("NO_DEBT");
     }
     if (nation.treasury < action.amount) {
-      throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
     const repayAmount = Math.min(action.amount, nation.nationalDebt);
     const nextDebt = nation.nationalDebt - repayAmount;

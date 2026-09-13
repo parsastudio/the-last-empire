@@ -94,8 +94,6 @@ export class ReconTierExecutor {
       guarantorAuxiliaryValuation,
     };
 
-    const message = `شنود ماهواره‌ای کامل با موفقیت ۱۰۰٪ انجام شد. تمام مختصات نظامی و خزانه‌داری کشور هدف بدون هیچ ردیابی آشکار گردید.`;
-
-    return { reconData, message };
+    return { reconData, message: "RECON_OPERATION_SUCCESS" };
   }
 }

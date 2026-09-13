@@ -26,10 +26,7 @@ export class BuyIndustrialEquipmentExecutor {
       state.nations[sellerCanonical] || state.nations[action.sellerNationId];
 
     if (!seller || !seller.isAlive) {
-      throw new GameError(
-        "SELLER_NOT_FOUND",
-        "کشور فروشنده تجهیزات صنعتی در دسترس نیست.",
-      );
+      throw new GameError("SELLER_NOT_FOUND");
     }
 
     const rel = NationRelationResolver.getRelation(
@@ -37,10 +34,7 @@ export class BuyIndustrialEquipmentExecutor {
       sellerCanonical,
     );
     if (rel?.stance === "WAR" || (rel?.tension ?? 10) >= 50) {
-      throw new GameError(
-        "DIPLOMATIC_TENSION",
-        "به دلیل تنش دیپلماتیک یا جنگ، امکان معامله صنعتی با این کشور وجود ندارد.",
-      );
+      throw new GameError("DIPLOMATIC_TENSION");
     }
 
     const sellerTech = seller.industrialLevel;

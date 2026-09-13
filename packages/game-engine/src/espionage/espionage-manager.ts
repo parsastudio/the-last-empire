@@ -75,13 +75,10 @@ export class EspionageManager {
       state.nations[canonicalTarget] || state.nations[targetNationId];
 
     if (!source || !source.isAlive) {
-      throw new GameError(
-        "NATION_NOT_FOUND",
-        "کشور صادرکننده دستور فعال نیست.",
-      );
+      throw new GameError("NATION_NOT_FOUND");
     }
     if (!target || !target.isAlive) {
-      throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال نیست.");
+      throw new GameError("TARGET_NOT_FOUND");
     }
 
     const executedTiers =
@@ -89,20 +86,14 @@ export class EspionageManager {
     const executionKey = `${canonicalTarget}:${tier}`;
 
     if (executedTiers.includes(executionKey)) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `عملیات سطح ${tier} علیه این کشور در این نوبت قبلاً اجرا شده است.`,
-      );
+      throw new GameError("TIER_ALREADY_EXECUTED_THIS_TURN");
     }
 
     const targetGdp = getNationGdp(target, state.provinces);
     const cost = EspionageCalculator.calculateOperationCost(targetGdp, tier);
 
     if (source.treasury < cost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای تأمین بودجه این عملیات سیاه کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const superiority = EspionageCalculator.calculateTechSuperiority(
@@ -114,10 +105,7 @@ export class EspionageManager {
       superiority.totalAvailablePoints <
         EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST
     ) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "کشور هدف باید حداقل ۰.۵ لول فناوری نظامی یا صنعتی از شما بالاتر باشد.",
-      );
+      throw new GameError("TECH_DISPARITY_INSUFFICIENT");
     }
 
     const effectivePrng = prng ?? new SeededRandom(state.seed);
@@ -222,8 +210,7 @@ export class EspionageManager {
             "CRITICAL",
             "ESPIONAGE_OPERATION",
             {
-              details:
-                "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (منشأ خرابکاری نامشخص).",
+              details: "SABOTAGE_DEFENDER_UNKNOWN_ORIGIN",
               tier,
               outcome,
               role: "DEFENDER",
@@ -232,12 +219,10 @@ export class EspionageManager {
           newLogs.push(defenderLog);
         }
       } else if (outcome === "CRITICAL_FAILURE") {
-        let defenderMsg = "";
-        if (tier === 2) {
-          defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.id} متلاشی شد.`;
-        } else {
-          defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.id} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
-        }
+        const defenderMsg =
+          tier === 2
+            ? "SABOTAGE_DETECTED_DEFENDER"
+            : "TECH_HEIST_DETECTED_DEFENDER";
 
         const defenderLog = TurnLogBuilder.createNationalLog(
           state.currentTurn,

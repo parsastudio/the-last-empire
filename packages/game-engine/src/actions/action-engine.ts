@@ -19,7 +19,7 @@ export class ActionEngine {
       return {
         success: false,
         actionId: targetActionId,
-        message: "دستور رد شد: بازی به پایان رسیده است.",
+        message: "GAME_OVER",
         error: "GAME_OVER",
       };
     }
@@ -35,7 +35,7 @@ export class ActionEngine {
       return {
         success: false,
         actionId: targetActionId,
-        message: `کشور صادرکننده دستور (${action.nationId}) فعال نیست.`,
+        message: "NATION_NOT_FOUND",
         error: "NATION_NOT_FOUND",
       };
     }
@@ -52,8 +52,8 @@ export class ActionEngine {
         return {
           success: false,
           actionId: targetActionId,
-          message: `کشور هدف دستور (${action.targetNationId}) یافت نشد.`,
-          error: "NATION_NOT_FOUND",
+          message: "TARGET_NOT_FOUND",
+          error: "TARGET_NOT_FOUND",
         };
       }
     }
@@ -132,7 +132,7 @@ export class ActionEngine {
           return {
             success: false,
             actionId: targetActionId,
-            message: "دستور ناشناخته است.",
+            message: "UNKNOWN_ACTION",
             error: "UNKNOWN_ACTION",
           };
       }
@@ -140,24 +140,24 @@ export class ActionEngine {
       return {
         success: true,
         actionId: targetActionId,
-        message: "دستور با موفقیت اجرا شد.",
+        message: "ACTION_SUCCESS",
         newState: execResult.newState,
         resultData: execResult.resultData,
         logs: execResult.logs,
       };
     } catch (err) {
-      const errorMsg =
+      const errorKey =
         err instanceof GameError
-          ? err.message
+          ? err.code
           : err instanceof Error
             ? err.message
-            : "خطا در اجرای دستور";
+            : "EXECUTION_FAILED";
 
       return {
         success: false,
         actionId: targetActionId,
-        message: errorMsg,
-        error: "EXECUTION_FAILED",
+        message: errorKey,
+        error: errorKey,
       };
     }
   }

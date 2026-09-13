@@ -33,10 +33,7 @@ export class ResearchManager {
     );
 
     if (nation.treasury < cost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای پژوهش ارتقای فناوری نظامی کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const nextTechLevel = Number(

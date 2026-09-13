@@ -7,7 +7,6 @@ import {
 
 export interface NationTurnSnapshot {
   code: string;
-  name: string;
   isAlive: boolean;
   provincesCount: number;
   gdp: number;
@@ -32,7 +31,6 @@ export class TurnStateLogger {
 
     const nations: NationTurnSnapshot[] = allNationsList.map((nation) => {
       const canonicalCode = CountryRegistry.resolveCanonicalId(nation.id);
-      const profile = CountryRegistry.getCountry(canonicalCode);
       const ownedProvinces = NationGettersUtility.getOwnedProvinces(
         nation.id,
         state.provinces,
@@ -47,7 +45,6 @@ export class TurnStateLogger {
 
       return {
         code: canonicalCode,
-        name: profile?.nameFa ?? canonicalCode,
         isAlive: nation.isAlive,
         provincesCount,
         gdp,
@@ -82,18 +79,7 @@ export class TurnStateLogger {
       );
 
       if (console.table) {
-        console.table(
-          report.nations.map((n) => ({
-            "کد کشور": n.code,
-            "نام کشور": n.name,
-            وضعیت: n.isAlive ? "زنده" : "ساقط‌شده",
-            "تعداد استان": n.provincesCount,
-            "GDP (دلار)": n.gdp.toLocaleString("en-US"),
-            جمعیت: n.population.toLocaleString("en-US"),
-            "لول دفاعی": n.militaryTech,
-            "لول صنعتی": n.industrialLevel,
-          })),
-        );
+        console.table(report.nations);
       } else {
         console.log(report.nations);
       }

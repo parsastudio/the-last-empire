@@ -49,19 +49,13 @@ export class FactoryModernizationRunner {
     const totalFactories = nationalBatches.reduce((sum, b) => sum + b.count, 0);
 
     if (totalFactories <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "هیچ کارخانه فعالی در کشور جهت تجهیز وجود ندارد.",
-      );
+      throw new GameError("NO_ACTIVE_FACTORIES");
     }
 
     if (sourceTechLevel !== undefined) {
       const roundedSource = Number(sourceTechLevel.toFixed(2));
       if (roundedSource >= targetTech) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "این رده از کارخانجات در حال حاضر در بالاترین سطح دانش قرار دارد.",
-        );
+        throw new GameError("TIER_ALREADY_MAXED");
       }
 
       const availableInTier = nationalBatches
@@ -69,10 +63,7 @@ export class FactoryModernizationRunner {
         .reduce((sum, b) => sum + b.count, 0);
 
       if (availableInTier <= 0) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "هیچ کارخانه‌ای در رده انتخابی جهت ارتقا یافت نشد.",
-        );
+        throw new GameError("NO_FACTORIES_IN_TIER");
       }
 
       const qty = Math.min(availableInTier, quantity ?? availableInTier);
@@ -80,10 +71,7 @@ export class FactoryModernizationRunner {
       const totalCost = qty * unitCost;
 
       if (nation.treasury < totalCost) {
-        throw new GameError(
-          "INSUFFICIENT_FUNDS",
-          "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
-        );
+        throw new GameError("INSUFFICIENT_FUNDS");
       }
 
       let provRemainingToUpgrade = qty;
@@ -142,10 +130,7 @@ export class FactoryModernizationRunner {
     );
 
     if (!hasUpgradableFactories) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "تمامی کارخانجات در حال حاضر در سطح فناوری بالاتر یا مساوی قرار دارند.",
-      );
+      throw new GameError("ALL_FACTORIES_MAXED");
     }
 
     const qty = Math.min(totalFactories, quantity ?? totalFactories);
@@ -181,10 +166,7 @@ export class FactoryModernizationRunner {
     }
 
     if (nation.treasury < totalCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     let provRemainingToUpgrade = qty;

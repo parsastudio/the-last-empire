@@ -16,10 +16,7 @@ export class DomesticRecruitmentManager {
     provincesMap?: Record<string, Province>,
   ): Nation {
     if (quantity <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "تعداد یگان درخواستی باید مثبت باشد.",
-      );
+      throw new GameError("INVALID_QUANTITY");
     }
 
     const govModifiers = GovernmentTraitsUtility.getModifiers(
@@ -40,10 +37,7 @@ export class DomesticRecruitmentManager {
     const totalMoney = unitPrice * quantity;
 
     if (nation.treasury < totalMoney) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای ساخت یگان کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const gdp = getNationGdp(nation, provincesMap);
@@ -54,10 +48,7 @@ export class DomesticRecruitmentManager {
     const q = quotas[unitType];
 
     if (q.remainingRoom < quantity) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `سقف مجاز ساخت ${unitType} تکمیل شده است.`,
-      );
+      throw new GameError("QUOTA_REACHED");
     }
 
     const updatedMilitary = MilitaryInventoryHelper.addUnits(

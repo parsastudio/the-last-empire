@@ -21,18 +21,12 @@ export class NavalFleetExecutor {
     );
 
     if (!hasSea) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "کشور شما به آب‌های آزاد دسترسی ندارد و امکان تجهیز ناوگان دریایی وجود ندارد.",
-      );
+      throw new GameError("NO_SEA_ACCESS");
     }
 
     const fleetCost = NAVAL_FLEET_CONFIG.FLEET_UNIT_COST * action.quantity;
     if (nation.treasury < fleetCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای خرید ناوگان دریایی کافی نیست.",
-      );
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
 
     const nextFleet = (nation.navalFleet || 0) + action.quantity;

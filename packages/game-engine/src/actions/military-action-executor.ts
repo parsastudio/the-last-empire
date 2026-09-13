@@ -35,10 +35,7 @@ export class MilitaryActionExecutor {
     switch (action.type) {
       case "RECRUIT_UNIT": {
         if (action.quantity <= 0) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "تعداد یگان درخواستی باید مثبت باشد.",
-          );
+          throw new GameError("INVALID_QUANTITY");
         }
         const updatedNation = DomesticRecruitmentManager.executeRecruitment(
           nation,
@@ -88,10 +85,7 @@ export class MilitaryActionExecutor {
           nation.military.techLevel,
         );
         if (nation.treasury < cost) {
-          throw new GameError(
-            "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای پژوهش ارتقای فناوری نظامی کافی نیست.",
-          );
+          throw new GameError("INSUFFICIENT_FUNDS");
         }
         const updatedNation = this.researchManager.investInMilitaryTech(nation);
         return {
@@ -118,7 +112,7 @@ export class MilitaryActionExecutor {
           state.nations[action.targetNationId];
 
         if (!target) {
-          throw new GameError("NATION_NOT_FOUND", "کشور هدف یافت نشد.");
+          throw new GameError("TARGET_NOT_FOUND");
         }
 
         BattleInitiationValidator.validate(
