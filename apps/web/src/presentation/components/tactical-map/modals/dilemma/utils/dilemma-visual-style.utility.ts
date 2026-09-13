@@ -6,7 +6,7 @@ import {
   Swords,
   LucideIcon,
 } from "lucide-react";
-import { DilemmaCategory, DilemmaUrgency } from "@geopolitics/domain";
+import { DilemmaCategory } from "@geopolitics/domain";
 
 export interface DilemmaCategoryVisual {
   icon: LucideIcon;
@@ -62,20 +62,6 @@ export class DilemmaVisualStyleUtility {
           borderColor: "border-military/40",
           glowGradient: "from-military/15 via-card/95 to-military/5",
         };
-    }
-  }
-
-  public static getUrgencyBadgeClass(urgency: DilemmaUrgency): string {
-    switch (urgency) {
-      case "CRITICAL":
-        return "bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse";
-      case "HIGH":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/40";
-      case "MEDIUM":
-        return "bg-primary/20 text-primary border-primary/40";
-      case "LOW":
-      default:
-        return "bg-secondary text-muted-foreground border-border/60";
     }
   }
 }

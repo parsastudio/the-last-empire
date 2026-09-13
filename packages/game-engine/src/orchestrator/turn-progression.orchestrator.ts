@@ -22,11 +22,6 @@ export class TurnProgressionOrchestrator {
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
 
-  public advanceTurn(state: GameState, prng: SeededRandom): GameState {
-    const { newState } = this.advanceTurnWithLogs(state, prng);
-    return newState;
-  }
-
   public advanceTurnWithLogs(
     state: GameState,
     prng: SeededRandom,

@@ -20,14 +20,6 @@ export class NationalProjectEffectApplierUtility {
     return NATIONAL_PROJECTS_CATALOG.filter((p) => completedIds.includes(p.id));
   }
 
-  public static hasEffect<K extends keyof NationalProjectEffect>(
-    completedIds: string[] = [],
-    effectKey: K,
-  ): boolean {
-    const completed = this.getCompletedProjects(completedIds);
-    return completed.some((p) => p.effect[effectKey] !== undefined);
-  }
-
   public static getCombinedBonus<K extends keyof NationalProjectEffect>(
     completedIds: string[] = [],
     effectKey: K,
