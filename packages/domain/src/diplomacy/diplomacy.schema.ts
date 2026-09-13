@@ -33,7 +33,6 @@ export const RelationProfileSchema = z.object({
   alignment: z.number().min(-100).max(100).default(0),
   tension: z.number().min(0).max(100).default(10),
   warDeclaredTurn: z.number().nonnegative().optional(),
-  warInitiatorId: z.string().optional(),
   isIntervener: z.boolean().optional(),
 });
 

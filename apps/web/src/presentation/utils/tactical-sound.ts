@@ -35,15 +35,6 @@ export class TacticalSound {
     return this.muted;
   }
 
-  public static setVolume(volume: number): void {
-    this.masterVolume = Math.max(0, Math.min(1, volume));
-    this.synthesizer.setMasterVolume(this.masterVolume, this.muted);
-  }
-
-  public static getVolume(): number {
-    return this.masterVolume;
-  }
-
   public static play(soundId: SoundEffectId): void {
     if (this.muted) return;
     const preset = SOUND_PRESETS[soundId];

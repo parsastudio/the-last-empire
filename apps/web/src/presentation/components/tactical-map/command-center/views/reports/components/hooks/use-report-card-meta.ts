@@ -26,13 +26,8 @@ export function useReportCardMeta({
   humanNationId,
   pendingProposals = [],
 }: UseReportCardMetaProps) {
-  const {
-    locale,
-    formatCurrency,
-    toDigits,
-    countryTranslator,
-    formatCountryName,
-  } = useLocaleFormatter();
+  const { formatCurrency, toDigits, countryTranslator, formatCountryName } =
+    useLocaleFormatter();
   const tEvents = useTranslations("reports.events");
   const tDiplomacy = useTranslations("diplomacy");
   const tDilemmas = useTranslations("dilemmas");
@@ -66,7 +61,6 @@ export function useReportCardMeta({
       formatCountryName,
       sourceName: source.name,
       targetName: target?.name || "",
-      locale,
     });
   }, [
     log,
@@ -78,7 +72,6 @@ export function useReportCardMeta({
     formatCurrency,
     toDigits,
     formatCountryName,
-    locale,
   ]);
 
   const battleReportData = useMemo<BattleFullReportData | null>(() => {

@@ -175,7 +175,6 @@ export class GuarantorRetaliationApplier {
           alignment: -100,
           tension: 100,
           warDeclaredTurn: state.currentTurn,
-          warInitiatorId: canonicalAttacker,
           isIntervener: true,
         },
       };
@@ -189,7 +188,6 @@ export class GuarantorRetaliationApplier {
           alignment: -100,
           tension: 100,
           warDeclaredTurn: state.currentTurn,
-          warInitiatorId: canonicalAttacker,
           isIntervener: true,
         },
       };

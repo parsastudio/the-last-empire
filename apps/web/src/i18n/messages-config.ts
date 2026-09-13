@@ -92,22 +92,3 @@ export async function loadLocaleMessages(
 
   return merged;
 }
-
-export async function loadNamespaceMessages(
-  locale: string,
-  namespaces: readonly MessageNamespace[],
-): Promise<Record<string, unknown>> {
-  const entries = await Promise.all(
-    namespaces.map(async (ns) => {
-      const fileName = NAMESPACE_FILE_MAP[ns];
-      try {
-        const module = await import(`../../messages/${locale}/${fileName}`);
-        return [ns, module.default] as const;
-      } catch {
-        return [ns, {}] as const;
-      }
-    }),
-  );
-
-  return Object.fromEntries(entries);
-}

@@ -1,5 +1,4 @@
 import { TurnLogEntry } from "@geopolitics/domain";
-import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 
 export interface TurnLogPresenterOptions {
   tEvents: (key: string, values?: Record<string, string | number>) => string;
@@ -10,7 +9,6 @@ export interface TurnLogPresenterOptions {
   formatCountryName: (code: string) => string;
   sourceName: string;
   targetName: string;
-  locale?: AppLocale;
 }
 
 export class TurnLogPresenterUtility {

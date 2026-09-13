@@ -26,19 +26,4 @@ export class BinaryAssetRepository {
       await db.binaryAssets.put(record);
     } catch {}
   }
-
-  public static async hasAsset(key: string): Promise<boolean> {
-    try {
-      const count = await db.binaryAssets.where("key").equals(key).count();
-      return count > 0;
-    } catch {
-      return false;
-    }
-  }
-
-  public static async clearAssets(): Promise<void> {
-    try {
-      await db.binaryAssets.clear();
-    } catch {}
-  }
 }

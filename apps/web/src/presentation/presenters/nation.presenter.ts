@@ -18,11 +18,6 @@ export class NationPresenter {
     return CountryRegistry.resolveCanonicalId(identifier);
   }
 
-  public static getProfile(identifier: unknown): CountryProfile | undefined {
-    const canonical = this.resolveCanonicalId(identifier);
-    return CountryRegistry.getCountry(canonical);
-  }
-
   public static formatName(
     nationOrId: Nation | string | null | undefined,
     translator?: CountryNameTranslator,
@@ -57,13 +52,6 @@ export class NationPresenter {
       typeof nationOrId === "object" ? nationOrId.flagCode : undefined;
 
     return flagFromNation || profile?.flagCode || canonicalId || defaultCode;
-  }
-
-  public static resolveFlagEmoji(
-    nationOrId: Nation | string | null | undefined,
-  ): string {
-    const flagCode = this.resolveFlagCode(nationOrId);
-    return getFlagEmoji(flagCode);
   }
 
   public static present(
