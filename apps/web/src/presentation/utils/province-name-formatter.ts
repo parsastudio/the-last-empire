@@ -4,6 +4,8 @@ import {
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import enMap from "../../../messages/en/map.json";
+import faMap from "../../../messages/fa/map.json";
 
 export class ProvinceNameFormatter {
   public static format(
@@ -11,6 +13,7 @@ export class ProvinceNameFormatter {
     locale: AppLocale = "fa",
     fallbackProvinceId?: number,
   ): string {
+    const dict = (locale === "en" ? enMap : faMap).province;
     const resolvedId =
       typeof target === "number"
         ? target
@@ -29,9 +32,10 @@ export class ProvinceNameFormatter {
           locale,
         );
       }
-      return locale === "en"
-        ? `Province #${resolvedId}`
-        : `استان #${LocaleNumberFormatter.toDigits(resolvedId, "fa")}`;
+      return dict.fallback.replace(
+        "{id}",
+        LocaleNumberFormatter.toDigits(resolvedId, locale),
+      );
     }
 
     if (typeof target === "string" && target.trim().length > 0) {
@@ -43,7 +47,7 @@ export class ProvinceNameFormatter {
       return trimmed;
     }
 
-    return locale === "en" ? "Unknown Territory" : "استان نامشخص";
+    return dict.unknown;
   }
 
   public static formatByParts(
@@ -57,16 +61,15 @@ export class ProvinceNameFormatter {
       locale,
     );
     const totalCount = MapTopologyRegistry.getCountryProvinceCount(canonical);
+    const dict = (locale === "en" ? enMap : faMap).province;
 
     if (totalCount <= 1 || !provinceIndex) {
-      return locale === "en"
-        ? `${countryName} Province`
-        : `استان ${countryName}`;
+      return dict.single.replace("{country}", countryName);
     }
 
     const indexDisplay = LocaleNumberFormatter.toDigits(provinceIndex, locale);
-    return locale === "en"
-      ? `${countryName} Province (${indexDisplay})`
-      : `استان ${countryName} (${indexDisplay})`;
+    return dict.indexed
+      .replace("{country}", countryName)
+      .replace("{index}", indexDisplay);
   }
 }

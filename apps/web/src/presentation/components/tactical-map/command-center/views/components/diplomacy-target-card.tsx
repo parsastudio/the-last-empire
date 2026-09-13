@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
 import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
@@ -31,6 +32,7 @@ export function DiplomacyTargetCard({
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
 }: DiplomacyTargetCardProps) {
+  const t = useTranslations("diplomacy.stats");
   const { toDigits, formatPercent } = useLocaleFormatter();
   const flagEmoji = getFlagEmoji(flagCode || code);
   const alignColor = getAlignmentColor(alignment);
@@ -55,14 +57,14 @@ export function DiplomacyTargetCard({
       <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
         <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
-            Alignment:
+            {t("alignmentLabel")}
           </span>
           <span className={`font-bold ${alignColor}`}>{formattedAlign}</span>
         </div>
 
         <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
-            Tension:
+            {t("tensionLabel")}
           </span>
           <span className={`font-bold ${tensionColor}`}>
             {formatPercent(tension)}

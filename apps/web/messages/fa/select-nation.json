@@ -18,6 +18,12 @@
     "title": "شناسنامه استراتژیک",
     "template": "شناسنامه استراتژیک رسمی {name} با رتبه جهانی #{rank}."
   },
+  "powerTiers": {
+    "superpower": "ابرقدرت جهانی",
+    "hegemon": "قدرت برتر صنعتی",
+    "transRegional": "قدرت فرامنطقه‌ای",
+    "regional": "قدرت منطقه‌ای"
+  },
   "startButton": "آغاز حاکمیت بر {name}",
   "loadingNations": "در حال بارگذاری اطلاعات کشورها...",
   "difficulty": {

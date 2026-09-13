@@ -18,6 +18,12 @@
     "title": "Strategic Dossier",
     "template": "Official strategic dossier of {name} with global rank #{rank}."
   },
+  "powerTiers": {
+    "superpower": "Global Superpower",
+    "hegemon": "Leading Industrial Hegemon",
+    "transRegional": "Trans-Regional Power",
+    "regional": "Regional Power"
+  },
   "startButton": "Begin Reign over {name}",
   "loadingNations": "Loading global intelligence roster...",
   "difficulty": {

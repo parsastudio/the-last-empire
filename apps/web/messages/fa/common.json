@@ -15,6 +15,7 @@
   "maxLimit": "حداکثر سقف مجاز:",
   "requestedAmount": "مقدار درخواستی:",
   "actionUnavailable": "امکان انجام این عملیات با شرایط فعلی وجود ندارد.",
+  "unknown": "نامشخص",
   "units": {
     "billion": "میلیارد دلار",
     "million": "میلیون دلار",

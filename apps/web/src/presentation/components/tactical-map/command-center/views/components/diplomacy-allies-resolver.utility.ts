@@ -10,6 +10,8 @@ import {
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import enDiplomacy from "../../../../../../messages/en/diplomacy.json";
+import faDiplomacy from "../../../../../../messages/fa/diplomacy.json";
 
 export interface NationAllyDetail {
   id: string;
@@ -47,10 +49,8 @@ export class DiplomacyAlliesResolver {
       locale,
     );
 
-    const allianceTypeLabel =
-      locale === "en"
-        ? "Committed Defense Guarantor (Direct War Intervention)"
-        : "حامی دفاعی متعهد (ورود قطعی به جنگ)";
+    const dict = locale === "en" ? enDiplomacy : faDiplomacy;
+    const allianceTypeLabel = dict.alliesBox.committedAllyLabel;
 
     return {
       id: presented.canonicalId,

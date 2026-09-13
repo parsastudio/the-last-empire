@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   Radio,
   AlertCircle,
@@ -7,10 +7,6 @@ import {
   Swords,
   BellRing,
 } from "lucide-react";
-import {
-  INITIAL_BRIEFING_MESSAGES,
-  FeedMessageItem,
-} from "@/presentation/components/main-menu/config/briefing-messages.config";
 
 export interface FeedMessage {
   id: string;
@@ -50,16 +46,7 @@ function BriefingFeedItem({ message }: { message: FeedMessage }) {
 
 export function BriefingPanel() {
   const t = useTranslations("menu.briefing");
-  const locale = useLocale();
-
-  const messages: FeedMessage[] = INITIAL_BRIEFING_MESSAGES.map(
-    (item: FeedMessageItem) => ({
-      id: item.id,
-      type: item.type,
-      text: locale === "en" ? item.textEn : item.textFa,
-      time: locale === "en" ? item.timeEn : item.timeFa,
-    }),
-  );
+  const messages = (t.raw("feed") as FeedMessage[]) || [];
 
   return (
     <div className="bg-card/40 backdrop-blur-md border border-border rounded-2xl sm:rounded-3xl p-3 sm:p-4 space-y-2 sm:space-y-3 w-full shadow-lg flex flex-col h-[150px] sm:h-[180px] md:h-[240px] text-start font-sans">
