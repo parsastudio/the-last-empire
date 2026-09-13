@@ -11,7 +11,6 @@ interface AttackHeaderProps {
   defenderName: string;
   defenderCode: string;
   defenderFlagCode: string;
-  originRegionName?: string;
   targetRegionName: string;
   targetProvinceId?: number | null;
   attackType?: "LAND" | "NAVAL";

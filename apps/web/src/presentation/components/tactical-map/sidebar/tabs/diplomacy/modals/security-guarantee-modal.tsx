@@ -22,7 +22,6 @@ interface SecurityGuaranteeModalProps {
   targetName: string;
   targetFlagCode?: string;
   targetNationId: string;
-  isWar: boolean;
   signingCost: number;
   validation: SecurityGuaranteeValidationResult;
   onConfirmGuarantee: () => Promise<void> | void;

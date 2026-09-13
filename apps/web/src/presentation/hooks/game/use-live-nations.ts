@@ -1,10 +1,6 @@
 import { useMemo } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -13,26 +9,17 @@ export interface LiveNationItem {
   name: string;
   code: string;
   flagCode: string;
-  rank: number;
-  gdp: number;
-  population: number;
-  stability: number;
-  governmentType: string;
-  isAlive: boolean;
-  isReachable: boolean;
   rawNation: Nation;
 }
 
 interface UseLiveNationsProps {
   nationsMap?: Record<string, Nation>;
-  provincesMap?: Record<string, Province>;
   excludeNationId?: string;
   searchQuery?: string;
 }
 
 export function useLiveNations({
   nationsMap,
-  provincesMap,
   excludeNationId,
   searchQuery = "",
 }: UseLiveNationsProps) {
@@ -44,12 +31,6 @@ export function useLiveNations({
     const canonicalExclude = excludeNationId
       ? CountryRegistry.resolveCanonicalId(excludeNationId)
       : null;
-
-    const sourceNation = canonicalExclude ? nationsMap[canonicalExclude] : null;
-    const rankLookup = NationGettersUtility.calculateRankMap(
-      nationsMap,
-      provincesMap,
-    );
 
     return Object.values(nationsMap)
       .filter((n) => {
@@ -64,37 +45,15 @@ export function useLiveNations({
           countryTranslator,
         );
 
-        const isReachable = sourceNation
-          ? GeopoliticalReachResolver.canInitiateDiplomacy(
-              sourceNation,
-              n,
-              nationsMap,
-              provincesMap,
-            )
-          : true;
-
-        const population = NationGettersUtility.getPopulation(
-          n.id,
-          provincesMap,
-        );
-        const rank = rankLookup.get(presented.canonicalId) ?? 99;
-
         return {
           id: presented.canonicalId,
           name: presented.name,
           code: presented.canonicalId,
           flagCode: presented.flagCode,
-          rank,
-          gdp: getNationGdp(n, provincesMap),
-          population,
-          stability: n.government.stability,
-          governmentType: n.government.type,
-          isAlive: n.isAlive,
-          isReachable,
           rawNation: n,
         };
       });
-  }, [nationsMap, provincesMap, excludeNationId, countryTranslator]);
+  }, [nationsMap, excludeNationId, countryTranslator]);
 
   const filteredNations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
