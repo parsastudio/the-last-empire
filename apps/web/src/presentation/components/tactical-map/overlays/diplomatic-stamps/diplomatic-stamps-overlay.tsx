@@ -2,14 +2,12 @@
 
 import React, { useMemo, useRef, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  Nation,
-  ProvinceDynamicState,
-  CountryRegistry,
-} from "@geopolitics/domain";
+import { Nation, ProvinceDynamicState } from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { DiplomaticStampBuilderUtility } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/utils/diplomatic-stamp-builder.utility";
 import { DiplomaticStampVariant } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/types/diplomatic-stamp.types";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 
 interface DiplomaticStampsOverlayProps {
   dimensions: { width: number; height: number };
@@ -203,13 +201,10 @@ export function DiplomaticStampsOverlay({
           continue;
         }
 
-        const profile = CountryRegistry.getCountry(
-          item.flagCode || item.nationId,
+        const displayName = NationPresenter.formatName(
+          item.nationId,
+          locale as AppLocale,
         );
-        const displayName =
-          locale === "en"
-            ? profile?.nameEn || item.nationName
-            : item.nationName;
 
         const baseSize =
           item.territoryPixels >= 50000

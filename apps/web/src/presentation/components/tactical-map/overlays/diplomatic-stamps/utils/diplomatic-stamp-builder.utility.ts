@@ -57,7 +57,7 @@ export class DiplomaticStampBuilderUtility {
         items.push({
           id: `label-${humanNation.id}`,
           nationId: humanNation.id,
-          nationName: humanNation.name,
+          nationName: humanNation.id,
           flagCode: humanNation.flagCode || humanNation.id,
           variant: "PLAYER",
           worldX: geo.centerX,
@@ -127,7 +127,7 @@ export class DiplomaticStampBuilderUtility {
       items.push({
         id: `label-${nation.id}`,
         nationId: nation.id,
-        nationName: nation.name,
+        nationName: nation.id,
         flagCode: nation.flagCode || nation.id,
         variant,
         worldX: geo.centerX,

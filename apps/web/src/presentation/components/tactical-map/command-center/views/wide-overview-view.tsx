@@ -26,7 +26,7 @@ export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-200 text-start font-sans pb-4">
       <NationHeaderCard
-        name={model.name}
+        name=""
         code={model.id}
         flagCode={model.flagCode}
         governmentType={model.governmentType}

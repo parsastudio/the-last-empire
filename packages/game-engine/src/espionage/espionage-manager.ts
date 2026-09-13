@@ -234,9 +234,9 @@ export class EspionageManager {
       } else if (outcome === "CRITICAL_FAILURE") {
         let defenderMsg = "";
         if (tier === 2) {
-          defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.name} متلاشی شد.`;
+          defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.id} متلاشی شد.`;
         } else {
-          defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.name} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
+          defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.id} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
         }
 
         const defenderLog = TurnLogBuilder.createNationalLog(
@@ -286,7 +286,7 @@ export class EspionageManager {
       operationType:
         tier === 1 ? "RECON" : tier === 2 ? "SABOTAGE" : "TECH_THEFT",
       targetNationId: target.id,
-      targetName: target.name,
+      targetName: target.id,
       outcome,
       message,
       cost,

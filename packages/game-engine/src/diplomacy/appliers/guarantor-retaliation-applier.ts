@@ -207,7 +207,7 @@ export class GuarantorRetaliationApplier {
 
       retaliatingGuarantors.push({
         id: guarantorNation.id,
-        name: guarantorNation.name,
+        name: guarantorNation.id,
         flagCode: guarantorNation.flagCode || guarantorNation.id,
       });
 
@@ -221,7 +221,7 @@ export class GuarantorRetaliationApplier {
             isRetaliation: true,
             retaliationReason: "DEFENSE_GUARANTOR",
             protectedTargetId: canonicalTarget,
-            protectedTargetName: target.name,
+            protectedTargetName: target.id,
           },
           "CRITICAL",
         ),

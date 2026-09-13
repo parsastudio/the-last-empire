@@ -36,7 +36,7 @@ export class ArmsMarketManager {
     if (seller.military.techLevel <= buyer.military.techLevel) {
       throw new GameError(
         "INVALID_ACTION",
-        `سطح فناوری نظامی کشور ${seller.name} (${seller.military.techLevel.toFixed(1)}) از فناوری نظامی شما (${buyer.military.techLevel.toFixed(1)}) بالاتر نیست.`,
+        `سطح فناوری نظامی کشور ${seller.id} (${seller.military.techLevel.toFixed(1)}) از فناوری نظامی شما (${buyer.military.techLevel.toFixed(1)}) بالاتر نیست.`,
       );
     }
 
@@ -48,7 +48,7 @@ export class ArmsMarketManager {
     if (stance === "WAR" || tension >= 50) {
       throw new GameError(
         "INVALID_ACTION",
-        `کشور ${seller.name} به دلیل وضعیت جنگی یا تنش امنیتی بالا (۵۰٪ یا بیشتر) حاضر به فروش تسلیحات نیست.`,
+        `کشور ${seller.id} به دلیل وضعیت جنگی یا تنش امنیتی بالا (۵۰٪ یا بیشتر) حاضر به فروش تسلیحات نیست.`,
       );
     }
 

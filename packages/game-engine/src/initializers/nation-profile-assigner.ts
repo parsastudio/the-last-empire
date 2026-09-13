@@ -124,7 +124,6 @@ export class NationProfileAssigner {
 
     return {
       id: cleanId,
-      name: item.nameFa,
       isAi: !isHuman,
       isAlive: true,
       flagCode: item.flagCode,

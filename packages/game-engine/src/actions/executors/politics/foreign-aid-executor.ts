@@ -27,7 +27,7 @@ export class ForeignAidExecutor {
     ) {
       throw new GameError(
         "INVALID_ACTION",
-        `بسته کمک مالی به کشور ${receiver.name} در این نوبت قبلاً ارسال شده است. ارسال مجدد در نوبت بعد امکان‌پذیر خواهد بود.`,
+        `بسته کمک مالی به کشور ${receiver.id} در این نوبت قبلاً ارسال شده است. ارسال مجدد در نوبت بعد امکان‌پذیر خواهد بود.`,
       );
     }
 
@@ -111,7 +111,7 @@ export class ForeignAidExecutor {
         proposalType: "SEND_FOREIGN_AID",
         accepted: true,
         targetNationId: receiver.id,
-        targetName: receiver.name,
+        targetName: receiver.id,
         targetFlagCode: receiver.flagCode,
         reputationChange: 1,
       }),

@@ -8,12 +8,9 @@ import { EspionageTargetSelector } from "@/presentation/components/tactical-map/
 import { EspionageTierCard } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-tier-card";
 import { EspionageResultBanner } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-result-banner";
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
-import {
-  NationGettersUtility,
-  NationTurnActivity,
-  CountryRegistry,
-} from "@geopolitics/domain";
+import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface WideEspionageViewProps {
   nation: Nation;
@@ -49,14 +46,8 @@ export function WideEspionageView({
       )
     : 99;
 
-  const targetProfile = form.selectedTargetNation
-    ? CountryRegistry.getCountry(form.selectedTargetNation.id)
-    : null;
-
   const targetDisplayName = form.selectedTargetNation
-    ? locale === "en"
-      ? targetProfile?.nameEn || form.selectedTargetNation.name
-      : form.selectedTargetNation.name
+    ? NationPresenter.formatName(form.selectedTargetNation, locale)
     : "";
 
   const tier3Subtitle = useMemo(() => {

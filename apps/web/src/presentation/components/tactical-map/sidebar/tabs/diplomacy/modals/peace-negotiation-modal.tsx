@@ -26,6 +26,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
@@ -74,6 +75,8 @@ export function PeaceNegotiationModal({
 
   const humanFlag = getFlagEmoji(humanNation.flagCode || humanNation.id);
   const targetFlag = getFlagEmoji(targetNation.flagCode || targetNation.id);
+  const humanDisplayName = NationPresenter.formatName(humanNation, locale);
+  const targetDisplayName = NationPresenter.formatName(targetNation, locale);
 
   const isDominantAi = terms.statusCode === "AI_DOMINANT_REFUSAL";
   const isCrushedAi = terms.statusCode === "AI_DESPERATE_CAPITULATION";
@@ -103,13 +106,13 @@ export function PeaceNegotiationModal({
 
   const resolvedHeadline = t(`statusTerms.${terms.statusCode}.headline`);
   const resolvedDescription = t(`statusTerms.${terms.statusCode}.description`, {
-    name: targetNation.name,
+    name: targetDisplayName,
   });
 
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title={t("title", { name: targetNation.name })}
+      title={t("title", { name: targetDisplayName })}
       subtitle={t("subtitle")}
       maxWidthClass="max-w-xl"
       onClose={onClose}
@@ -122,7 +125,7 @@ export function PeaceNegotiationModal({
             </div>
             <div className="space-y-0.5">
               <span className="text-sm font-black text-foreground block">
-                {humanNation.name}
+                {humanDisplayName}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
                 {t("twmiValuation")} {formatCurrency(terms.targetTwmi, true)}
@@ -145,7 +148,7 @@ export function PeaceNegotiationModal({
             </div>
             <div className="space-y-0.5 text-end">
               <span className="text-sm font-black text-foreground block">
-                {targetNation.name}
+                {targetDisplayName}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
                 {t("twmiValuation")} {formatCurrency(terms.sourceTwmi, true)}
