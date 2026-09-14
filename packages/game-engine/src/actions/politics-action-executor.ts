@@ -13,6 +13,7 @@ import {
   StrategicPartnershipCalculatorUtility,
   TurnLogBuilder,
   GameIdGenerator,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diplomatic-proposal-executor";
 import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
@@ -25,12 +26,15 @@ export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
 
   public static execute(state: GameState, action: GameAction): ExecutionResult {
+    const nation = NationGettersUtility.resolveNation(
+      action.nationId,
+      state.nations,
+    );
+    if (!nation) return { newState: state };
+
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
-    const nation =
-      state.nations[canonicalSourceId] || state.nations[action.nationId];
-    if (!nation) return { newState: state };
 
     switch (action.type) {
       case "SIGN_PEACE_SETTLEMENT": {
@@ -86,13 +90,15 @@ export class PoliticsActionExecutor {
       }
 
       case "DIPLOMATIC_PROPOSAL": {
+        const receiver = NationGettersUtility.resolveNation(
+          action.targetNationId,
+          state.nations,
+        );
+        if (!receiver) return { newState: state };
+
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,
         );
-        const receiver =
-          state.nations[canonicalTargetId] ||
-          state.nations[action.targetNationId];
-        if (!receiver) return { newState: state };
 
         const senderRel = NationRelationResolver.getRelation(
           nation.relations,

@@ -1,7 +1,7 @@
 import {
   TurnLogEntry,
   TurnLogScope,
-  CountryRegistry,
+  TurnLogFilterUtility,
 } from "@geopolitics/domain";
 import { db, SavedTurnLogRecord } from "@/infrastructure/storage/game-database";
 
@@ -52,25 +52,12 @@ export class TurnLogRepository {
 
   private static filterRecordsByScopeAndNational(
     records: SavedTurnLogRecord[],
-    scope?: TurnLogScope,
+    scope: TurnLogScope = "NATIONAL",
     humanNationId?: string,
   ): SavedTurnLogRecord[] {
-    const withoutDilemmas = records.filter(
-      (r) => r.log.eventCode !== "DILEMMA_RESOLVED",
+    return records.filter((r) =>
+      TurnLogFilterUtility.matchesScope(r.log, scope, humanNationId),
     );
-
-    if (scope === "NATIONAL" && humanNationId) {
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
-      return withoutDilemmas.filter((r) => {
-        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
-        const trg = r.log.targetNationId
-          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
-          : null;
-        return src === canonicalHuman || trg === canonicalHuman;
-      });
-    }
-
-    return withoutDilemmas;
   }
 
   public static async appendLogs(

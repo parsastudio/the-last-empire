@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   TurnLogEntry,
   TurnLogScope,
-  CountryRegistry,
+  TurnLogFilterUtility,
 } from "@geopolitics/domain";
 import {
   TurnLogRepository,
@@ -16,29 +16,6 @@ interface UseWideReportsProps {
   currentTurn?: number;
   humanNationId?: string;
   gameId?: string;
-}
-
-function filterFallbackLogs(
-  rawLogs: TurnLogEntry[],
-  scope: TurnLogScope,
-  humanNationId?: string,
-): TurnLogEntry[] {
-  const canonicalHuman = humanNationId
-    ? CountryRegistry.resolveCanonicalId(humanNationId)
-    : null;
-
-  return rawLogs.filter((log) => {
-    if (log.eventCode === "DILEMMA_RESOLVED") return false;
-    if (scope && log.scope !== scope) return false;
-    if (scope === "NATIONAL" && canonicalHuman) {
-      const src = CountryRegistry.resolveCanonicalId(log.sourceNationId);
-      const trg = log.targetNationId
-        ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-        : null;
-      return src === canonicalHuman || trg === canonicalHuman;
-    }
-    return true;
-  });
 }
 
 export function useWideReports({
@@ -95,12 +72,16 @@ export function useWideReports({
       if (pagedResult.logs.length > 0) {
         setDbLogs(pagedResult.logs);
       } else if (logs.length > 0 && selectedTurn === currentTurn) {
-        setDbLogs(filterFallbackLogs(logs, selectedScope, humanNationId));
+        setDbLogs(
+          TurnLogFilterUtility.filterLogs(logs, selectedScope, humanNationId),
+        );
       } else {
         setDbLogs([]);
       }
     } catch {
-      setDbLogs(filterFallbackLogs(logs, selectedScope, humanNationId));
+      setDbLogs(
+        TurnLogFilterUtility.filterLogs(logs, selectedScope, humanNationId),
+      );
     } finally {
       setIsLoading(false);
     }

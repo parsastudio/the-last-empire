@@ -1,13 +1,13 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import {
   BattleSpoilsDetails,
   BattleFullReportData,
 } from "@/domain/reports/combat-report.schema";
+import { GameStateMetricsUtility } from "@geopolitics/domain";
 
 export class BattleLogFactory {
   public static assembleReportData(
@@ -51,11 +51,14 @@ export class BattleLogFactory {
     spoilsData?: BattleSpoilsDetails,
   ): TurnLogEntry[] {
     const logs: TurnLogEntry[] = [];
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
-    const isAttackerHuman =
-      CountryRegistry.resolveCanonicalId(attacker.id) === canonicalHuman;
-    const isDefenderHuman =
-      CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
+    const isAttackerHuman = GameStateMetricsUtility.isHumanNation(
+      humanNationId,
+      attacker.id,
+    );
+    const isDefenderHuman = GameStateMetricsUtility.isHumanNation(
+      humanNationId,
+      defender.id,
+    );
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
     let outcome = "DEFEAT";

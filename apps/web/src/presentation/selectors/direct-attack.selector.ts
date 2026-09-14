@@ -8,9 +8,10 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   getNationGdp,
-  MILITARY_UNIT_STATS,
   NationTurnActivity,
   MapTopologyRegistry,
+  MilitaryPricingCalculator,
+  GameStateMetricsUtility,
 } from "@geopolitics/domain";
 import {
   BattleCalculator,
@@ -164,12 +165,15 @@ export class DirectAttackSelector {
     for (let i = 0; i < targetGuarantors.length; i++) {
       const gId = targetGuarantors[i]!;
       const canonicalG = CountryRegistry.resolveCanonicalId(gId);
-      const gNation = gameState.nations[canonicalG];
+      const gNation = NationGettersUtility.resolveNation(
+        canonicalG,
+        gameState.nations,
+      );
 
       if (!gNation || !gNation.isAlive) continue;
 
-      const isMutual = humanGuarantors.some(
-        (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,
+      const isMutual = humanGuarantors.some((hId) =>
+        GameStateMetricsUtility.isHumanNation(canonicalG, hId),
       );
 
       if (isMutual) {
@@ -205,10 +209,12 @@ export class DirectAttackSelector {
     attackType: "LAND" | "NAVAL",
   ): DirectAttackLogisticsEvaluation {
     const totalForceCost =
-      infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      armor * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      drones * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
+      MilitaryPricingCalculator.calculateTotalArmyValuation({
+        infantry,
+        armor,
+        airForce,
+        droneMissile: drones,
+      });
 
     const { moneyCost: totalLogisticsCost } =
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);

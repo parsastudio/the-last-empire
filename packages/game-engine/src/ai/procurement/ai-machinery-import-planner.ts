@@ -3,10 +3,9 @@ import {
   ActionFactory,
   Nation,
   Province,
-  CountryRegistry,
   IndustryCalculator,
   NationGettersUtility,
-  NationRelationResolver,
+  DiplomacyTradeValidator,
 } from "@geopolitics/domain";
 import { AiProcurementWeightsUtility } from "@/engine/ai/procurement/ai-procurement-weights.utility";
 
@@ -32,21 +31,9 @@ export class AIMachineryImportPlanner {
     }
 
     const eligibleSellers: { nation: Nation; industrialLevel: number }[] = [];
-    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
 
     for (const seller of Object.values(allNations)) {
-      if (!seller.isAlive || seller.id === buyer.id) continue;
-      const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
-      if (canonicalSeller === canonicalBuyer) continue;
-
-      const rel = NationRelationResolver.getRelation(
-        buyer.relations,
-        canonicalSeller,
-      );
-
-      if (rel?.stance === "WAR" || (rel?.tension ?? 10) >= 50) continue;
-
-      if (seller.industrialLevel > buyer.equipmentTechLevel) {
+      if (DiplomacyTradeValidator.isEligibleMachinerySeller(buyer, seller)) {
         eligibleSellers.push({
           nation: seller,
           industrialLevel: seller.industrialLevel,

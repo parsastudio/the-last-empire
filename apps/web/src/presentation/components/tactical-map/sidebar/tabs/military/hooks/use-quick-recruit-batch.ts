@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import {
   MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
@@ -9,6 +9,7 @@ import {
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { useBaselineTreasury } from "@/presentation/hooks/common/use-baseline-treasury";
 import { ProcurementUnitItemInfo } from "../components/procurement-unit-card";
 
 export type QuickUnitBatchInfo = ProcurementUnitItemInfo;
@@ -27,19 +28,7 @@ export function useQuickRecruitBatch({
   const { dispatchAction } = useGameActions();
   const { feedbacks, triggerFeedback } = useFloatingFeedback();
 
-  const baselineTreasuryRef = useRef<number>(nation.treasury);
-  const prevNationIdRef = useRef<string>(nationId);
-
-  if (prevNationIdRef.current !== nationId) {
-    prevNationIdRef.current = nationId;
-    baselineTreasuryRef.current = nation.treasury;
-  }
-
-  useEffect(() => {
-    if (nation.treasury > baselineTreasuryRef.current) {
-      baselineTreasuryRef.current = nation.treasury;
-    }
-  }, [nation.treasury]);
+  const baselineTreasury = useBaselineTreasury(nation.treasury, [nationId]);
 
   const remainingValuationCapacity =
     MilitaryPricingCalculator.calculateRemainingArmyValuation(
@@ -61,7 +50,7 @@ export function useQuickRecruitBatch({
 
       const batchResult = ProcurementBatchCalculator.calculateBatch({
         treasury: nation.treasury,
-        baselineTreasury: baselineTreasuryRef.current,
+        baselineTreasury,
         budgetPercentage: 0.1,
         unitPrice,
         baseValuationPrice: unitPrice,
@@ -85,6 +74,7 @@ export function useQuickRecruitBatch({
     nation.government?.type,
     quotas,
     remainingValuationCapacity,
+    baselineTreasury,
   ]);
 
   const handleBuyBatch = useCallback(

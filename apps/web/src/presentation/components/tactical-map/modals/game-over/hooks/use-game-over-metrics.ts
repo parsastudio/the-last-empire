@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   NationGettersUtility,
   VICTORY_CONFIG,
+  GameStateMetricsUtility,
 } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -39,12 +40,10 @@ export function useGameOverMetrics(
       return null;
     }
 
-    const humanCanonical = CountryRegistry.resolveCanonicalId(
+    const humanNation = NationGettersUtility.resolveNation(
       gameState.humanNationId,
+      gameState.nations,
     );
-    const humanNation =
-      gameState.nations[humanCanonical] ||
-      gameState.nations[gameState.humanNationId];
 
     const pixelCount = humanNation
       ? NationGettersUtility.getTerritoryPixelCount(
@@ -53,7 +52,7 @@ export function useGameOverMetrics(
         )
       : 0;
 
-    const rawReason = gameState.gameOverReason || "";
+    const rawReason = gameState.gameOverReason || "GENERIC";
     const isPlayerDefeated =
       !humanNation ||
       !humanNation.isAlive ||
@@ -68,7 +67,7 @@ export function useGameOverMetrics(
       .filter(
         (n) =>
           n.isAlive &&
-          CountryRegistry.resolveCanonicalId(n.id) !== humanCanonical,
+          !GameStateMetricsUtility.isHumanNation(gameState.humanNationId, n.id),
       )
       .sort((a, b) => {
         const gdpA = getNationGdp(a, gameState.provinces);
@@ -77,18 +76,27 @@ export function useGameOverMetrics(
       })[0];
 
     const effectiveWinnerNation = isPlayerDefeated
-      ? winnerCanonical && winnerCanonical !== humanCanonical
-        ? gameState.nations[winnerCanonical] || leadingAliveNation
+      ? winnerCanonical &&
+        !GameStateMetricsUtility.isHumanNation(
+          gameState.humanNationId,
+          winnerCanonical,
+        )
+        ? NationGettersUtility.resolveNation(
+            winnerCanonical,
+            gameState.nations,
+          ) || leadingAliveNation
         : leadingAliveNation
       : winnerCanonical
-        ? gameState.nations[winnerCanonical] || null
+        ? NationGettersUtility.resolveNation(winnerCanonical, gameState.nations)
         : null;
 
     const isVictory =
       !isPlayerDefeated &&
       !!effectiveWinnerNation &&
-      CountryRegistry.resolveCanonicalId(effectiveWinnerNation.id) ===
-        humanCanonical;
+      GameStateMetricsUtility.isHumanNation(
+        gameState.humanNationId,
+        effectiveWinnerNation.id,
+      );
 
     const winnerDisplayName = effectiveWinnerNation
       ? formatCountryName(effectiveWinnerNation)
@@ -120,70 +128,23 @@ export function useGameOverMetrics(
       VICTORY_CONFIG.TERRITORIAL_DOMINANCE_TARGET_PCT,
     );
 
-    let reasonTitle = t("reasons.defaultTitle");
-    let reasonDescription = "";
+    const outcomeCategory = isVictory ? "victory" : "defeat";
+    const resolvedReasonKey =
+      rawReason === "HUMAN_PLAYER_DEFEATED" ? "PLAYER_DEFEATED" : rawReason;
 
-    if (isVictory) {
-      if (rawReason === "ECONOMIC_DOMINANCE") {
-        reasonTitle = t("reasons.victory.ECONOMIC_DOMINANCE.title");
-        reasonDescription = t(
-          "reasons.victory.ECONOMIC_DOMINANCE.description",
-          {
-            name: winnerDisplayName,
-            targetPct: targetPctText,
-          },
-        );
-      } else if (rawReason === "TERRITORIAL_DOMINANCE") {
-        reasonTitle = t("reasons.victory.TERRITORIAL_DOMINANCE.title");
-        reasonDescription = t(
-          "reasons.victory.TERRITORIAL_DOMINANCE.description",
-          {
-            name: winnerDisplayName,
-            targetPct: targetPctText,
-          },
-        );
-      } else if (rawReason === "WORLD_CONQUEST") {
-        reasonTitle = t("reasons.victory.WORLD_CONQUEST.title");
-        reasonDescription = t("reasons.victory.WORLD_CONQUEST.description", {
-          name: winnerDisplayName,
-        });
-      } else {
-        reasonTitle = t("reasons.victory.GENERIC.title");
-        reasonDescription = t("reasons.victory.GENERIC.description", {
-          name: winnerDisplayName,
-        });
-      }
-    } else {
-      if (isPlayerDefeated) {
-        reasonTitle = t("reasons.defeat.PLAYER_DEFEATED.title");
-        reasonDescription = t("reasons.defeat.PLAYER_DEFEATED.description");
-      } else if (rawReason === "ECONOMIC_DOMINANCE") {
-        reasonTitle = t("reasons.defeat.ECONOMIC_DOMINANCE.title");
-        reasonDescription = t("reasons.defeat.ECONOMIC_DOMINANCE.description", {
+    const titlePath = `reasons.${outcomeCategory}.${resolvedReasonKey}.title`;
+    const descPath = `reasons.${outcomeCategory}.${resolvedReasonKey}.description`;
+
+    const reasonTitle = t.has(titlePath)
+      ? t(titlePath as Parameters<typeof t>[0])
+      : t("reasons.defaultTitle");
+
+    const reasonDescription = t.has(descPath)
+      ? t(descPath as Parameters<typeof t>[0], {
           name: winnerDisplayName,
           targetPct: targetPctText,
-        });
-      } else if (rawReason === "TERRITORIAL_DOMINANCE") {
-        reasonTitle = t("reasons.defeat.TERRITORIAL_DOMINANCE.title");
-        reasonDescription = t(
-          "reasons.defeat.TERRITORIAL_DOMINANCE.description",
-          {
-            name: winnerDisplayName,
-            targetPct: targetPctText,
-          },
-        );
-      } else if (rawReason === "WORLD_CONQUEST") {
-        reasonTitle = t("reasons.defeat.WORLD_CONQUEST.title");
-        reasonDescription = t("reasons.defeat.WORLD_CONQUEST.description", {
-          name: winnerDisplayName,
-        });
-      } else {
-        reasonTitle = t("reasons.defeat.GENERIC.title");
-        reasonDescription = t("reasons.defeat.GENERIC.description", {
-          name: winnerDisplayName,
-        });
-      }
-    }
+        })
+      : "";
 
     return {
       isVictory,

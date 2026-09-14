@@ -15,19 +15,60 @@ import {
   ClientMapPathResolver,
   GameDifficulty,
   MapTopologyRegistry,
+  ECONOMY_CONFIG,
 } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+
+function createNationDetailItem(
+  canonicalId: string,
+  rawCode: string,
+  flagCode: string | undefined,
+  rank: number,
+  gdp: number,
+  population: number,
+  treasury: number | undefined,
+  defaultGovernment: string,
+  formatCountryName: (code: string) => string,
+  tPowerTiers: (key: string) => string,
+  tDossier: (values: { name: string; rank: number }) => string,
+): NationDetail {
+  const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
+  const powerLabel = tPowerTiers(powerTierKey);
+  const displayName = formatCountryName(canonicalId);
+
+  const summary = NationPresentationMapper.formatNationSummary(
+    canonicalId,
+    rawCode,
+    flagCode || canonicalId,
+    rank,
+    gdp,
+    population,
+    treasury,
+    displayName,
+    powerLabel,
+  );
+
+  return {
+    id: canonicalId,
+    name: summary.name,
+    code: summary.code,
+    rank: summary.rank,
+    power: summary.powerLabel,
+    gdp: summary.gdpText,
+    population: summary.populationText,
+    treasury: summary.treasuryText,
+    desc: tDossier({ name: summary.name, rank }),
+    defaultGovernment,
+  };
+}
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
   tDossier: (values: { name: string; rank: number }) => string,
   tPowerTiers: (key: string) => string,
   formatCountryName: (code: string) => string,
-  formatNumber: (val: number | string) => string,
-  formatPopulation: (val: number) => string,
-  formatCurrency: (val: number, compact?: boolean) => string,
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -38,15 +79,11 @@ function mapManifestToNationDetails(
     return profiles.map((p, idx) => {
       const gdp = p.gdp || 50_000_000_000;
       const pop = p.population || 10_000_000;
-      const treasury = Math.floor(gdp * 0.05);
+      const treasury = Math.floor(gdp * ECONOMY_CONFIG.STARTING_TREASURY_RATIO);
       const rank = idx + 1;
       const gov = p.startingGovernment || "PLURALIST_PARLIAMENTARY";
 
-      const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
-      const powerLabel = tPowerTiers(powerTierKey);
-      const displayName = formatCountryName(p.code);
-
-      const summary = NationPresentationMapper.formatNationSummary(
+      return createNationDetailItem(
         p.code,
         p.code,
         p.flagCode,
@@ -54,24 +91,11 @@ function mapManifestToNationDetails(
         gdp,
         pop,
         treasury,
-        displayName,
-        powerLabel,
+        gov,
+        formatCountryName,
+        tPowerTiers,
+        tDossier,
       );
-
-      const desc = tDossier({ name: summary.name, rank });
-
-      return {
-        id: p.code,
-        name: summary.name,
-        code: summary.code,
-        rank: summary.rank,
-        power: summary.powerLabel,
-        gdp: summary.gdpText,
-        population: summary.populationText,
-        treasury: summary.treasuryText,
-        desc,
-        defaultGovernment: gov,
-      };
     });
   }
 
@@ -87,43 +111,28 @@ function mapManifestToNationDetails(
 
     const gdp = item.gdp ?? profile?.gdp ?? 50_000_000_000;
     const population = item.population ?? profile?.population ?? 10_000_000;
-    const treasury = item.startingTreasury ?? Math.floor(gdp * 0.05);
+    const treasury =
+      item.startingTreasury ??
+      Math.floor(gdp * ECONOMY_CONFIG.STARTING_TREASURY_RATIO);
     const rank = item.initialRank || 1;
     const gov =
       item.defaultGovernment ||
       profile?.startingGovernment ||
       "PLURALIST_PARLIAMENTARY";
 
-    const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
-    const powerLabel = tPowerTiers(powerTierKey);
-    const displayName = formatCountryName(canonicalId);
-
-    const summary = NationPresentationMapper.formatNationSummary(
+    return createNationDetailItem(
       canonicalId,
       item.code || canonicalId,
-      item.flagCode || profile?.flagCode || canonicalId,
+      item.flagCode || profile?.flagCode,
       rank,
       gdp,
       population,
       treasury,
-      displayName,
-      powerLabel,
+      gov,
+      formatCountryName,
+      tPowerTiers,
+      tDossier,
     );
-
-    const desc = tDossier({ name: summary.name, rank });
-
-    return {
-      id: canonicalId,
-      name: summary.name,
-      code: summary.code,
-      rank: summary.rank,
-      power: summary.powerLabel,
-      gdp: summary.gdpText,
-      population: summary.populationText,
-      treasury: summary.treasuryText,
-      desc,
-      defaultGovernment: gov,
-    };
   });
 }
 
@@ -135,8 +144,7 @@ export function useSelectNationForm() {
   const { showToast } = useToast();
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
-  const { formatCountryName, formatNumber, formatPopulation, formatCurrency } =
-    useLocaleFormatter();
+  const { formatCountryName } = useLocaleFormatter();
 
   const [manifest, setManifest] = useState<FinalMapManifest | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,19 +196,8 @@ export function useSelectNationForm() {
         (values) => tDossier("template", values),
         (key) => tPowerTiers(key),
         formatCountryName,
-        formatNumber,
-        formatPopulation,
-        formatCurrency,
       ),
-    [
-      manifest,
-      tDossier,
-      tPowerTiers,
-      formatCountryName,
-      formatNumber,
-      formatPopulation,
-      formatCurrency,
-    ],
+    [manifest, tDossier, tPowerTiers, formatCountryName],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {

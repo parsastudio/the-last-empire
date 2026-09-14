@@ -1,8 +1,8 @@
-import { useMemo } from "react";
-import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
+import { useMemo, useCallback } from "react";
+import { Nation, GameStateMetricsUtility } from "@geopolitics/domain";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { useTacticalSearchFilter } from "@/presentation/hooks/common/use-tactical-search-filter";
 
 export interface LiveNationItem {
   id: string;
@@ -28,15 +28,10 @@ export function useLiveNations({
   const allLiveNations = useMemo<LiveNationItem[]>(() => {
     if (!nationsMap) return [];
 
-    const canonicalExclude = excludeNationId
-      ? CountryRegistry.resolveCanonicalId(excludeNationId)
-      : null;
-
     return Object.values(nationsMap)
       .filter((n) => {
         if (!n.isAlive) return false;
-        const canonical = CountryRegistry.resolveCanonicalId(n.id);
-        return canonical !== canonicalExclude && n.id !== excludeNationId;
+        return !GameStateMetricsUtility.isHumanNation(excludeNationId, n.id);
       })
       .map((n) => {
         const presented = NationPresenter.present(
@@ -55,18 +50,16 @@ export function useLiveNations({
       });
   }, [nationsMap, excludeNationId, countryTranslator]);
 
-  const filteredNations = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return allLiveNations;
+  const extractSearchFields = useCallback(
+    (item: LiveNationItem) => [item.name, item.code, item.id, item.flagCode],
+    [],
+  );
 
-    return allLiveNations.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.code.toLowerCase().includes(q) ||
-        item.id.toLowerCase().includes(q) ||
-        item.flagCode.toLowerCase().includes(q),
-    );
-  }, [allLiveNations, searchQuery]);
+  const filteredNations = useTacticalSearchFilter(
+    allLiveNations,
+    searchQuery,
+    extractSearchFields,
+  );
 
   return {
     filteredNations,

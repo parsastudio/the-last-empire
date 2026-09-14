@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@geopolitics/domain";
+import { GameError, NationGettersUtility } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { DomesticRecruitmentManager } from "@/engine/military/domestic-recruitment-manager";
@@ -25,8 +25,7 @@ export class MilitaryActionExecutor {
       canonicalSourceId ?? CountryRegistry.resolveCanonicalId(action.nationId);
     const nation =
       sourceNation ??
-      state.nations[canonicalId] ??
-      state.nations[action.nationId];
+      NationGettersUtility.resolveNation(canonicalId, state.nations);
 
     if (!nation) return { newState: state };
 
@@ -104,16 +103,18 @@ export class MilitaryActionExecutor {
       }
 
       case "INITIATE_BATTLE": {
-        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
+        const target = NationGettersUtility.resolveNation(
           action.targetNationId,
+          state.nations,
         );
-        const target =
-          state.nations[canonicalTargetId] ||
-          state.nations[action.targetNationId];
 
         if (!target) {
           throw new GameError("TARGET_NOT_FOUND");
         }
+
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
+          action.targetNationId,
+        );
 
         BattleInitiationValidator.validate(
           state,

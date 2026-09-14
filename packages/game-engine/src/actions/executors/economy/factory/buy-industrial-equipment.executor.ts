@@ -4,7 +4,11 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
-import { NationRelationResolver } from "@geopolitics/domain";
+import {
+  DiplomacyTradeValidator,
+  GameStateMetricsUtility,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 import { ExecutionResult } from "@/engine/actions/execution-result";
 import { FactoryModernizationRunner } from "@/engine/actions/executors/economy/factory/factory-modernization-runner";
 
@@ -19,21 +23,16 @@ export class BuyIndustrialEquipmentExecutor {
     totalCost: number;
     sellerId: string;
   }> {
-    const sellerCanonical = CountryRegistry.resolveCanonicalId(
+    const seller = NationGettersUtility.resolveNation(
       action.sellerNationId,
+      state.nations,
     );
-    const seller =
-      state.nations[sellerCanonical] || state.nations[action.sellerNationId];
 
     if (!seller || !seller.isAlive) {
       throw new GameError("SELLER_NOT_FOUND");
     }
 
-    const rel = NationRelationResolver.getRelation(
-      buyer.relations,
-      sellerCanonical,
-    );
-    if (rel?.stance === "WAR" || (rel?.tension ?? 10) >= 50) {
+    if (!DiplomacyTradeValidator.isEligibleMachinerySeller(buyer, seller)) {
       throw new GameError("DIPLOMATIC_TENSION");
     }
 
@@ -53,14 +52,15 @@ export class BuyIndustrialEquipmentExecutor {
         ),
     });
 
+    const sellerCanonical = CountryRegistry.resolveCanonicalId(seller.id);
     const sellerKey = state.nations[sellerCanonical]
       ? sellerCanonical
       : seller.id;
 
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+    const isHumanSeller = GameStateMetricsUtility.isHumanNation(
       state.humanNationId,
+      seller.id,
     );
-    const isHumanSeller = sellerCanonical === canonicalHuman;
 
     const logs = [];
     if (isHumanSeller && result.totalCost > 0) {
