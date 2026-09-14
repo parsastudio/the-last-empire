@@ -1,6 +1,14 @@
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
+import {
+  UnitType,
+  MilitaryStack,
+  ALL_MILITARY_UNIT_TYPES,
+} from "@/domain/military/military.schema";
 import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
+import {
+  MilitaryInventoryHelper,
+  MilitaryStackKey,
+} from "@/domain/military/military-inventory-helper";
 
 export class MilitaryPricingCalculator {
   public static readonly ARMS_IMPORT_BASE = 2.0;
@@ -50,20 +58,16 @@ export class MilitaryPricingCalculator {
     return Math.floor(basePrice * techMultiplier);
   }
 
-  public static calculateTotalArmyValuation(military: {
-    infantry?: number;
-    armor?: number;
-    airDefense?: number;
-    airForce?: number;
-    droneMissile?: number;
-  }): number {
-    return (
-      (military.infantry || 0) * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      (military.armor || 0) * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      (military.airDefense || 0) * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
-      (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
-    );
+  public static calculateTotalArmyValuation(
+    military: Partial<Record<MilitaryStackKey, number>>,
+  ): number {
+    let total = 0;
+    for (let i = 0; i < ALL_MILITARY_UNIT_TYPES.length; i++) {
+      const type = ALL_MILITARY_UNIT_TYPES[i]!;
+      const count = MilitaryInventoryHelper.getUnitCount(military, type);
+      total += this.calculateUnitValuation(type, count);
+    }
+    return total;
   }
 
   public static calculateMaxArmyValuation(gdp: number): number {

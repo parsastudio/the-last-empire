@@ -31,6 +31,48 @@ export interface TurnLogStatsSummary {
 }
 
 export class TurnLogRepository {
+  private static getFilteredCollection(
+    gameId: string,
+    turn: number | "ALL" = "ALL",
+    scope?: TurnLogScope,
+  ) {
+    if (scope && turn !== "ALL") {
+      return db.turnLogs
+        .where("[gameId+scope+turn]")
+        .equals([gameId, scope, turn]);
+    }
+    if (turn !== "ALL") {
+      return db.turnLogs.where("[gameId+turn]").equals([gameId, turn]);
+    }
+    if (scope) {
+      return db.turnLogs.where("[gameId+scope]").equals([gameId, scope]);
+    }
+    return db.turnLogs.where("gameId").equals(gameId);
+  }
+
+  private static filterRecordsByScopeAndNational(
+    records: SavedTurnLogRecord[],
+    scope?: TurnLogScope,
+    humanNationId?: string,
+  ): SavedTurnLogRecord[] {
+    const withoutDilemmas = records.filter(
+      (r) => r.log.eventCode !== "DILEMMA_RESOLVED",
+    );
+
+    if (scope === "NATIONAL" && humanNationId) {
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
+      return withoutDilemmas.filter((r) => {
+        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
+        const trg = r.log.targetNationId
+          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
+          : null;
+        return src === canonicalHuman || trg === canonicalHuman;
+      });
+    }
+
+    return withoutDilemmas;
+  }
+
   public static async appendLogs(
     gameId: string,
     logs: TurnLogEntry[],
@@ -75,33 +117,15 @@ export class TurnLogRepository {
       humanNationId,
     } = options;
 
-    let collection = db.turnLogs.where("gameId").equals(gameId);
-
-    if (scope && turn !== "ALL") {
-      collection = db.turnLogs
-        .where("[gameId+scope+turn]")
-        .equals([gameId, scope, turn]);
-    } else if (turn !== "ALL") {
-      collection = db.turnLogs.where("[gameId+turn]").equals([gameId, turn]);
-    } else if (scope) {
-      collection = db.turnLogs.where("[gameId+scope]").equals([gameId, scope]);
-    }
-
+    const collection = this.getFilteredCollection(gameId, turn, scope);
     let records = await collection.sortBy("timestamp");
     records = records.reverse();
 
-    records = records.filter((r) => r.log.eventCode !== "DILEMMA_RESOLVED");
-
-    if (scope === "NATIONAL" && humanNationId) {
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
-      records = records.filter((r) => {
-        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
-        const trg = r.log.targetNationId
-          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
-          : null;
-        return src === canonicalHuman || trg === canonicalHuman;
-      });
-    }
+    records = this.filterRecordsByScopeAndNational(
+      records,
+      scope,
+      humanNationId,
+    );
 
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
@@ -143,39 +167,14 @@ export class TurnLogRepository {
     humanNationId?: string,
     scope: TurnLogScope = "NATIONAL",
   ): Promise<TurnLogStatsSummary> {
-    let records: SavedTurnLogRecord[];
+    const collection = this.getFilteredCollection(gameId, turn, scope);
+    let records = await collection.toArray();
 
-    if (scope && turn !== "ALL") {
-      records = await db.turnLogs
-        .where("[gameId+scope+turn]")
-        .equals([gameId, scope, turn])
-        .toArray();
-    } else if (turn !== "ALL") {
-      records = await db.turnLogs
-        .where("[gameId+turn]")
-        .equals([gameId, turn])
-        .toArray();
-    } else if (scope) {
-      records = await db.turnLogs
-        .where("[gameId+scope]")
-        .equals([gameId, scope])
-        .toArray();
-    } else {
-      records = await db.turnLogs.where("gameId").equals(gameId).toArray();
-    }
-
-    records = records.filter((r) => r.log.eventCode !== "DILEMMA_RESOLVED");
-
-    if (scope === "NATIONAL" && humanNationId) {
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
-      records = records.filter((r) => {
-        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
-        const trg = r.log.targetNationId
-          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
-          : null;
-        return src === canonicalHuman || trg === canonicalHuman;
-      });
-    }
+    records = this.filterRecordsByScopeAndNational(
+      records,
+      scope,
+      humanNationId,
+    );
 
     let combatCount = 0;
     let diplomacyCount = 0;

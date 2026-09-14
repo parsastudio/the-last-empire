@@ -8,6 +8,9 @@ export const UnitTypeSchema = z.enum([
   "DRONE_MISSILE",
 ]);
 
+export const ALL_MILITARY_UNIT_TYPES: readonly UnitType[] =
+  UnitTypeSchema.options;
+
 export const BranchTechRatingSchema = z.object({
   infantry: z.number().default(1),
   armor: z.number().default(1),

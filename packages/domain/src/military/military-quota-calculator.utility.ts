@@ -1,6 +1,11 @@
-import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
+import {
+  UnitType,
+  MilitaryStack,
+  ALL_MILITARY_UNIT_TYPES,
+} from "@/domain/military/military.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export interface UnitBudgetQuota {
   unitType: UnitType;
@@ -29,18 +34,7 @@ export class MilitaryQuotaCalculator {
     military: MilitaryStack,
     unitType: UnitType,
   ): number {
-    switch (unitType) {
-      case "INFANTRY":
-        return military.infantry || 0;
-      case "ARMOR":
-        return military.armor || 0;
-      case "AIR_DEFENSE":
-        return military.airDefense || 0;
-      case "AIR_FORCE":
-        return military.airForce || 0;
-      case "DRONE_MISSILE":
-        return military.droneMissile || 0;
-    }
+    return MilitaryInventoryHelper.getUnitCount(military, unitType);
   }
 
   public static calculateQuotas(
@@ -50,21 +44,13 @@ export class MilitaryQuotaCalculator {
     const ratios = this.getUnitRatios();
     const result: Partial<Record<UnitType, UnitBudgetQuota>> = {};
 
-    const types: UnitType[] = [
-      "INFANTRY",
-      "ARMOR",
-      "AIR_DEFENSE",
-      "AIR_FORCE",
-      "DRONE_MISSILE",
-    ];
-
     const maxGlobalValuation =
       MilitaryPricingCalculator.calculateMaxArmyValuation(gdp);
     const remainingGlobalValuation =
       MilitaryPricingCalculator.calculateRemainingArmyValuation(gdp, military);
 
-    for (let i = 0; i < types.length; i++) {
-      const type = types[i]!;
+    for (let i = 0; i < ALL_MILITARY_UNIT_TYPES.length; i++) {
+      const type = ALL_MILITARY_UNIT_TYPES[i]!;
       const ratio = ratios[type] || 0;
       const unitPrice = MILITARY_UNIT_STATS[type].moneyCost;
       const budgetCap = Math.floor(maxGlobalValuation * ratio);

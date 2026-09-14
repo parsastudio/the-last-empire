@@ -26,6 +26,42 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
+function resolvePeaceStatusStyle(
+  isDominantAi: boolean,
+  isCrushedAi: boolean,
+  isWhitePeace: boolean,
+  isAiOffering: boolean,
+) {
+  if (isDominantAi) {
+    return {
+      containerClass: "bg-rose-950/25 border-rose-500/50",
+      badgeClass: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+    };
+  }
+  if (isCrushedAi) {
+    return {
+      containerClass: "bg-emerald-950/25 border-emerald-500/50",
+      badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    };
+  }
+  if (isWhitePeace) {
+    return {
+      containerClass: "bg-secondary/40 border-border/70",
+      badgeClass: "bg-secondary/40 border-border/70 text-foreground",
+    };
+  }
+  if (isAiOffering) {
+    return {
+      containerClass: "bg-emerald-950/20 border-emerald-500/40",
+      badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+    };
+  }
+  return {
+    containerClass: "bg-amber-950/20 border-amber-500/40",
+    badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+  };
+}
+
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
   humanNation: Nation | null;
@@ -108,6 +144,13 @@ export function PeaceNegotiationModal({
     name: targetDisplayName,
   });
 
+  const statusStyle = resolvePeaceStatusStyle(
+    isDominantAi,
+    isCrushedAi,
+    isWhitePeace,
+    terms.isAiOffering,
+  );
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
@@ -174,17 +217,7 @@ export function PeaceNegotiationModal({
         )}
 
         <div
-          className={`p-4.5 rounded-3xl border space-y-3 shadow-lg relative overflow-hidden ${
-            isDominantAi
-              ? "bg-rose-950/25 border-rose-500/50"
-              : isCrushedAi
-                ? "bg-emerald-950/25 border-emerald-500/50"
-                : isWhitePeace
-                  ? "bg-secondary/40 border-border/70"
-                  : terms.isAiOffering
-                    ? "bg-emerald-950/20 border-emerald-500/40"
-                    : "bg-amber-950/20 border-amber-500/40"
-          }`}
+          className={`p-4.5 rounded-3xl border space-y-3 shadow-lg relative overflow-hidden ${statusStyle.containerClass}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -194,17 +227,7 @@ export function PeaceNegotiationModal({
               </h4>
             </div>
             <span
-              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
-                isDominantAi
-                  ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                  : isCrushedAi
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                    : isWhitePeace
-                      ? "bg-secondary/40 border-border/70"
-                      : terms.isAiOffering
-                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                        : "bg-amber-500/20 text-amber-300 border-amber-500/40"
-              }`}
+              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${statusStyle.badgeClass}`}
             >
               {resolvedHeadline}
             </span>

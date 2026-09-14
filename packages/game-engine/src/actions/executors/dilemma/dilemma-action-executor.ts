@@ -1,12 +1,23 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ResolveDilemmaAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError, getNationGdp } from "@geopolitics/domain";
 import {
+  GameError,
+  getNationGdp,
   CORE_DILEMMA_EVENTS,
   MilitaryInventoryHelper,
+  UnitType,
+  DilemmaEffect,
 } from "@geopolitics/domain";
 import { ExecutionResult } from "@/engine/actions/execution-result";
+
+const MILITARY_DELTA_MAP: { key: keyof DilemmaEffect; unitType: UnitType }[] = [
+  { key: "infantryDelta", unitType: "INFANTRY" },
+  { key: "armorDelta", unitType: "ARMOR" },
+  { key: "airDefenseDelta", unitType: "AIR_DEFENSE" },
+  { key: "airForceDelta", unitType: "AIR_FORCE" },
+  { key: "droneMissileDelta", unitType: "DRONE_MISSILE" },
+];
 
 export class DilemmaActionExecutor {
   public static execute(
@@ -79,88 +90,24 @@ export class DilemmaActionExecutor {
       );
     }
 
-    if (effect.infantryDelta) {
-      if (effect.infantryDelta > 0) {
-        updatedMilitary = MilitaryInventoryHelper.addUnits(
-          updatedMilitary,
-          "INFANTRY",
-          effect.infantryDelta,
-          updatedMilitary.techLevel,
-        );
-      } else {
-        updatedMilitary = MilitaryInventoryHelper.removeUnits(
-          updatedMilitary,
-          "INFANTRY",
-          Math.abs(effect.infantryDelta),
-        );
-      }
-    }
-
-    if (effect.armorDelta) {
-      if (effect.armorDelta > 0) {
-        updatedMilitary = MilitaryInventoryHelper.addUnits(
-          updatedMilitary,
-          "ARMOR",
-          effect.armorDelta,
-          updatedMilitary.techLevel,
-        );
-      } else {
-        updatedMilitary = MilitaryInventoryHelper.removeUnits(
-          updatedMilitary,
-          "ARMOR",
-          Math.abs(effect.armorDelta),
-        );
-      }
-    }
-
-    if (effect.airDefenseDelta) {
-      if (effect.airDefenseDelta > 0) {
-        updatedMilitary = MilitaryInventoryHelper.addUnits(
-          updatedMilitary,
-          "AIR_DEFENSE",
-          effect.airDefenseDelta,
-          updatedMilitary.techLevel,
-        );
-      } else {
-        updatedMilitary = MilitaryInventoryHelper.removeUnits(
-          updatedMilitary,
-          "AIR_DEFENSE",
-          Math.abs(effect.airDefenseDelta),
-        );
-      }
-    }
-
-    if (effect.airForceDelta) {
-      if (effect.airForceDelta > 0) {
-        updatedMilitary = MilitaryInventoryHelper.addUnits(
-          updatedMilitary,
-          "AIR_FORCE",
-          effect.airForceDelta,
-          updatedMilitary.techLevel,
-        );
-      } else {
-        updatedMilitary = MilitaryInventoryHelper.removeUnits(
-          updatedMilitary,
-          "AIR_FORCE",
-          Math.abs(effect.airForceDelta),
-        );
-      }
-    }
-
-    if (effect.droneMissileDelta) {
-      if (effect.droneMissileDelta > 0) {
-        updatedMilitary = MilitaryInventoryHelper.addUnits(
-          updatedMilitary,
-          "DRONE_MISSILE",
-          effect.droneMissileDelta,
-          updatedMilitary.techLevel,
-        );
-      } else {
-        updatedMilitary = MilitaryInventoryHelper.removeUnits(
-          updatedMilitary,
-          "DRONE_MISSILE",
-          Math.abs(effect.droneMissileDelta),
-        );
+    for (let i = 0; i < MILITARY_DELTA_MAP.length; i++) {
+      const { key, unitType } = MILITARY_DELTA_MAP[i]!;
+      const delta = effect[key];
+      if (delta) {
+        if (delta > 0) {
+          updatedMilitary = MilitaryInventoryHelper.addUnits(
+            updatedMilitary,
+            unitType,
+            delta,
+            updatedMilitary.techLevel,
+          );
+        } else {
+          updatedMilitary = MilitaryInventoryHelper.removeUnits(
+            updatedMilitary,
+            unitType,
+            Math.abs(delta),
+          );
+        }
       }
     }
 

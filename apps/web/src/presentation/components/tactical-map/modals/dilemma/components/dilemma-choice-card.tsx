@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import {
   Coins,
@@ -11,6 +11,7 @@ import {
   Crosshair,
   Radio,
   CheckCircle2,
+  LucideIcon,
 } from "lucide-react";
 import { DilemmaChoice } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
@@ -22,6 +23,14 @@ interface DilemmaChoiceCardProps {
   isSelected: boolean;
   nationGdp: number;
   onSelect: (choiceId: string) => void;
+}
+
+interface RenderedEffectBadge {
+  id: string;
+  icon: LucideIcon;
+  text: string;
+  isPositive: boolean;
+  styleClass: string;
 }
 
 export function DilemmaChoiceCard({
@@ -49,6 +58,122 @@ export function DilemmaChoiceCard({
   ) {
     moneyVal = Math.floor(nationGdp * effect.treasuryGdpPercent);
   }
+
+  const badges = useMemo<RenderedEffectBadge[]>(() => {
+    const list: RenderedEffectBadge[] = [];
+
+    if (moneyVal !== 0) {
+      list.push({
+        id: "money",
+        icon: Coins,
+        text: `${moneyVal > 0 ? "+" : ""}${formatCurrency(moneyVal, true)}`,
+        isPositive: moneyVal > 0,
+        styleClass:
+          moneyVal > 0
+            ? "bg-gdp/15 text-gdp border-gdp/30"
+            : "bg-rose-500/15 text-rose-400 border-rose-500/30",
+      });
+    }
+
+    if (effect.stabilityDelta) {
+      list.push({
+        id: "stability",
+        icon: Landmark,
+        text: `${effect.stabilityDelta > 0 ? "+" : ""}${formatPercent(effect.stabilityDelta)} ${t("modal.units.stability")}`,
+        isPositive: effect.stabilityDelta > 0,
+        styleClass:
+          effect.stabilityDelta > 0
+            ? "bg-gdp/15 text-gdp border-gdp/30"
+            : "bg-rose-500/15 text-rose-400 border-rose-500/30",
+      });
+    }
+
+    if (effect.globalReputationDelta) {
+      list.push({
+        id: "reputation",
+        icon: Globe,
+        text: `${effect.globalReputationDelta > 0 ? "+" : ""}${toDigits(effect.globalReputationDelta)} ${t("modal.units.prestige")}`,
+        isPositive: effect.globalReputationDelta > 0,
+        styleClass:
+          effect.globalReputationDelta > 0
+            ? "bg-gdp/15 text-gdp border-gdp/30"
+            : "bg-rose-500/15 text-rose-400 border-rose-500/30",
+      });
+    }
+
+    if (effect.militaryTechDelta) {
+      list.push({
+        id: "milTech",
+        icon: Award,
+        text: `+${toDigits(effect.militaryTechDelta)} ${t("modal.units.milTech")}`,
+        isPositive: true,
+        styleClass: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+      });
+    }
+
+    if (effect.industrialLevelDelta) {
+      list.push({
+        id: "indTech",
+        icon: Cpu,
+        text: `+${toDigits(effect.industrialLevelDelta)} ${t("modal.units.indTech")}`,
+        isPositive: true,
+        styleClass: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+      });
+    }
+
+    const unitBadges = [
+      {
+        delta: effect.infantryDelta,
+        unit: "infantry",
+        icon: Shield,
+        colorClass: "bg-primary/15 text-primary border-primary/30",
+      },
+      {
+        delta: effect.armorDelta,
+        unit: "armor",
+        icon: ShieldAlert,
+        colorClass: "bg-military/15 text-military border-military/30",
+      },
+      {
+        delta: effect.airDefenseDelta,
+        unit: "airDefense",
+        icon: Crosshair,
+        colorClass: "bg-diplomacy/15 text-diplomacy border-diplomacy/30",
+      },
+      {
+        delta: effect.droneMissileDelta,
+        unit: "droneMissile",
+        icon: Radio,
+        colorClass: "bg-treasury/15 text-treasury border-treasury/30",
+      },
+    ];
+
+    for (let i = 0; i < unitBadges.length; i++) {
+      const b = unitBadges[i]!;
+      if (b.delta) {
+        list.push({
+          id: b.unit,
+          icon: b.icon,
+          text: `${b.delta > 0 ? "+" : ""}${formatNumber(b.delta)} ${t(`modal.units.${b.unit}`)}`,
+          isPositive: b.delta > 0,
+          styleClass:
+            b.delta > 0
+              ? b.colorClass
+              : "bg-rose-500/15 text-rose-400 border-rose-500/30",
+        });
+      }
+    }
+
+    return list;
+  }, [
+    moneyVal,
+    effect,
+    formatCurrency,
+    formatPercent,
+    formatNumber,
+    toDigits,
+    t,
+  ]);
 
   return (
     <button
@@ -88,145 +213,18 @@ export function DilemmaChoiceCard({
       </div>
 
       <div className="flex flex-wrap gap-1.5 ps-8 font-mono text-[10px] w-full pt-1 border-t border-border/40">
-        {moneyVal !== 0 && (
-          <span
-            className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-              moneyVal > 0
-                ? "bg-gdp/15 text-gdp border-gdp/30"
-                : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-            }`}
-          >
-            <Coins size={11} />
-            <span>
-              {moneyVal > 0 ? "+" : ""}
-              {formatCurrency(moneyVal, true)}
-            </span>
-          </span>
-        )}
-
-        {effect.stabilityDelta !== undefined && effect.stabilityDelta !== 0 && (
-          <span
-            className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-              effect.stabilityDelta > 0
-                ? "bg-gdp/15 text-gdp border-gdp/30"
-                : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-            }`}
-          >
-            <Landmark size={11} />
-            <span>
-              {effect.stabilityDelta > 0 ? "+" : ""}
-              {formatPercent(effect.stabilityDelta)}{" "}
-              {t("modal.units.stability")}
-            </span>
-          </span>
-        )}
-
-        {effect.globalReputationDelta !== undefined &&
-          effect.globalReputationDelta !== 0 && (
+        {badges.map((badge) => {
+          const BadgeIcon = badge.icon;
+          return (
             <span
-              className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-                effect.globalReputationDelta > 0
-                  ? "bg-gdp/15 text-gdp border-gdp/30"
-                  : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-              }`}
+              key={badge.id}
+              className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${badge.styleClass}`}
             >
-              <Globe size={11} />
-              <span>
-                {effect.globalReputationDelta > 0 ? "+" : ""}
-                {toDigits(effect.globalReputationDelta)}{" "}
-                {t("modal.units.prestige")}
-              </span>
+              <BadgeIcon size={11} />
+              <span>{badge.text}</span>
             </span>
-          )}
-
-        {effect.militaryTechDelta !== undefined &&
-          effect.militaryTechDelta !== 0 && (
-            <span className="px-2 py-0.5 rounded-lg border bg-amber-500/15 text-amber-300 border-amber-500/30 flex items-center gap-1 font-bold">
-              <Award size={11} />
-              <span>
-                +{toDigits(effect.militaryTechDelta)} {t("modal.units.milTech")}
-              </span>
-            </span>
-          )}
-
-        {effect.industrialLevelDelta !== undefined &&
-          effect.industrialLevelDelta !== 0 && (
-            <span className="px-2 py-0.5 rounded-lg border bg-emerald-500/15 text-emerald-300 border-emerald-500/30 flex items-center gap-1 font-bold">
-              <Cpu size={11} />
-              <span>
-                +{toDigits(effect.industrialLevelDelta)}{" "}
-                {t("modal.units.indTech")}
-              </span>
-            </span>
-          )}
-
-        {effect.infantryDelta !== undefined && effect.infantryDelta !== 0 && (
-          <span
-            className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-              effect.infantryDelta > 0
-                ? "bg-primary/15 text-primary border-primary/30"
-                : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-            }`}
-          >
-            <Shield size={11} />
-            <span>
-              {effect.infantryDelta > 0 ? "+" : ""}
-              {formatNumber(effect.infantryDelta)} {t("modal.units.infantry")}
-            </span>
-          </span>
-        )}
-
-        {effect.armorDelta !== undefined && effect.armorDelta !== 0 && (
-          <span
-            className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-              effect.armorDelta > 0
-                ? "bg-military/15 text-military border-military/30"
-                : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-            }`}
-          >
-            <ShieldAlert size={11} />
-            <span>
-              {effect.armorDelta > 0 ? "+" : ""}
-              {formatNumber(effect.armorDelta)} {t("modal.units.armor")}
-            </span>
-          </span>
-        )}
-
-        {effect.airDefenseDelta !== undefined &&
-          effect.airDefenseDelta !== 0 && (
-            <span
-              className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-                effect.airDefenseDelta > 0
-                  ? "bg-diplomacy/15 text-diplomacy border-diplomacy/30"
-                  : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-              }`}
-            >
-              <Crosshair size={11} />
-              <span>
-                {effect.airDefenseDelta > 0 ? "+" : ""}
-                {formatNumber(effect.airDefenseDelta)}{" "}
-                {t("modal.units.airDefense")}
-              </span>
-            </span>
-          )}
-
-        {effect.droneMissileDelta !== undefined &&
-          effect.droneMissileDelta !== 0 && (
-            <span
-              className={`px-2 py-0.5 rounded-lg border flex items-center gap-1 font-bold ${
-                effect.droneMissileDelta > 0
-                  ? "bg-treasury/15 text-treasury border-treasury/30"
-                  : "bg-rose-500/15 text-rose-400 border-rose-500/30"
-              }`}
-            >
-              <Radio size={11} />
-              <span>
-                {effect.droneMissileDelta > 0 ? "+" : ""}
-                {formatNumber(effect.droneMissileDelta)}{" "}
-                {t("modal.units.droneMissile")}
-              </span>
-            </span>
-          )}
+          );
+        })}
       </div>
     </button>
   );

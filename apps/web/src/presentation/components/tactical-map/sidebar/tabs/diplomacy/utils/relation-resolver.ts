@@ -7,6 +7,7 @@ import {
   CountryDefaultsUtility,
   getNationGdp,
   NationGettersUtility,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import {
   LocaleNumberFormatter,
@@ -100,42 +101,22 @@ export function resolveProfileRelation(
     tension = vector.tension;
     posture = vector.posture;
 
-    const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
+    const umbrella = NationRelationResolver.resolveBilateralUmbrellaState(
+      humanNation,
+      liveNation,
+    );
 
-    const isEmergencyGuarantorOfHuman =
-      Boolean(humanNation.securityGuarantorId) &&
-      CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
-        targetCanonical &&
-      Boolean(humanNation.isEmergencyProtectorate);
-
-    if (isEmergencyGuarantorOfHuman) {
-      isEmergencyProtectorate = true;
-    }
-
-    const hasDefensePactWithTarget = (
-      humanNation.defenseGuarantorIds || []
-    ).some((id) => CountryRegistry.resolveCanonicalId(id) === targetCanonical);
-
-    if (hasDefensePactWithTarget) {
-      hasSecurityGuarantee = true;
-    }
+    isEmergencyProtectorate = umbrella.isEmergencyGuarantorOfHuman;
+    hasSecurityGuarantee = umbrella.hasSecurityGuarantee;
   }
 
-  const firstDefenseGuarantorId = liveNation?.defenseGuarantorIds?.[0];
-  const emergencyGuarantorId = liveNation?.securityGuarantorId;
+  const liveGuarantors = liveNation
+    ? NationGettersUtility.getLiveDefenseGuarantors(liveNation, allNations)
+    : [];
 
-  const guarantorNation =
-    emergencyGuarantorId && allNations
-      ? allNations[CountryRegistry.resolveCanonicalId(emergencyGuarantorId)] ||
-        allNations[emergencyGuarantorId]
-      : firstDefenseGuarantorId && allNations
-        ? allNations[
-            CountryRegistry.resolveCanonicalId(firstDefenseGuarantorId)
-          ] || null
-        : null;
-
-  const guarantorName = guarantorNation
-    ? NationPresenter.formatName(guarantorNation, translator)
+  const firstGuarantor = liveGuarantors[0];
+  const guarantorName = firstGuarantor
+    ? NationPresenter.formatName(firstGuarantor, translator)
     : undefined;
 
   const humanTech = humanNation?.military.techLevel ?? 1.0;

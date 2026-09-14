@@ -18,6 +18,29 @@ interface UseWideReportsProps {
   gameId?: string;
 }
 
+function filterFallbackLogs(
+  rawLogs: TurnLogEntry[],
+  scope: TurnLogScope,
+  humanNationId?: string,
+): TurnLogEntry[] {
+  const canonicalHuman = humanNationId
+    ? CountryRegistry.resolveCanonicalId(humanNationId)
+    : null;
+
+  return rawLogs.filter((log) => {
+    if (log.eventCode === "DILEMMA_RESOLVED") return false;
+    if (scope && log.scope !== scope) return false;
+    if (scope === "NATIONAL" && canonicalHuman) {
+      const src = CountryRegistry.resolveCanonicalId(log.sourceNationId);
+      const trg = log.targetNationId
+        ? CountryRegistry.resolveCanonicalId(log.targetNationId)
+        : null;
+      return src === canonicalHuman || trg === canonicalHuman;
+    }
+    return true;
+  });
+}
+
 export function useWideReports({
   logs = [],
   currentTurn = 1,
@@ -72,46 +95,12 @@ export function useWideReports({
       if (pagedResult.logs.length > 0) {
         setDbLogs(pagedResult.logs);
       } else if (logs.length > 0 && selectedTurn === currentTurn) {
-        const canonicalHuman = humanNationId
-          ? CountryRegistry.resolveCanonicalId(humanNationId)
-          : null;
-
-        const filteredFallback = logs.filter((log) => {
-          if (log.eventCode === "DILEMMA_RESOLVED") return false;
-          if (selectedScope && log.scope !== selectedScope) return false;
-          if (selectedScope === "NATIONAL" && canonicalHuman) {
-            const src = CountryRegistry.resolveCanonicalId(log.sourceNationId);
-            const trg = log.targetNationId
-              ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-              : null;
-            return src === canonicalHuman || trg === canonicalHuman;
-          }
-          return true;
-        });
-
-        setDbLogs(filteredFallback);
+        setDbLogs(filterFallbackLogs(logs, selectedScope, humanNationId));
       } else {
         setDbLogs([]);
       }
     } catch {
-      const canonicalHuman = humanNationId
-        ? CountryRegistry.resolveCanonicalId(humanNationId)
-        : null;
-
-      const filteredFallback = logs.filter((log) => {
-        if (log.eventCode === "DILEMMA_RESOLVED") return false;
-        if (selectedScope && log.scope !== selectedScope) return false;
-        if (selectedScope === "NATIONAL" && canonicalHuman) {
-          const src = CountryRegistry.resolveCanonicalId(log.sourceNationId);
-          const trg = log.targetNationId
-            ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-            : null;
-          return src === canonicalHuman || trg === canonicalHuman;
-        }
-        return true;
-      });
-
-      setDbLogs(filteredFallback);
+      setDbLogs(filterFallbackLogs(logs, selectedScope, humanNationId));
     } finally {
       setIsLoading(false);
     }

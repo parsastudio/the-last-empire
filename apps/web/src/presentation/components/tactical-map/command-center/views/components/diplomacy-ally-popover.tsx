@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useTranslations } from "next-intl";
 import {
   X,
@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { useModalKeyboardShortcut } from "@/presentation/components/common/hooks/use-modal-keyboard-shortcut";
 import { NationAllyDetail } from "./diplomacy-allies-resolver.utility";
 
 interface DiplomacyAllyPopoverProps {
@@ -26,15 +27,7 @@ export function DiplomacyAllyPopover({
   const t = useTranslations("diplomacy.allyPopover");
   const { toDigits, formatLevel } = useLocaleFormatter();
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  useModalKeyboardShortcut(true, onClose);
 
   return (
     <div className="p-3.5 rounded-2xl bg-secondary/95 border-2 border-rose-500/50 shadow-2xl backdrop-blur-2xl space-y-3 animate-fade-smooth relative text-start font-sans">

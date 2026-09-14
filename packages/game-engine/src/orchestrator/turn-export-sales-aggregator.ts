@@ -8,6 +8,34 @@ export interface ExportAggregationResult {
 }
 
 export class TurnExportSalesAggregator {
+  private static buildSummaryLog(
+    spendingMap: Map<string, number>,
+    turn: number,
+    humanNationId: string,
+    eventCode: "ARMS_EXPORT_SUMMARY" | "MACHINERY_EXPORT_SUMMARY",
+  ): TurnLogEntry | null {
+    if (spendingMap.size === 0) return null;
+
+    const buyersList = Array.from(spendingMap.entries())
+      .map(([nationId, amount]) => ({ nationId, amount }))
+      .sort((a, b) => b.amount - a.amount);
+
+    const totalProfit = buyersList.reduce((sum, item) => sum + item.amount, 0);
+
+    return TurnLogBuilder.createNationalLog(
+      turn,
+      humanNationId,
+      "DOMESTIC",
+      "INFO",
+      eventCode,
+      {
+        totalProfit,
+        buyersCount: buyersList.length,
+        buyersJson: JSON.stringify(buyersList),
+      },
+    );
+  }
+
   public static aggregate(
     state: GameState,
     candidateLogs?: TurnLogEntry[],
@@ -36,13 +64,13 @@ export class TurnExportSalesAggregator {
         const amount = Number(log.params["amount"] || 0);
         const tradeType = String(log.params["tradeType"] || "ARMS");
 
-        if (tradeType === "MACHINERY") {
-          const currentSum = machineryBuyerSpendingMap.get(buyerId) || 0;
-          machineryBuyerSpendingMap.set(buyerId, currentSum + amount);
-        } else {
-          const currentSum = armsBuyerSpendingMap.get(buyerId) || 0;
-          armsBuyerSpendingMap.set(buyerId, currentSum + amount);
-        }
+        const targetMap =
+          tradeType === "MACHINERY"
+            ? machineryBuyerSpendingMap
+            : armsBuyerSpendingMap;
+
+        const currentSum = targetMap.get(buyerId) || 0;
+        targetMap.set(buyerId, currentSum + amount);
       } else {
         nonExportLogs.push(log);
       }
@@ -50,57 +78,21 @@ export class TurnExportSalesAggregator {
 
     const summaryLogs: TurnLogEntry[] = [];
 
-    if (armsBuyerSpendingMap.size > 0) {
-      const buyersList = Array.from(armsBuyerSpendingMap.entries())
-        .map(([nationId, amount]) => ({ nationId, amount }))
-        .sort((a, b) => b.amount - a.amount);
+    const armsLog = this.buildSummaryLog(
+      armsBuyerSpendingMap,
+      turn,
+      state.humanNationId,
+      "ARMS_EXPORT_SUMMARY",
+    );
+    if (armsLog) summaryLogs.push(armsLog);
 
-      const totalProfit = buyersList.reduce(
-        (sum, item) => sum + item.amount,
-        0,
-      );
-
-      summaryLogs.push(
-        TurnLogBuilder.createNationalLog(
-          turn,
-          state.humanNationId,
-          "DOMESTIC",
-          "INFO",
-          "ARMS_EXPORT_SUMMARY",
-          {
-            totalProfit,
-            buyersCount: buyersList.length,
-            buyersJson: JSON.stringify(buyersList),
-          },
-        ),
-      );
-    }
-
-    if (machineryBuyerSpendingMap.size > 0) {
-      const buyersList = Array.from(machineryBuyerSpendingMap.entries())
-        .map(([nationId, amount]) => ({ nationId, amount }))
-        .sort((a, b) => b.amount - a.amount);
-
-      const totalProfit = buyersList.reduce(
-        (sum, item) => sum + item.amount,
-        0,
-      );
-
-      summaryLogs.push(
-        TurnLogBuilder.createNationalLog(
-          turn,
-          state.humanNationId,
-          "DOMESTIC",
-          "INFO",
-          "MACHINERY_EXPORT_SUMMARY",
-          {
-            totalProfit,
-            buyersCount: buyersList.length,
-            buyersJson: JSON.stringify(buyersList),
-          },
-        ),
-      );
-    }
+    const machineryLog = this.buildSummaryLog(
+      machineryBuyerSpendingMap,
+      turn,
+      state.humanNationId,
+      "MACHINERY_EXPORT_SUMMARY",
+    );
+    if (machineryLog) summaryLogs.push(machineryLog);
 
     return {
       state: {

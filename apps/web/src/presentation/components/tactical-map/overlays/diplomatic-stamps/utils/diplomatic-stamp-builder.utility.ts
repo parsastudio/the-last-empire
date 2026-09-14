@@ -96,14 +96,10 @@ export class DiplomaticStampBuilderUtility {
           canonicalTarget,
         );
 
-        const isGuaranteed =
-          (Boolean(humanNation.securityGuarantorId) &&
-            CountryRegistry.resolveCanonicalId(
-              humanNation.securityGuarantorId,
-            ) === canonicalTarget) ||
-          (Boolean(nation.securityGuarantorId) &&
-            CountryRegistry.resolveCanonicalId(nation.securityGuarantorId) ===
-              canonicalHuman);
+        const umbrella = NationRelationResolver.resolveBilateralUmbrellaState(
+          humanNation,
+          nation,
+        );
 
         if (rel?.stance === "WAR") {
           variant = "WAR";
@@ -111,7 +107,7 @@ export class DiplomaticStampBuilderUtility {
           variant = "STRATEGIC_PARTNERSHIP";
         } else if (rel?.stance === "NON_AGGRESSION_PACT") {
           variant = "NON_AGGRESSION_PACT";
-        } else if (isGuaranteed) {
+        } else if (umbrella.hasSecurityGuarantee) {
           variant = "SECURITY_GUARANTEE";
         }
       }

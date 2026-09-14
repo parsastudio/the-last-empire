@@ -12,6 +12,19 @@ export interface TurnLogPresenterOptions {
 }
 
 export class TurnLogPresenterUtility {
+  private static resolveProposalLabel(
+    treatyType: unknown,
+    tDiplomacy: (key: string) => string,
+  ): string {
+    const safeType = String(treatyType || "PEACE_TREATY");
+    try {
+      const label = tDiplomacy(`proposalTypes.${safeType}`);
+      return label || safeType;
+    } catch {
+      return safeType;
+    }
+  }
+
   public static format(
     log: TurnLogEntry,
     options: TurnLogPresenterOptions,
@@ -90,42 +103,17 @@ export class TurnLogPresenterUtility {
       case "NATION_BANKRUPTCY":
         return tEvents("NATION_BANKRUPTCY", { source: sourceName });
 
-      case "DIPLOMATIC_PROPOSAL_SENT": {
-        const treatyType = String(params["treatyType"] || "PEACE_TREATY");
-        let proposalLabel = treatyType;
-        try {
-          proposalLabel = tDiplomacy(`proposalTypes.${treatyType}`);
-        } catch {}
-        return tEvents("DIPLOMATIC_PROPOSAL_SENT", {
-          source: sourceName,
-          target: targetName,
-          proposal: proposalLabel,
-        });
-      }
-
-      case "TREATY_ACCEPTED": {
-        const treatyType = String(params["treatyType"] || "PEACE_TREATY");
-        let proposalLabel = treatyType;
-        try {
-          proposalLabel = tDiplomacy(`proposalTypes.${treatyType}`);
-        } catch {}
-        return tEvents("TREATY_ACCEPTED", {
-          source: sourceName,
-          target: targetName,
-          proposal: proposalLabel,
-        });
-      }
-
+      case "DIPLOMATIC_PROPOSAL_SENT":
+      case "TREATY_ACCEPTED":
       case "TREATY_REJECTED": {
-        const treatyType = String(params["treatyType"] || "PEACE_TREATY");
-        let proposalLabel = treatyType;
-        try {
-          proposalLabel = tDiplomacy(`proposalTypes.${treatyType}`);
-        } catch {}
-        return tEvents("TREATY_REJECTED", {
+        const proposal = this.resolveProposalLabel(
+          params["treatyType"],
+          tDiplomacy,
+        );
+        return tEvents(log.eventCode, {
           source: sourceName,
           target: targetName,
-          proposal: proposalLabel,
+          proposal,
         });
       }
 
@@ -189,29 +177,18 @@ export class TurnLogPresenterUtility {
 
       case "ARMS_TRADE": {
         const amount = formatCurrency(Number(params["amount"] || 0));
-        const role = String(params["role"] || "BUYER");
-        const tradeType = String(params["tradeType"] || "ARMS");
-
-        if (tradeType === "MACHINERY") {
-          return role === "BUYER"
-            ? tEvents("MACHINERY_TRADE_BUY", { target: targetName, amount })
-            : tEvents("MACHINERY_TRADE_SELL", { target: targetName, amount });
-        }
-        return role === "BUYER"
-          ? tEvents("ARMS_TRADE_BUY", { target: targetName, amount })
-          : tEvents("ARMS_TRADE_SELL", { target: targetName, amount });
+        const role = params["role"] === "SELLER" ? "SELL" : "BUY";
+        const tradeType =
+          params["tradeType"] === "MACHINERY" ? "MACHINERY" : "ARMS";
+        const eventKey = `${tradeType}_TRADE_${role}`;
+        return tEvents(eventKey, { target: targetName, amount });
       }
 
-      case "ARMS_EXPORT_SUMMARY": {
-        const count = toDigits(Number(params["buyersCount"] || 0));
-        const profit = formatCurrency(Number(params["totalProfit"] || 0));
-        return tEvents("ARMS_EXPORT_SUMMARY", { count, profit });
-      }
-
+      case "ARMS_EXPORT_SUMMARY":
       case "MACHINERY_EXPORT_SUMMARY": {
         const count = toDigits(Number(params["buyersCount"] || 0));
         const profit = formatCurrency(Number(params["totalProfit"] || 0));
-        return tEvents("MACHINERY_EXPORT_SUMMARY", { count, profit });
+        return tEvents(log.eventCode, { count, profit });
       }
 
       case "DILEMMA_RESOLVED": {

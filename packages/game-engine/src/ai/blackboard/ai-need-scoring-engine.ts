@@ -1,11 +1,11 @@
 import {
   Nation,
-  UnitType,
   MilitaryQuotaCalculator,
   NATIONAL_PROJECTS_CATALOG,
   NationalProjectEffectApplierUtility,
   CountryRegistry,
   NationGettersUtility,
+  ALL_MILITARY_UNIT_TYPES,
 } from "@geopolitics/domain";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
@@ -71,17 +71,10 @@ export class AiNeedScoringEngine {
       gdp,
       nation.military,
     );
-    const types: UnitType[] = [
-      "ARMOR",
-      "AIR_FORCE",
-      "AIR_DEFENSE",
-      "INFANTRY",
-      "DRONE_MISSILE",
-    ];
 
     let totalRemainingRoom = 0;
     let totalMaxUnits = 0;
-    for (const t of types) {
+    for (const t of ALL_MILITARY_UNIT_TYPES) {
       totalRemainingRoom += quotas[t]?.remainingRoom ?? 0;
       totalMaxUnits += quotas[t]?.maxUnits ?? 1;
     }

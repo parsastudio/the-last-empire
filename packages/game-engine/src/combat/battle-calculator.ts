@@ -14,7 +14,10 @@ import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver
 import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
 import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
 import { GuarantorMultiplierBlender } from "@/engine/combat/optimizer/helpers/guarantor-multiplier-blender";
-import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
+import {
+  NationalProjectEffectApplierUtility,
+  MilitaryPricingCalculator,
+} from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -60,10 +63,12 @@ export class BattleCalculator {
     );
 
     const totalForceCost =
-      deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      deployedArmor * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      deployedDrones * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
+      MilitaryPricingCalculator.calculateTotalArmyValuation({
+        infantry: deployedInfantry,
+        armor: deployedArmor,
+        airForce: deployedAirForce,
+        droneMissile: deployedDrones,
+      });
 
     const { moneyCost: deploymentMoneyCost } =
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
