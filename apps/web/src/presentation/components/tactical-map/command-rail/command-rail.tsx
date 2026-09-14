@@ -85,7 +85,7 @@ function RailToggleButton({
   return (
     <button
       onClick={handleToggle}
-      className="p-1.5 md:p-2.5 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
+      className="p-1.5 md:p-2 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
       title={isCollapsed ? expandLabel : collapseLabel}
     >
       <ChevronLeft
@@ -140,21 +140,28 @@ export function CommandRail({
       }`}
     >
       <div className="space-y-1.5 md:space-y-3 overflow-x-hidden flex-1 flex flex-col min-h-0">
-        <div className="flex items-center justify-between px-0.5 shrink-0">
+        <div
+          className={`flex items-center ${
+            isCollapsed ? "justify-center" : "justify-between"
+          } px-0.5 shrink-0`}
+        >
+          {!isCollapsed && (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-gdp animate-pulse shrink-0" />
+              <span className="text-xs font-sans font-black text-foreground truncate">
+                {t("warRoom")}
+              </span>
+            </div>
+          )}
           <RailToggleButton
             isCollapsed={isCollapsed}
             onToggle={onToggleCollapse}
             expandLabel={t("expand")}
             collapseLabel={t("collapse")}
           />
-          {!isCollapsed && (
-            <span className="text-[9px] md:text-[10px] font-mono font-black text-gdp truncate uppercase tracking-widest">
-              {t("warRoom")}
-            </span>
-          )}
         </div>
 
-        <nav className="space-y-1 md:space-y-1.5 overflow-y-auto overflow-x-hidden flex-1 scrollbar-none py-0.5">
+        <nav className="space-y-1 md:space-y-1.5 overflow-y-auto overflow-x-hidden flex-1 scrollbar-none no-scrollbar py-0.5">
           {COMMAND_RAIL_TABS.map((tab) => (
             <RailTabButton
               key={tab.id}

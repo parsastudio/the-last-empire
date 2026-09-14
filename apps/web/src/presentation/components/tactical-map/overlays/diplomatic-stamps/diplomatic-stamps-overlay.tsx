@@ -114,7 +114,7 @@ export function DiplomaticStampsOverlay({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
     canvas.width = Math.round(dimensions.width * dpr);
     canvas.height = Math.round(dimensions.height * dpr);
   }, [dimensions]);
@@ -148,7 +148,7 @@ export function DiplomaticStampsOverlay({
       lastY = posY;
       lastScale = scale;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
       const width = dimensions.width;
       const height = dimensions.height;
 

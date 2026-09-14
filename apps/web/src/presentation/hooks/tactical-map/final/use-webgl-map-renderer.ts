@@ -50,7 +50,7 @@ export function useWebGLMapRenderer({
       lastVersionRef.current = currentVersion;
     }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
     const pos = positionRef.current || { x: 0, y: 0 };
     const scale = scaleRef.current || 1;
 

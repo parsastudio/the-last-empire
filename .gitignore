@@ -52,3 +52,4 @@ apps/web/public/maps/**/temp/
 apps/web/public/maps/**/temp/**
 debug
 
+deploy.sh
