@@ -4,6 +4,9 @@ import {
   GameDifficulty,
   NationGettersUtility,
   NationalBudgetCalculator,
+  GameStateProjections,
+  TurnProjectionsCalculator,
+  CountryRegistry,
 } from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
@@ -22,6 +25,7 @@ export interface HumanResourceMetrics {
 
 export function selectHumanResourceMetrics(
   gameState: GameState | null,
+  projections?: GameStateProjections | null,
 ): HumanResourceMetrics {
   if (!gameState || !gameState.humanNationId) {
     return {
@@ -40,6 +44,7 @@ export function selectHumanResourceMetrics(
   }
 
   const humanId = gameState.humanNationId;
+  const canonicalHumanId = CountryRegistry.resolveCanonicalId(humanId);
   const nation = NationGettersUtility.resolveNation(humanId, gameState.nations);
 
   if (!nation) {
@@ -58,18 +63,26 @@ export function selectHumanResourceMetrics(
     };
   }
 
-  const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
-    nation.id,
-    gameState.provinces,
-  );
+  const activeProjections =
+    projections ?? TurnProjectionsCalculator.calculate(gameState);
+  const capacity =
+    activeProjections.capacityMap.get(canonicalHumanId) ??
+    NationGettersUtility.getTerritoryIndustrialCapacity(
+      nation.id,
+      gameState.provinces,
+    );
 
-  const budget = NationalBudgetCalculator.calculate(
-    nation,
-    gameState.nations,
-    gameState.provinces,
-    nation.treasury,
-    1.0,
-  );
+  const budget =
+    activeProjections.budgetMap.get(canonicalHumanId) ??
+    NationalBudgetCalculator.calculate(
+      nation,
+      gameState.nations,
+      gameState.provinces,
+      nation.treasury,
+      1.0,
+      activeProjections.gdpMap,
+      activeProjections.totalWorldGdp,
+    );
 
   return {
     nation,
