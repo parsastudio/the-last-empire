@@ -19,6 +19,14 @@ export interface DiplomaticPactCondition {
   icon: LucideIcon;
 }
 
+export interface DiplomaticPactConcession {
+  id: string;
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  variant: "negative" | "positive" | "warning";
+}
+
 export interface DiplomaticPactChecklistModalProps {
   isOpen: boolean;
   title: string;
@@ -32,6 +40,8 @@ export interface DiplomaticPactChecklistModalProps {
   calloutTitle?: string;
   calloutDescription: string;
   calloutContainerClass?: string;
+  concessionsTitle?: string;
+  concessions?: DiplomaticPactConcession[];
   checklistTitle: string;
   statusLabel: string;
   conditions: DiplomaticPactCondition[];
@@ -61,6 +71,8 @@ export function DiplomaticPactChecklistModal({
   calloutTitle,
   calloutDescription,
   calloutContainerClass = "bg-background/50 border-border/70",
+  concessionsTitle,
+  concessions,
   checklistTitle,
   statusLabel,
   conditions,
@@ -134,6 +146,41 @@ export function DiplomaticPactChecklistModal({
             </span>
           </div>
         </div>
+
+        {concessions && concessions.length > 0 && (
+          <div className="space-y-1.5">
+            {concessionsTitle && (
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
+                {concessionsTitle}
+              </span>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {concessions.map((c) => {
+                const Icon = c.icon;
+                const styleClass =
+                  c.variant === "positive"
+                    ? "bg-emerald-500/10 border-emerald-500/35 text-emerald-400"
+                    : c.variant === "warning"
+                      ? "bg-amber-500/10 border-amber-500/35 text-amber-300"
+                      : "bg-rose-500/10 border-rose-500/35 text-rose-400";
+                return (
+                  <div
+                    key={c.id}
+                    className={`p-2.5 rounded-xl border flex flex-col justify-between gap-1.5 min-h-[64px] ${styleClass}`}
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] font-medium font-sans min-w-0 opacity-90">
+                      <Icon size={13} className="shrink-0" />
+                      <span className="truncate">{c.label}</span>
+                    </div>
+                    <span className="font-bold text-xs font-mono break-words leading-tight">
+                      {c.value}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div
           className={`p-3 rounded-xl flex items-start gap-2 text-xs text-foreground/90 leading-relaxed border ${calloutContainerClass}`}

@@ -1,14 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Skull, Award, Scale, Globe, Flame } from "lucide-react";
+import {
+  Skull,
+  Award,
+  Scale,
+  Globe,
+  Flame,
+  Coins,
+  Landmark,
+  ShieldCheck,
+} from "lucide-react";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import {
   DiplomaticPactChecklistModal,
   DiplomaticPactCondition,
+  DiplomaticPactConcession,
 } from "./components/diplomatic-pact-checklist-modal";
 
 interface EmergencyProtectorateModalProps {
@@ -37,49 +47,88 @@ export function EmergencyProtectorateModal({
   const tCommon = useTranslations("common");
   const { formatCurrency, toDigits } = useLocaleFormatter();
 
-  if (!isOpen) return null;
-
   const flagEmoji = getFlagEmoji(targetFlagCode || targetNationId);
 
-  const conditions: DiplomaticPactCondition[] = [
-    {
-      id: "gdp",
-      title: t("gdpTitle"),
-      desc: t("gdpDesc"),
-      currentValue: `${toDigits(validation.gdpRatio)}x`,
-      isValid: validation.isGdpValid,
-      icon: Scale,
-    },
-    {
-      id: "tech",
-      title: t("techTitle"),
-      desc: t("techDesc"),
-      currentValue:
-        validation.techDiff > 0
-          ? t("techAdvantage", { points: toDigits(validation.techDiff) })
-          : t("noTechAdvantage"),
-      isValid: validation.isTechValid,
-      icon: Award,
-    },
-    {
-      id: "tension",
-      title: t("tensionTitle"),
-      desc: t("tensionDesc"),
-      currentValue: `${toDigits(validation.tension)}%`,
-      isValid: validation.isTensionValid,
-      icon: Globe,
-    },
-    {
-      id: "peace",
-      title: t("peaceTitle"),
-      desc: t("peaceDesc"),
-      currentValue: validation.isNotWar
-        ? t("noDirectWar")
-        : t("directWarActive"),
-      isValid: validation.isNotWar,
-      icon: Flame,
-    },
-  ];
+  const formattedCost = formatCurrency(costPerTurn, true);
+
+  const concessions = useMemo<DiplomaticPactConcession[]>(
+    () => [
+      {
+        id: "tribute",
+        label: t("tributePenaltyLabel"),
+        value: t("tributePenaltyValue", { cost: formattedCost }),
+        icon: Coins,
+        variant: "warning",
+      },
+      {
+        id: "reputation",
+        label: t("reputationPenaltyLabel"),
+        value: t("reputationPenaltyValue"),
+        icon: Globe,
+        variant: "negative",
+      },
+      {
+        id: "stability",
+        label: t("stabilityPenaltyLabel"),
+        value: t("stabilityPenaltyValue"),
+        icon: Landmark,
+        variant: "negative",
+      },
+      {
+        id: "garrison",
+        label: t("garrisonBenefitLabel"),
+        value: t("garrisonBenefitValue"),
+        icon: ShieldCheck,
+        variant: "positive",
+      },
+    ],
+    [t, formattedCost],
+  );
+
+  const conditions: DiplomaticPactCondition[] = useMemo(
+    () => [
+      {
+        id: "gdp",
+        title: t("gdpTitle"),
+        desc: t("gdpDesc"),
+        currentValue: `${toDigits(validation.gdpRatio)}x`,
+        isValid: validation.isGdpValid,
+        icon: Scale,
+      },
+      {
+        id: "tech",
+        title: t("techTitle"),
+        desc: t("techDesc"),
+        currentValue:
+          validation.techDiff > 0
+            ? t("techAdvantage", { points: toDigits(validation.techDiff) })
+            : t("noTechAdvantage"),
+        isValid: validation.isTechValid,
+        icon: Award,
+      },
+      {
+        id: "tension",
+        title: t("tensionTitle"),
+        desc: t("tensionDesc"),
+        currentValue: `${toDigits(validation.tension)}%`,
+        isValid: validation.isTensionValid,
+        icon: Globe,
+      },
+      {
+        id: "peace",
+        title: t("peaceTitle"),
+        desc: t("peaceDesc"),
+        currentValue: validation.isNotWar
+          ? t("noDirectWar")
+          : t("directWarActive"),
+        isValid: validation.isNotWar,
+        icon: Flame,
+      },
+    ],
+    [t, toDigits, validation],
+  );
+
+  if (!isOpen) return null;
 
   const validationReason = validation.reasonCode
     ? tErrors(validation.reasonCode)
@@ -94,7 +143,9 @@ export function EmergencyProtectorateModal({
       targetFlagEmoji={flagEmoji}
       roleLabel={t("protectorRole")}
       costLabel={t("tributeLabel")}
-      costFormatted={formatCurrency(costPerTurn, true)}
+      costFormatted={formattedCost}
+      concessionsTitle={t("concessionsTitle")}
+      concessions={concessions}
       calloutIcon={Skull}
       calloutTitle={t("consequencesTitle")}
       calloutDescription={t("consequencesDesc")}
