@@ -36,6 +36,14 @@ export class ServerMapPathResolver {
     return primaryPath;
   }
 
+  public static getMapFinalServerDir(mapId = "map1"): string {
+    const finalDir = path.join(this.getMapDir(mapId), "final");
+    if (!fs.existsSync(finalDir)) {
+      fs.mkdirSync(finalDir, { recursive: true });
+    }
+    return finalDir;
+  }
+
   public static getMapEssentialServerDir(mapId = "map1"): string {
     const essentialDir = path.join(this.getMapDir(mapId), "essential");
     if (!fs.existsSync(essentialDir)) {

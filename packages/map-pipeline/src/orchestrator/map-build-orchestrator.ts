@@ -23,6 +23,7 @@ export class MapBuildOrchestrator {
   public async cleanOutputDirectory(mapId = "map1"): Promise<void> {
     const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
     const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
+    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
 
     const strategicFiles = [
       "manifest.json",
@@ -39,6 +40,14 @@ export class MapBuildOrchestrator {
       "terrain-binary-stats.json",
     ];
 
+    const finalFiles = [
+      "manifest.json",
+      "live-state.bin",
+      "live-state.bin.gz",
+      "terrain-raw.bin",
+      "terrain-raw.bin.gz",
+    ];
+
     for (const file of strategicFiles) {
       try {
         await fs.unlink(path.join(strategicDir, file));
@@ -48,6 +57,12 @@ export class MapBuildOrchestrator {
     for (const file of visualFiles) {
       try {
         await fs.unlink(path.join(visualDir, file));
+      } catch {}
+    }
+
+    for (const file of finalFiles) {
+      try {
+        await fs.unlink(path.join(finalDir, file));
       } catch {}
     }
   }
@@ -60,6 +75,7 @@ export class MapBuildOrchestrator {
 
     const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
     const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
+    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
 
     const imageBuffer = await fs.readFile(maskPngPath);
     const png = await new Promise<PNG>((resolve, reject) => {
@@ -111,7 +127,11 @@ export class MapBuildOrchestrator {
       bitBuffer,
     );
 
-    await BinaryStateExporter.exportLiveState(bitBuffer, strategicDir);
+    await BinaryStateExporter.exportLiveState(
+      bitBuffer,
+      strategicDir,
+      finalDir,
+    );
     await this.manifestBuilder.buildAndSave(mapId, provinceMap, width, height);
 
     const destTerrainPath = path.join(visualDir, "tactical_map_terrain.png");
@@ -120,6 +140,22 @@ export class MapBuildOrchestrator {
       destTerrainPath,
     );
 
+    const rawTerrainGzSrc = path.join(visualDir, "terrain-raw.bin.gz");
+    const rawTerrainGzDest = path.join(finalDir, "terrain-raw.bin.gz");
+    const rawTerrainSrc = path.join(visualDir, "terrain-raw.bin");
+    const rawTerrainDest = path.join(finalDir, "terrain-raw.bin");
+
+    try {
+      await fs.copyFile(rawTerrainGzSrc, rawTerrainGzDest);
+      await fs.copyFile(rawTerrainSrc, rawTerrainDest);
+    } catch {}
+
     await MaritimeEnricherEngine.enrichManifestMaritimeTopology(mapId);
+
+    const finalManifestSrc = path.join(strategicDir, "manifest.json");
+    const finalManifestDest = path.join(finalDir, "manifest.json");
+    try {
+      await fs.copyFile(finalManifestSrc, finalManifestDest);
+    } catch {}
   }
 }

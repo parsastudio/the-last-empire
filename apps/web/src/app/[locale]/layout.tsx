@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import { ToastProvider } from "@/presentation/context/toast-context";
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 import { OrientationGuard } from "@/presentation/components/common/orientation-guard";
+import { PwaRegister } from "@/presentation/components/common/pwa-register";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -33,6 +34,15 @@ export async function generateMetadata({
     description: isEn
       ? "Advanced geopolitical simulation, statecraft, diplomacy, and tactical combat. Expand your domain and conquer the world."
       : "شبیه‌ساز پیشرفته مدیریت کشور، دیپلماسی و نبردهای نظامی تاکتیکی در بازی آنلاین آخرین امپراتوری. قلمرو خود را توسعه دهید و جهان را تسخیر کنید.",
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: isEn ? "The Last Empire" : "آخرین امپراتوری",
+    },
+    formatDetection: {
+      telephone: false,
+    },
   };
 }
 
@@ -68,6 +78,7 @@ export default async function LocaleLayout({
             {children}
             <StrategicToastContainer />
             <OrientationGuard />
+            <PwaRegister />
           </ToastProvider>
         </NextIntlClientProvider>
       </body>

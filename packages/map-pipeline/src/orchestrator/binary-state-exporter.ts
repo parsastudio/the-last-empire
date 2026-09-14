@@ -5,11 +5,21 @@ export class BinaryStateExporter {
   public static async exportLiveState(
     bitBuffer: BitPackedBuffer,
     outputDir: string,
+    secondaryDir?: string,
   ): Promise<void> {
+    const data = bitBuffer.toUint8ArrayBuffer();
     await BinaryFileExportHelper.exportRawAndGzip(
       outputDir,
       "live-state.bin",
-      bitBuffer.toUint8ArrayBuffer(),
+      data,
     );
+
+    if (secondaryDir) {
+      await BinaryFileExportHelper.exportRawAndGzip(
+        secondaryDir,
+        "live-state.bin",
+        data,
+      );
+    }
   }
 }

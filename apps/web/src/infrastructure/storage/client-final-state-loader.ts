@@ -61,7 +61,7 @@ export class ClientFinalStateLoader {
           return manifest;
         }
 
-        const url = ClientMapPathResolver.getMapStrategicClientUrl(
+        const url = ClientMapPathResolver.getMapFinalClientUrl(
           mapId,
           "manifest.json",
         );
@@ -118,11 +118,11 @@ export class ClientFinalStateLoader {
       }
 
       if (!arrayBuf || arrayBuf.byteLength === 0) {
-        const gzUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+        const gzUrl = ClientMapPathResolver.getMapFinalClientUrl(
           mapId,
           "live-state.bin.gz",
         );
-        const rawUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+        const rawUrl = ClientMapPathResolver.getMapFinalClientUrl(
           mapId,
           "live-state.bin",
         );
@@ -184,11 +184,11 @@ export class ClientFinalStateLoader {
       }
 
       if (!arrayBuf || arrayBuf.byteLength < 32) {
-        const gzUrl = ClientMapPathResolver.getMapVisualClientUrl(
+        const gzUrl = ClientMapPathResolver.getMapFinalClientUrl(
           mapId,
           "terrain-raw.bin.gz",
         );
-        const rawUrl = ClientMapPathResolver.getMapVisualClientUrl(
+        const rawUrl = ClientMapPathResolver.getMapFinalClientUrl(
           mapId,
           "terrain-raw.bin",
         );

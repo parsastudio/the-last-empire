@@ -9,7 +9,8 @@ import { BriefingPanel } from "@/presentation/components/main-menu/briefing-pane
 import { StatusTicker } from "@/presentation/components/main-menu/status-ticker";
 import { LoadCampaignModal } from "@/presentation/components/main-menu/load-campaign-modal";
 import { LanguageSwitcher } from "@/presentation/components/common/language-switcher";
-import { Globe2 } from "lucide-react";
+import { usePwaInstall } from "@/presentation/hooks/common/use-pwa-install";
+import { Globe2, Download, ShieldCheck } from "lucide-react";
 
 function GithubIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   return (
@@ -28,6 +29,7 @@ export function MainMenuView() {
   const t = useTranslations("menu");
   const router = useRouter();
   const [isLoadGameModalOpen, setIsLoadGameModalOpen] = useState(false);
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
 
   const handleNewCampaign = () => {
     router.push("/select-nation");
@@ -56,6 +58,25 @@ export function MainMenuView() {
         </div>
 
         <div className="flex items-center gap-2">
+          {isInstallable && (
+            <button
+              type="button"
+              onClick={promptInstall}
+              className="p-1.5 md:p-2 rounded-xl border transition-all cursor-pointer flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/40 text-emerald-400 shadow-inner font-mono text-[10px] md:text-xs font-black animate-pulse"
+              title={t("installApp")}
+            >
+              <Download size={14} className="shrink-0" />
+              <span>{t("installApp")}</span>
+            </button>
+          )}
+
+          {isInstalled && (
+            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl border bg-secondary/60 border-border/70 text-muted-foreground font-mono text-[10px]">
+              <ShieldCheck size={13} className="text-gdp" />
+              <span>{t("installedBadge")}</span>
+            </div>
+          )}
+
           <a
             href="https://github.com/parsastudio/the-last-empire"
             target="_blank"
