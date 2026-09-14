@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { BattleFullReportData, DilemmaEvent } from "@geopolitics/domain";
+import {
+  BattleFullReportData,
+  DilemmaEvent,
+  ExportSalesBuyerItem,
+  ExportSalesModalData,
+} from "@geopolitics/domain";
+
+export type { ExportSalesBuyerItem, ExportSalesModalData };
 
 export interface CoalitionAlertData {
   targetNationId: string;
@@ -8,17 +15,6 @@ export interface CoalitionAlertData {
   targetFlagCode: string;
   isHumanTarget: boolean;
   memberIds: string[];
-  turn: number;
-}
-
-export interface ExportSalesBuyerItem {
-  nationId: string;
-  amount: number;
-}
-
-export interface ExportSalesModalData {
-  buyers: ExportSalesBuyerItem[];
-  totalProfit: number;
   turn: number;
 }
 

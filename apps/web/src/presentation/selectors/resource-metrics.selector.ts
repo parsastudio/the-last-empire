@@ -1,7 +1,6 @@
 import {
   GameState,
   Nation,
-  CountryRegistry,
   GameDifficulty,
   NationGettersUtility,
   NationalBudgetCalculator,
@@ -41,9 +40,7 @@ export function selectHumanResourceMetrics(
   }
 
   const humanId = gameState.humanNationId;
-  const canonicalHumanId = CountryRegistry.resolveCanonicalId(humanId);
-  const nation =
-    gameState.nations[canonicalHumanId] || gameState.nations[humanId] || null;
+  const nation = NationGettersUtility.resolveNation(humanId, gameState.nations);
 
   if (!nation) {
     return {
@@ -62,7 +59,7 @@ export function selectHumanResourceMetrics(
   }
 
   const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
-    canonicalHumanId,
+    nation.id,
     gameState.provinces,
   );
 

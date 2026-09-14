@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import {
   MILITARY_UNIT_STATS,
   MilitaryPricingCalculator,
@@ -12,6 +12,7 @@ import {
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { useBaselineTreasury } from "@/presentation/hooks/common/use-baseline-treasury";
 import { ProcurementUnitItemInfo } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/procurement-unit-card";
 
 export type AlliedUnitProcurementInfo = ProcurementUnitItemInfo;
@@ -32,24 +33,10 @@ export function useAlliedArmsProcurement({
   const { dispatchAction } = useGameActions();
   const { feedbacks, triggerFeedback } = useFloatingFeedback();
 
-  const baselineTreasuryRef = useRef<number>(buyerNation.treasury);
-  const prevBuyerIdRef = useRef<string>(buyerNation.id);
-  const prevSellerIdRef = useRef<string>(sellerNation.id);
-
-  if (
-    prevBuyerIdRef.current !== buyerNation.id ||
-    prevSellerIdRef.current !== sellerNation.id
-  ) {
-    prevBuyerIdRef.current = buyerNation.id;
-    prevSellerIdRef.current = sellerNation.id;
-    baselineTreasuryRef.current = buyerNation.treasury;
-  }
-
-  useEffect(() => {
-    if (buyerNation.treasury > baselineTreasuryRef.current) {
-      baselineTreasuryRef.current = buyerNation.treasury;
-    }
-  }, [buyerNation.treasury]);
+  const baselineTreasury = useBaselineTreasury(buyerNation.treasury, [
+    buyerNation.id,
+    sellerNation.id,
+  ]);
 
   const effectiveBuyerGdp = useMemo(() => {
     if (currentGdp !== undefined && currentGdp > 0) return currentGdp;
@@ -99,7 +86,7 @@ export function useAlliedArmsProcurement({
 
       const batchResult = ProcurementBatchCalculator.calculateBatch({
         treasury: buyerNation.treasury,
-        baselineTreasury: baselineTreasuryRef.current,
+        baselineTreasury,
         budgetPercentage: 0.1,
         unitPrice: marketUnitPrice,
         baseValuationPrice: baseUnitPrice,
@@ -128,6 +115,7 @@ export function useAlliedArmsProcurement({
     remainingValuationCapacity,
     techMultiplier,
     techDelta,
+    baselineTreasury,
   ]);
 
   const handleBuyAlliedBatch = useCallback(

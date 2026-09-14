@@ -1,6 +1,10 @@
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import {
+  ExportSalesBuyerItem,
+  GameStateMetricsUtility,
+} from "@geopolitics/domain";
 
 export interface ExportAggregationResult {
   state: GameState;
@@ -16,7 +20,7 @@ export class TurnExportSalesAggregator {
   ): TurnLogEntry | null {
     if (spendingMap.size === 0) return null;
 
-    const buyersList = Array.from(spendingMap.entries())
+    const buyersList: ExportSalesBuyerItem[] = Array.from(spendingMap.entries())
       .map(([nationId, amount]) => ({ nationId, amount }))
       .sort((a, b) => b.amount - a.amount);
 
@@ -40,11 +44,7 @@ export class TurnExportSalesAggregator {
     state: GameState,
     candidateLogs?: TurnLogEntry[],
   ): ExportAggregationResult {
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(
-      state.humanNationId,
-    );
     const turn = state.currentTurn;
-
     const sourceLogs = candidateLogs ?? state.turnLogs;
     const armsBuyerSpendingMap = new Map<string, number>();
     const machineryBuyerSpendingMap = new Map<string, number>();
@@ -56,8 +56,10 @@ export class TurnExportSalesAggregator {
       const isSellerTrade =
         log.eventCode === "ARMS_TRADE" &&
         log.params?.["role"] === "SELLER" &&
-        CountryRegistry.resolveCanonicalId(log.sourceNationId) ===
-          canonicalHuman;
+        GameStateMetricsUtility.isHumanNation(
+          state.humanNationId,
+          log.sourceNationId,
+        );
 
       if (isThisTurn && isSellerTrade && log.targetNationId) {
         const buyerId = CountryRegistry.resolveCanonicalId(log.targetNationId);

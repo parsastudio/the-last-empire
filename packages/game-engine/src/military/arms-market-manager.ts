@@ -3,10 +3,14 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
-import { CountryRegistry } from "@/domain/data/countries";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
+import {
+  DiplomacyTradeValidator,
+  NationGettersUtility,
+  GameStateMetricsUtility,
+} from "@geopolitics/domain";
 
 export class ArmsMarketManager {
   public static executePurchase(
@@ -20,11 +24,8 @@ export class ArmsMarketManager {
       throw new GameError("INVALID_QUANTITY");
     }
 
-    const canonicalBuyerId = CountryRegistry.resolveCanonicalId(buyerId);
-    const canonicalSellerId = CountryRegistry.resolveCanonicalId(sellerId);
-
-    const buyer = state.nations[canonicalBuyerId] || state.nations[buyerId];
-    const seller = state.nations[canonicalSellerId] || state.nations[sellerId];
+    const buyer = NationGettersUtility.resolveNation(buyerId, state.nations);
+    const seller = NationGettersUtility.resolveNation(sellerId, state.nations);
 
     if (!buyer || !buyer.isAlive) {
       throw new GameError("BUYER_NOT_FOUND");
@@ -33,16 +34,10 @@ export class ArmsMarketManager {
       throw new GameError("SELLER_NOT_FOUND");
     }
 
-    if (seller.military.techLevel <= buyer.military.techLevel) {
-      throw new GameError("TECH_NOT_SUPERIOR");
-    }
-
-    const rel =
-      seller.relations[canonicalBuyerId] || seller.relations[buyer.id];
-    const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
-    const tension = rel ? (rel.tension ?? 10) : 10;
-
-    if (stance === "WAR" || tension >= 50) {
+    if (!DiplomacyTradeValidator.isEligibleArmsSeller(buyer, seller)) {
+      if (seller.military.techLevel <= buyer.military.techLevel) {
+        throw new GameError("TECH_NOT_SUPERIOR");
+      }
       throw new GameError("DIPLOMATIC_TENSION");
     }
 
@@ -101,10 +96,10 @@ export class ArmsMarketManager {
       treasury: seller.treasury + sellerProfit,
     };
 
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+    const isHumanSeller = GameStateMetricsUtility.isHumanNation(
       state.humanNationId,
+      seller.id,
     );
-    const isHumanSeller = canonicalSellerId === canonicalHuman;
 
     const logs = [];
     if (isHumanSeller && sellerProfit > 0) {

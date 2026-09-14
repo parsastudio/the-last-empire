@@ -8,6 +8,7 @@ import {
   MilitaryInventoryHelper,
   UnitType,
   DilemmaEffect,
+  DilemmaCalculator,
 } from "@geopolitics/domain";
 import { ExecutionResult } from "@/engine/actions/execution-result";
 
@@ -43,16 +44,10 @@ export class DilemmaActionExecutor {
 
     const effect = choice.effect;
     const nationGdp = getNationGdp(nation, state.provinces);
-
-    let effectiveTreasuryDelta = effect.treasuryDelta || 0;
-    if (
-      effect.treasuryGdpPercent !== undefined &&
-      effect.treasuryGdpPercent !== 0
-    ) {
-      effectiveTreasuryDelta = Math.floor(
-        nationGdp * effect.treasuryGdpPercent,
-      );
-    }
+    const effectiveTreasuryDelta = DilemmaCalculator.resolveTreasuryDelta(
+      effect,
+      nationGdp,
+    );
 
     const nextTreasury = Math.max(0, nation.treasury + effectiveTreasuryDelta);
 

@@ -6,6 +6,8 @@ import {
   DebtCalculatorUtility,
   CountryRegistry,
   NationalBudgetCalculator,
+  NationGettersUtility,
+  GameStateMetricsUtility,
 } from "@geopolitics/domain";
 import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
 import { TurnContext } from "@/engine/pipeline/turn-context";
@@ -46,10 +48,10 @@ export class EconomyTurnProcessor {
     let nextIsEmergency = nation.isEmergencyProtectorate ?? false;
 
     if (nation.securityGuarantorId && nextIsEmergency) {
-      const guarantorCanonical = CountryRegistry.resolveCanonicalId(
+      const guarantor = NationGettersUtility.resolveNation(
         nation.securityGuarantorId,
+        turnContext.state.nations,
       );
-      const guarantor = turnContext.state.nations[guarantorCanonical];
       if (!guarantor || !guarantor.isAlive) {
         nextSecurityGuarantorId = null;
         nextIsEmergency = false;
@@ -58,8 +60,10 @@ export class EconomyTurnProcessor {
 
     const activeDefenseGuarantors = (nation.defenseGuarantorIds || []).filter(
       (gId) => {
-        const canonical = CountryRegistry.resolveCanonicalId(gId);
-        const g = turnContext.state.nations[canonical];
+        const g = NationGettersUtility.resolveNation(
+          gId,
+          turnContext.state.nations,
+        );
         return g && g.isAlive;
       },
     );
@@ -108,11 +112,10 @@ export class EconomyTurnProcessor {
       updated = bankResult.updatedNation;
       updatedProvinces = bankResult.updatedProvinces;
 
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      const isHuman = GameStateMetricsUtility.isHumanNation(
         turnContext.state.humanNationId,
+        updated.id,
       );
-      const isHuman =
-        CountryRegistry.resolveCanonicalId(updated.id) === canonicalHuman;
 
       bankruptcyLog = TurnLogBuilder.createLogEntry(
         turnContext.turn,

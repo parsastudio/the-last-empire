@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, NationGettersUtility } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationalDebtExecutor } from "@/engine/actions/executors/economy/national-debt-executor";
@@ -18,8 +18,7 @@ export class EconomyActionExecutor {
       canonicalNationId ?? CountryRegistry.resolveCanonicalId(action.nationId);
     const nation =
       sourceNation ??
-      state.nations[canonicalId] ??
-      state.nations[action.nationId];
+      NationGettersUtility.resolveNation(canonicalId, state.nations);
 
     if (!nation) {
       throw new GameError("NATION_NOT_FOUND");

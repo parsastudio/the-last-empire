@@ -29,9 +29,14 @@ export class NationAnnexationExecutor {
     };
     const updatedNations: Record<string, Nation> = { ...nations };
 
-    const winnerObj =
-      updatedNations[winnerCanonical] || updatedNations[winnerId];
-    const loserObj = updatedNations[loserCanonical] || updatedNations[loserId];
+    const winnerObj = NationGettersUtility.resolveNation(
+      winnerCanonical,
+      updatedNations,
+    );
+    const loserObj = NationGettersUtility.resolveNation(
+      loserCanonical,
+      updatedNations,
+    );
 
     const loserProvs = NationGettersUtility.getOwnedProvinces(
       loserCanonical,

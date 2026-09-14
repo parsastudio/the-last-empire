@@ -1,8 +1,4 @@
-import {
-  Nation,
-  CountryRegistry,
-  NationRelationResolver,
-} from "@geopolitics/domain";
+import { Nation, DiplomacyTradeValidator } from "@geopolitics/domain";
 
 export class AIArmsSellerMatcher {
   public static findEligibleArmsSellers(
@@ -10,25 +6,9 @@ export class AIArmsSellerMatcher {
     allNations: Record<string, Nation>,
   ): Nation[] {
     const sellers: Nation[] = [];
-    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
 
     for (const seller of Object.values(allNations)) {
-      if (!seller.isAlive || seller.id === buyer.id) continue;
-      const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
-      if (canonicalSeller === canonicalBuyer) continue;
-
-      const rel = NationRelationResolver.getRelation(
-        seller.relations,
-        canonicalBuyer,
-      );
-      const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
-      const tension = rel ? (rel.tension ?? 10) : 10;
-
-      if (
-        stance !== "WAR" &&
-        tension < 50 &&
-        seller.military.techLevel > buyer.military.techLevel
-      ) {
+      if (DiplomacyTradeValidator.isEligibleArmsSeller(buyer, seller)) {
         sellers.push(seller);
       }
     }
