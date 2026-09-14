@@ -9,9 +9,6 @@ import { TerritoryClaimsUtility } from "@/domain/nation/territory-claims.utility
 
 export interface BilateralUmbrellaState {
   isEmergencyGuarantorOfHuman: boolean;
-  isHumanEmergencyGuarantorOfTarget: boolean;
-  isDefenseGuarantorOfHuman: boolean;
-  isHumanDefenseGuarantorOfTarget: boolean;
   hasSecurityGuarantee: boolean;
 }
 
@@ -197,9 +194,6 @@ export class NationRelationResolver {
     if (!humanNation || !targetNation) {
       return {
         isEmergencyGuarantorOfHuman: false,
-        isHumanEmergencyGuarantorOfTarget: false,
-        isDefenseGuarantorOfHuman: false,
-        isHumanDefenseGuarantorOfTarget: false,
         hasSecurityGuarantee: false,
       };
     }
@@ -235,9 +229,6 @@ export class NationRelationResolver {
 
     return {
       isEmergencyGuarantorOfHuman,
-      isHumanEmergencyGuarantorOfTarget,
-      isDefenseGuarantorOfHuman,
-      isHumanDefenseGuarantorOfTarget,
       hasSecurityGuarantee,
     };
   }

@@ -3,9 +3,7 @@
 import React from "react";
 import { LucideIcon } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { AmountActionForm, AmountActionInfoRow } from "./amount-action-form";
-
-export type { AmountActionInfoRow };
+import { AmountActionForm } from "./amount-action-form";
 
 export interface AmountActionDialogProps {
   isOpen: boolean;
@@ -17,12 +15,8 @@ export interface AmountActionDialogProps {
   confirmLabel: string;
   colorVariant?: "gdp" | "military" | "primary" | "treasury";
   icon?: LucideIcon;
-  infoRows?: AmountActionInfoRow[];
-  warningText?: string;
   emptyStateText?: string;
   submittingText?: string;
-  ceilingLabel?: string;
-  requestedLabel?: string;
   onClose: () => void;
   onConfirm: (amount: number) => Promise<void> | void;
 }
@@ -37,12 +31,8 @@ export function AmountActionDialog({
   confirmLabel,
   colorVariant,
   icon,
-  infoRows,
-  warningText,
   emptyStateText,
   submittingText,
-  ceilingLabel,
-  requestedLabel,
   onClose,
   onConfirm,
 }: AmountActionDialogProps) {
@@ -65,12 +55,8 @@ export function AmountActionDialog({
         confirmLabel={confirmLabel}
         colorVariant={colorVariant}
         icon={icon}
-        infoRows={infoRows}
-        warningText={warningText}
         emptyStateText={emptyStateText}
         submittingText={submittingText}
-        ceilingLabel={ceilingLabel}
-        requestedLabel={requestedLabel}
         onClose={onClose}
         onConfirm={onConfirm}
       />

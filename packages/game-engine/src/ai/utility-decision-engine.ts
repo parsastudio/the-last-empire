@@ -9,11 +9,10 @@ import { WarUtilityEvaluator } from "@/engine/ai/decision/war-utility-evaluator"
 import { TreatyUtilityEvaluator } from "@/engine/ai/decision/treaty-utility-evaluator";
 import {
   ProposalAcceptanceEvaluator,
-  DecisionReasonItem,
   AcceptanceEvaluation,
 } from "@/engine/ai/decision/proposal-acceptance-evaluator";
 
-export type { DecisionReasonItem, AcceptanceEvaluation };
+export type { AcceptanceEvaluation };
 
 export class UtilityDecisionEngine {
   public static calculateWarUtility(

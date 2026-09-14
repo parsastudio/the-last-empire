@@ -6,40 +6,30 @@ import {
   ActionVariantStyleUtility,
 } from "./utils/action-variant-style.utility";
 
-interface PercentageOption {
-  pct: number;
-  label?: string;
-  isMax?: boolean;
-}
-
 interface PercentageSelectorProps {
   disabled?: boolean;
-  options?: PercentageOption[];
   colorVariant?: ActionColorVariant;
   onSelect: (percentage: number) => void;
 }
 
 export function PercentageSelector({
   disabled = false,
-  options,
   colorVariant = "gdp",
   onSelect,
 }: PercentageSelectorProps) {
   const { formatPercent } = useLocaleFormatter();
   const maxButtonClass = ActionVariantStyleUtility.getMaxButtonBg(colorVariant);
 
-  const defaultOptions: PercentageOption[] = [
+  const defaultOptions = [
     { pct: 0.25, label: formatPercent(25) },
     { pct: 0.5, label: formatPercent(50) },
     { pct: 0.75, label: formatPercent(75) },
     { pct: 1.0, label: `${formatPercent(100)}`, isMax: true },
   ];
 
-  const effectiveOptions = options || defaultOptions;
-
   return (
     <div className="grid grid-cols-4 gap-1.5 pt-1 font-sans">
-      {effectiveOptions.map((opt) => {
+      {defaultOptions.map((opt) => {
         if (opt.isMax) {
           return (
             <button

@@ -26,7 +26,7 @@ export class ForeignAidExecutor {
       prevSentAidList.includes(receiver.id)
     ) {
       throw new GameError(
-        "INVALID_ACTION",
+        "AID_ALREADY_SENT_THIS_TURN",
         `بسته کمک مالی به کشور ${receiver.id} در این نوبت قبلاً ارسال شده است. ارسال مجدد در نوبت بعد امکان‌پذیر خواهد بود.`,
       );
     }

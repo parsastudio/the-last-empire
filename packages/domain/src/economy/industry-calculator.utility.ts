@@ -8,24 +8,10 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export class IndustryCalculator {
-  public static readonly INDUSTRIAL_FLOOR_DELTA =
-    FactoryBatchManagerUtility.INDUSTRIAL_FLOOR_DELTA;
-  public static readonly BASE_FACTORY_YIELD =
-    FactoryYieldCalculatorUtility.BASE_FACTORY_YIELD;
-  public static readonly YIELD_TECH_BASE =
-    FactoryYieldCalculatorUtility.YIELD_TECH_BASE;
   public static readonly FACTORY_REBUILD_COST =
     FactoryYieldCalculatorUtility.FACTORY_REBUILD_COST;
-  public static readonly RESEARCH_BASE_COST =
-    FactoryYieldCalculatorUtility.RESEARCH_BASE_COST;
-  public static readonly RESEARCH_GROWTH_BASE =
-    FactoryYieldCalculatorUtility.RESEARCH_GROWTH_BASE;
   public static readonly RESEARCH_STEP =
     FactoryYieldCalculatorUtility.RESEARCH_STEP;
-  public static readonly MACHINERY_BASE_UNIT_PRICE =
-    FactoryYieldCalculatorUtility.MACHINERY_BASE_UNIT_PRICE;
-  public static readonly MAX_MODERNIZE_BASE_UNIT_COST =
-    FactoryYieldCalculatorUtility.MAX_MODERNIZE_BASE_UNIT_COST;
   public static readonly IMPORT_BASE_PRICE =
     FactoryYieldCalculatorUtility.IMPORT_BASE_PRICE;
   public static readonly IMPORT_TECH_GAP_BASE =

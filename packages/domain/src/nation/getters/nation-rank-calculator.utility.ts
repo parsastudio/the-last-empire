@@ -163,7 +163,7 @@ export class NationRankCalculatorUtility {
 
   public static getRank(
     nationId: string,
-    nationsMap?: Record<string, Nation>,
+    allNations?: Record<string, Nation>,
     provincesMap?:
       | Record<string, ProvinceDynamicState>
       | ProvinceDynamicState[],
@@ -173,13 +173,13 @@ export class NationRankCalculatorUtility {
     if (rankMap) {
       return rankMap.get(canonicalId) ?? rankMap.get(nationId) ?? 99;
     }
-    const map = this.calculateRankMap(nationsMap, provincesMap);
+    const map = this.calculateRankMap(allNations, provincesMap);
     return map.get(canonicalId) ?? map.get(nationId) ?? 99;
   }
 
   public static getGdpRank(
     nationId: string,
-    nationsMap?: Record<string, Nation>,
+    allNations?: Record<string, Nation>,
     provincesMap?:
       | Record<string, ProvinceDynamicState>
       | ProvinceDynamicState[],
@@ -189,7 +189,7 @@ export class NationRankCalculatorUtility {
     if (gdpRankMap) {
       return gdpRankMap.get(canonicalId) ?? gdpRankMap.get(nationId) ?? 99;
     }
-    const map = this.calculateGdpRankMap(nationsMap, provincesMap);
+    const map = this.calculateGdpRankMap(allNations, provincesMap);
     return map.get(canonicalId) ?? map.get(nationId) ?? 99;
   }
 }

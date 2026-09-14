@@ -13,7 +13,7 @@ import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assi
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
     currentId: string,
-    allNations: { id: string; govType: string }[],
+    allNations: { id: string }[],
   ): Record<string, RelationProfile> {
     const relations: Record<string, RelationProfile> = {};
 
@@ -118,11 +118,6 @@ export class GlobalAiInitializer {
 
     const nationsMetaData = manifestItems.map((item) => ({
       id: CountryRegistry.resolveCanonicalId(item.code || item.id),
-      govType:
-        CountryRegistry.resolveCanonicalId(item.code || item.id) ===
-          CountryRegistry.resolveCanonicalId(humanNationId) && humanGovType
-          ? humanGovType
-          : item.defaultGovernment,
     }));
 
     for (const nation of Object.values(nations)) {

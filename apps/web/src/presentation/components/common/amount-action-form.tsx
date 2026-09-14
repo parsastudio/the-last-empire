@@ -10,13 +10,6 @@ import {
   ActionVariantStyleUtility,
 } from "./utils/action-variant-style.utility";
 
-export interface AmountActionInfoRow {
-  label: string;
-  value: string;
-  colorClass?: string;
-  isBold?: boolean;
-}
-
 export interface AmountActionFormProps {
   unitLabel: string;
   maxAmount: number;
@@ -24,12 +17,8 @@ export interface AmountActionFormProps {
   confirmLabel: string;
   colorVariant?: ActionColorVariant;
   icon?: LucideIcon;
-  infoRows?: AmountActionInfoRow[];
-  warningText?: string;
   emptyStateText?: string;
   submittingText?: string;
-  ceilingLabel?: string;
-  requestedLabel?: string;
   onClose: () => void;
   onConfirm: (amount: number) => Promise<void> | void;
 }
@@ -41,12 +30,8 @@ export function AmountActionForm({
   confirmLabel,
   colorVariant = "gdp",
   icon: Icon = Zap,
-  infoRows = [],
-  warningText,
   emptyStateText,
   submittingText,
-  ceilingLabel,
-  requestedLabel,
   onClose,
   onConfirm,
 }: AmountActionFormProps) {
@@ -68,8 +53,8 @@ export function AmountActionForm({
 
   const resolvedEmptyStateText = emptyStateText || t("actionUnavailable");
   const resolvedSubmittingText = submittingText || t("submittingOrder");
-  const resolvedCeilingLabel = ceilingLabel || t("maxLimit");
-  const resolvedRequestedLabel = requestedLabel || t("requestedAmount");
+  const resolvedCeilingLabel = t("maxLimit");
+  const resolvedRequestedLabel = t("requestedAmount");
 
   const handleExecute = async () => {
     if (currentAmount <= 0 || isSubmitting) return;
@@ -118,32 +103,6 @@ export function AmountActionForm({
             onChange={setAmount}
           />
         </div>
-
-        {infoRows.length > 0 && (
-          <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60 font-sans shadow-inner">
-            {infoRows.map((row, idx) => (
-              <div
-                key={idx}
-                className="flex justify-between items-center font-mono"
-              >
-                <span className="text-muted-foreground font-sans">
-                  {row.label}
-                </span>
-                <span
-                  className={`${row.isBold ? "font-bold text-xs" : ""} ${row.colorClass || "text-foreground"}`}
-                >
-                  {row.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {warningText && (
-          <div className="p-3 bg-secondary/60 border border-border/60 rounded-xl text-[10px] text-muted-foreground font-sans">
-            {warningText}
-          </div>
-        )}
       </div>
 
       <button

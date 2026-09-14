@@ -83,6 +83,7 @@ export function CommandCenterTabRouter({
           humanNationId={gameState?.humanNationId || nation.id}
           provincesMap={gameState?.provinces}
           turnActivity={currentNationActivity}
+          currentTurn={gameState?.currentTurn}
           onNavigateTab={onNavigateTab}
         />
       );

@@ -60,7 +60,6 @@ export const BattleSpoilsDetailsSchema = z.object({
   conqueredPixels: z.number().nonnegative().default(0),
   conqueredProvincesCount: z.number().nonnegative().default(0),
   conqueredProvinceIds: z.array(z.number().positive()).optional(),
-  conqueredProvincesNames: z.array(z.string()).default([]),
   gainedPopulation: z.number().nonnegative().default(0),
   gainedGdp: z.number().nonnegative().default(0),
   lootedTreasury: z.number().nonnegative().default(0),
