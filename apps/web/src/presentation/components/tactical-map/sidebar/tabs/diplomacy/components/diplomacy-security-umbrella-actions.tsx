@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ShieldCheck, ShieldX, Skull } from "lucide-react";
+import { ShieldCheck, ShieldX, Skull, ArrowRight } from "lucide-react";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { SecurityGuaranteeModal } from "../modals/security-guarantee-modal";
@@ -46,16 +46,15 @@ export function DiplomacySecurityUmbrellaActions({
 
   if (isEmergencyProtectorate) {
     return (
-      <div className="p-3.5 bg-rose-950/40 border border-rose-500/60 rounded-2xl space-y-2 font-sans text-start">
+      <div className="p-3.5 bg-rose-950/40 border border-rose-500/60 rounded-2xl space-y-2 font-sans text-start shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
             <Skull size={16} className="text-rose-400 animate-pulse" />
             <span>{t("umbrella.protectorateActive")}</span>
           </div>
-          <span className="text-[10px] font-mono text-rose-400 font-bold">
-            {t("umbrella.protectorateTribute", {
-              cost: formatCurrency(emergencyProtectorateCost, true),
-            })}
+          <span className="text-[10px] font-mono text-rose-300 font-bold bg-rose-500/20 px-2 py-0.5 rounded-lg border border-rose-500/30">
+            {formatCurrency(emergencyProtectorateCost, true)}{" "}
+            {t("umbrella.protectorateTribute", { cost: "" }).trim()}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -74,13 +73,13 @@ export function DiplomacySecurityUmbrellaActions({
 
   if (hasSecurityGuarantee) {
     return (
-      <div className="p-3.5 bg-cyan-950/30 border border-cyan-500/40 rounded-2xl space-y-2 font-sans text-start">
+      <div className="p-3.5 bg-cyan-950/30 border border-cyan-500/40 rounded-2xl space-y-2 font-sans text-start shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-cyan-300 text-xs font-black">
             <ShieldCheck size={16} />
             <span>{t("umbrella.defensePactActive")}</span>
           </div>
-          <span className="text-[10px] font-mono text-cyan-400 font-bold">
+          <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-500/20 px-2 py-0.5 rounded-lg border border-cyan-500/30">
             {t("umbrella.defensePactIntervention")}
           </span>
         </div>
@@ -122,15 +121,16 @@ export function DiplomacySecurityUmbrellaActions({
     <div className="space-y-2 font-sans text-start">
       <button
         onClick={() => setIsGuaranteeModalOpen(true)}
-        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3 rounded-2xl bg-cyan-950/20 hover:bg-cyan-950/40 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-start transition-all cursor-pointer space-y-1 shadow-sm group"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black flex items-center gap-2">
-            <ShieldCheck size={16} className="text-cyan-400" />
+            <ShieldCheck size={15} className="text-cyan-400 shrink-0" />
             <span>{t("umbrella.openDefenseModal")}</span>
           </span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            {t("umbrella.openDefenseModalBadge")}
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30 flex items-center gap-1 shrink-0 group-hover:bg-cyan-500/30">
+            <span>{t("umbrella.openDefenseModalBadge")}</span>
+            <ArrowRight size={10} className="rtl:rotate-180" />
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -140,15 +140,16 @@ export function DiplomacySecurityUmbrellaActions({
 
       <button
         onClick={() => setIsProtectorateModalOpen(true)}
-        className="w-full p-3.5 rounded-2xl bg-rose-950/25 hover:bg-rose-950/45 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3 rounded-2xl bg-rose-950/20 hover:bg-rose-950/40 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-start transition-all cursor-pointer space-y-1 shadow-sm group"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black flex items-center gap-2">
-            <Skull size={16} className="text-rose-400" />
+            <Skull size={15} className="text-rose-400 shrink-0" />
             <span>{t("umbrella.openProtectorateModal")}</span>
           </span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
-            {t("umbrella.openProtectorateModalBadge")}
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30 flex items-center gap-1 shrink-0 group-hover:bg-rose-500/30">
+            <span>{t("umbrella.openProtectorateModalBadge")}</span>
+            <ArrowRight size={10} className="rtl:rotate-180" />
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">

@@ -32,29 +32,31 @@ export function DiplomacyStepUpActions({
     return (
       <button
         onClick={onPeaceTreaty}
-        className={`w-full p-3.5 rounded-2xl border text-start transition-all space-y-1 shadow-sm ${
+        className={`w-full p-3 rounded-2xl border text-start transition-all space-y-1 shadow-sm ${
           isPeaceCooldownActive
             ? "bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-pointer"
             : "bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/40 text-emerald-400 cursor-pointer"
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black flex items-center gap-1.5">
             {isPeaceCooldownActive ? (
-              <Clock size={16} />
+              <Clock size={15} />
             ) : (
-              <Handshake size={16} />
+              <Handshake size={15} />
             )}
             <span>{t("actions.enterPeaceTalks")}</span>
           </span>
           <ArrowUpCircle
-            size={16}
+            size={15}
             className={
-              isPeaceCooldownActive ? "text-amber-400" : "text-emerald-400"
+              isPeaceCooldownActive
+                ? "text-amber-400 shrink-0"
+                : "text-emerald-400 shrink-0"
             }
           />
         </div>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
           {isPeaceCooldownActive
             ? t("actions.peaceCooldownDesc")
             : t("actions.peaceActiveDesc")}
@@ -67,15 +69,15 @@ export function DiplomacyStepUpActions({
     return (
       <button
         onClick={onNonAggression}
-        className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-start transition-all cursor-pointer space-y-1 shadow-sm"
+        className="w-full p-3 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-start transition-all cursor-pointer space-y-1 shadow-sm"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black">
             {t("actions.proposeNonAggression")}
           </span>
-          <ArrowUpCircle size={16} className="text-emerald-400" />
+          <ArrowUpCircle size={15} className="text-emerald-400 shrink-0" />
         </div>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
           {t("actions.proposeNonAggressionDesc")}
         </p>
       </button>
@@ -87,14 +89,14 @@ export function DiplomacyStepUpActions({
       <button
         onClick={onStrategicPartnership}
         disabled={!canAffordPartnership}
-        className="w-full p-3.5 rounded-2xl bg-gdp/15 hover:bg-gdp/25 disabled:bg-secondary/40 disabled:opacity-60 border border-gdp/40 text-gdp text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        className="w-full p-3 rounded-2xl bg-gdp/15 hover:bg-gdp/25 disabled:bg-secondary/40 disabled:opacity-60 border border-gdp/40 text-gdp text-start transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-black flex items-center gap-1.5">
-            <Coins size={15} />
+            <Coins size={14} />
             <span>{t("actions.signStrategicPartnership")}</span>
           </span>
-          <span className="text-[10px] font-mono font-bold bg-gdp/20 px-2 py-0.5 rounded-md text-gdp border border-gdp/30">
+          <span className="text-[10px] font-mono font-bold bg-gdp/20 px-2 py-0.5 rounded-md text-gdp border border-gdp/30 shrink-0">
             {formatCurrency(strategicPartnershipCost, true)}
           </span>
         </div>

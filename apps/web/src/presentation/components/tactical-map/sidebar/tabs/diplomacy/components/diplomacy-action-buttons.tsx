@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { HeartHandshake, CheckCircle2 } from "lucide-react";
+import { HeartHandshake, CheckCircle2, Coins } from "lucide-react";
 import {
   DiplomaticStance,
   SecurityGuaranteeValidationResult,
@@ -116,32 +116,37 @@ export function DiplomacyActionButtons({
               : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-500 cursor-pointer shadow-sm"
           }`}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold flex items-center gap-1.5 min-w-0">
               {isAidSentThisTurn ? (
                 <>
-                  <CheckCircle2 size={14} className="text-emerald-400" />
-                  <span className="text-foreground">
+                  <CheckCircle2
+                    size={14}
+                    className="text-emerald-400 shrink-0"
+                  />
+                  <span className="text-foreground truncate">
                     {t("actions.foreignAidSent")}
                   </span>
                 </>
-              ) : !canAffordAid ? (
-                t("actions.foreignAidInsufficient", {
-                  cost: formatCurrency(foreignAidCost),
-                })
               ) : (
-                t("actions.sendForeignAid", {
-                  cost: formatCurrency(foreignAidCost),
-                })
+                <>
+                  <HeartHandshake
+                    size={14}
+                    className="text-amber-500 shrink-0"
+                  />
+                  <span className="truncate">
+                    {t("actions.sendForeignAid", { cost: "" }).trim()}
+                  </span>
+                </>
               )}
             </span>
-            <HeartHandshake
-              size={14}
-              className={
-                isAidDisabled ? "text-muted-foreground" : "text-amber-500"
-              }
-            />
+
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border bg-amber-500/15 text-amber-300 border-amber-500/30 shrink-0 flex items-center gap-1">
+              <Coins size={11} />
+              <span>{formatCurrency(foreignAidCost, true)}</span>
+            </span>
           </div>
+
           <p className="text-[10px] text-muted-foreground leading-relaxed">
             {isAidSentThisTurn
               ? t("actions.foreignAidQuotaReached")

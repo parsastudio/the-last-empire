@@ -26,14 +26,14 @@ export function DiplomacyAlliesBox({
 
   if (allies.length === 0) {
     return (
-      <div className="bg-emerald-950/15 border border-emerald-500/30 p-3 rounded-2xl flex items-center justify-between text-xs font-sans text-start shadow-sm">
-        <div className="flex items-center gap-2">
+      <div className="bg-emerald-950/15 border border-emerald-500/30 p-3 rounded-2xl flex items-center justify-between text-xs font-sans text-start shadow-sm gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <ShieldCheck size={16} className="text-emerald-400 shrink-0" />
-          <div>
-            <span className="text-foreground font-black text-xs block">
+          <div className="min-w-0">
+            <span className="text-foreground font-black text-xs block truncate">
               {t("noAlliesTitle")}
             </span>
-            <span className="text-[10px] text-muted-foreground block font-medium">
+            <span className="text-[10px] text-muted-foreground block font-medium truncate">
               {t("noAlliesDesc")}
             </span>
           </div>
@@ -48,16 +48,16 @@ export function DiplomacyAlliesBox({
 
   return (
     <div className="bg-gradient-to-r from-rose-950/30 via-card to-rose-950/20 border-2 border-rose-500/50 p-3.5 rounded-2xl space-y-2.5 text-start font-sans shadow-md backdrop-blur-md">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">
-            <ShieldAlert size={16} />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse shrink-0">
+            <ShieldAlert size={15} />
           </div>
-          <div>
-            <span className="text-foreground font-black text-xs block">
+          <div className="min-w-0">
+            <span className="text-foreground font-black text-xs block truncate">
               {t("warningTitle")}
             </span>
-            <span className="text-[10px] text-rose-300/90 block font-medium">
+            <span className="text-[10px] text-rose-300/90 block font-medium truncate">
               {t("warningDesc")}
             </span>
           </div>
