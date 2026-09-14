@@ -93,16 +93,15 @@ void main() {
   vec2 texelPos = v_texCoord / u_texelSize;
   vec2 f = fract(texelPos);
 
-  float pixelScale = max(1.0, u_scale);
-  float dW = f.x * pixelScale;
-  float dE = (1.0 - f.x) * pixelScale;
-  float dN = f.y * pixelScale;
-  float dS = (1.0 - f.y) * pixelScale;
+  float dW = f.x * u_scale;
+  float dE = (1.0 - f.x) * u_scale;
+  float dN = f.y * u_scale;
+  float dS = (1.0 - f.y) * u_scale;
 
-  float halfStroke = 1.90;
-  float coastStroke = 3.80;
-  float provStroke = 0.70;
-  float edgeSoft = 0.50;
+  float halfStroke = clamp(u_scale * 0.95, 0.85, 1.90);
+  float coastStroke = clamp(u_scale * 1.85, 1.40, 3.80);
+  float provStroke = clamp(u_scale * 0.45, 0.40, 0.75);
+  float edgeSoft = clamp(halfStroke * 0.45, 0.35, 0.70);
 
   float intBorder = 0.0;
   float coastBorder = 0.0;
@@ -226,8 +225,9 @@ void main() {
   }
 
   float mainBorderFactor = max(intBorder, coastBorder);
+  float borderIntensity = clamp(0.60 + u_scale * 0.35, 0.70, 0.94);
   vec3 darkLineColor = vec3(0.01, 0.015, 0.03);
-  baseColor = mix(baseColor, darkLineColor, mainBorderFactor * 0.92);
+  baseColor = mix(baseColor, darkLineColor, mainBorderFactor * borderIntensity);
 
   if (isHovered && hoveredPerimeter > 0.0) {
     vec3 rimGlowColor = (u_activeLayer == 1)
