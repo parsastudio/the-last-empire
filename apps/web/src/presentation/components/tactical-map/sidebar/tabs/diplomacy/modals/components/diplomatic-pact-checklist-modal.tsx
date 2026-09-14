@@ -100,20 +100,20 @@ export function DiplomaticPactChecklistModal({
       zIndexClass="z-[60]"
       onClose={onClose}
     >
-      <div className="space-y-4 text-start font-sans pb-1">
+      <div className="space-y-3.5 text-start font-sans pb-1">
         <div
-          className={`p-4 rounded-3xl flex items-center justify-between shadow-md border ${bannerGradientClass} ${bannerBorderClass}`}
+          className={`p-3.5 rounded-2xl flex items-center justify-between shadow-md border ${bannerGradientClass} ${bannerBorderClass}`}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-border/80 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-secondary/80 border border-border/80 flex items-center justify-center text-2xl shadow-inner select-none shrink-0">
               {targetFlagEmoji}
             </div>
-            <div className="space-y-0.5">
-              <span className="text-sm font-black text-foreground block">
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-sm font-black text-foreground block truncate">
                 {targetName}
               </span>
               <span
-                className={`text-[10px] font-mono font-bold ${bannerTextClass}`}
+                className={`text-[10px] font-mono font-bold ${bannerTextClass} block truncate`}
               >
                 {roleLabel}
               </span>
@@ -121,7 +121,7 @@ export function DiplomaticPactChecklistModal({
           </div>
 
           <div
-            className={`text-end font-mono px-3.5 py-1.5 rounded-2xl border ${bannerBorderClass} bg-secondary/40`}
+            className={`text-end font-mono px-3 py-1.5 rounded-xl border ${bannerBorderClass} bg-secondary/60 shrink-0`}
           >
             <span className="text-[9px] text-muted-foreground block font-sans">
               {costLabel}
@@ -130,18 +130,18 @@ export function DiplomaticPactChecklistModal({
               className={`text-xs font-black flex items-center gap-1 justify-end ${bannerTextClass}`}
             >
               <Coins size={12} />
-              {costFormatted}
+              <span>{costFormatted}</span>
             </span>
           </div>
         </div>
 
         <div
-          className={`p-3.5 rounded-2xl flex items-start gap-2.5 text-xs text-foreground/90 leading-relaxed shadow-inner border ${calloutContainerClass}`}
+          className={`p-3 rounded-xl flex items-start gap-2 text-xs text-foreground/90 leading-relaxed border ${calloutContainerClass}`}
         >
-          <CalloutIcon size={18} className="shrink-0 mt-0.5 text-primary" />
+          <CalloutIcon size={16} className="shrink-0 mt-0.5 text-primary" />
           <div className="space-y-0.5">
             {calloutTitle && (
-              <span className="font-black text-xs block text-foreground">
+              <span className="font-bold text-xs block text-foreground">
                 {calloutTitle}
               </span>
             )}
@@ -156,47 +156,49 @@ export function DiplomaticPactChecklistModal({
             {checklistTitle}
           </span>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {conditions.map((cond) => {
               const Icon = cond.icon;
               return (
                 <div
                   key={cond.id}
-                  className={`p-3 rounded-2xl border transition-all flex flex-col justify-between space-y-2 ${
+                  className={`p-2.5 rounded-xl border transition-all flex flex-col justify-between gap-1.5 ${
                     cond.isValid
                       ? "bg-card/90 border-emerald-500/40 shadow-sm"
                       : "bg-card/50 border-rose-500/40 opacity-80"
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <Icon
-                        size={14}
+                        size={13}
                         className={
-                          cond.isValid ? "text-emerald-400" : "text-rose-400"
+                          cond.isValid
+                            ? "text-emerald-400 shrink-0"
+                            : "text-rose-400 shrink-0"
                         }
                       />
-                      <span className="text-xs font-bold text-foreground">
+                      <span className="text-xs font-bold text-foreground truncate">
                         {cond.title}
                       </span>
                     </div>
 
                     {cond.isValid ? (
                       <CheckCircle2
-                        size={16}
+                        size={15}
                         className="text-emerald-400 shrink-0"
                       />
                     ) : (
-                      <XCircle size={16} className="text-rose-400 shrink-0" />
+                      <XCircle size={15} className="text-rose-400 shrink-0" />
                     )}
                   </div>
 
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  <p className="text-[10px] text-muted-foreground leading-normal">
                     {cond.desc}
                   </p>
 
                   <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-muted-foreground font-sans">
+                    <span className="text-muted-foreground font-sans text-[9px]">
                       {statusLabel}
                     </span>
                     <span
@@ -213,11 +215,11 @@ export function DiplomaticPactChecklistModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-1">
           <button
             type="button"
             onClick={onClose}
-            className="sm:col-span-4 py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="sm:col-span-4 py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <span>{cancelLabel}</span>
           </button>
@@ -226,12 +228,12 @@ export function DiplomaticPactChecklistModal({
             type="button"
             onClick={handleAction}
             disabled={isSubmitDisabled || isSubmitting}
-            className={`sm:col-span-8 py-3.5 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl hover:scale-[1.005] active:scale-[0.995] disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${submitButtonClass}`}
+            className={`sm:col-span-8 py-3 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:scale-[1.005] active:scale-[0.995] disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${submitButtonClass}`}
           >
             {isSubmitting ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={15} className="animate-spin" />
             ) : (
-              <SubmitIcon size={16} />
+              <SubmitIcon size={15} />
             )}
             <span>{isSubmitting ? submittingLabel : submitLabel}</span>
           </button>

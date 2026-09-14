@@ -41,28 +41,36 @@ export function DiplomacyTargetCard({
     alignment > 0 ? `+${toDigits(alignment)}` : toDigits(alignment);
 
   return (
-    <div className="bg-background/50 border border-border/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm text-start font-sans">
-      <div className="flex items-center gap-3">
-        <span className="text-3xl select-none" role="img" aria-label={name}>
+    <div className="bg-card/75 border border-border/80 p-3.5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md text-start font-sans backdrop-blur-xl">
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className="text-3xl select-none shrink-0"
+          role="img"
+          aria-label={name}
+        >
           {flagEmoji}
         </span>
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
-          <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-            {code}
-          </span>
+        <div className="space-y-0.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-black text-foreground truncate">
+              {name}
+            </h3>
+            <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground border border-border/50 shrink-0">
+              {code}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-        <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
+      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+        <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
             {t("alignmentLabel")}
           </span>
           <span className={`font-bold ${alignColor}`}>{formattedAlign}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
+        <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
             {t("tensionLabel")}
           </span>

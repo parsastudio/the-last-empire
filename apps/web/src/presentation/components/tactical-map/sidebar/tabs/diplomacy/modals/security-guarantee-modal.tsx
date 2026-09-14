@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useTranslations } from "next-intl";
-import { ShieldCheck, Coins, Scale, Users2, Swords } from "lucide-react";
+import { ShieldCheck, Scale, Users2, Swords, Coins } from "lucide-react";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";

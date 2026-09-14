@@ -127,16 +127,16 @@ export function WideDiplomacyView({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-6 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 md:gap-5 items-start">
         <div
-          className={`md:col-span-5 lg:col-span-4 space-y-2.5 md:space-y-3 bg-background/30 p-3 md:p-4 border border-border/60 rounded-2xl md:rounded-3xl ${
+          className={`md:col-span-5 lg:col-span-4 space-y-2.5 md:space-y-3 bg-background/30 p-3 md:p-3.5 border border-border/60 rounded-2xl md:rounded-3xl ${
             mobileTab === "list" ? "block" : "hidden md:block"
           }`}
         >
           <div className="relative">
             <Search
               size={14}
-              className="absolute start-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               type="text"
@@ -165,7 +165,7 @@ export function WideDiplomacyView({
         </div>
 
         <div
-          className={`md:col-span-7 lg:col-span-8 space-y-3 md:space-y-5 ${
+          className={`md:col-span-7 lg:col-span-8 space-y-3 md:space-y-4 ${
             mobileTab === "details" ? "block" : "hidden md:block"
           }`}
         >
@@ -185,7 +185,7 @@ export function WideDiplomacyView({
             }
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 md:gap-5 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 md:gap-4 items-start">
             <CountryProfileStats
               data={diplomacy.selectedRelation.profileData}
               allies={targetAllies}
