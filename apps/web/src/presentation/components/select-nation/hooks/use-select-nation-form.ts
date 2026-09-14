@@ -170,7 +170,9 @@ export function useSelectNationForm() {
         ) {
           setManifest(loadedManifest);
         }
-      } catch {}
+      } catch (err) {
+        console.error("loadManifest error in useSelectNationForm:", err);
+      }
     }
 
     loadManifest();
@@ -247,7 +249,8 @@ export function useSelectNationForm() {
           "error",
         );
       }
-    } catch {
+    } catch (err) {
+      console.error("handleStartCampaign error:", err);
       showToast(
         tErrors("actionFailedTitle"),
         tErrors("campaignSaveFailed"),

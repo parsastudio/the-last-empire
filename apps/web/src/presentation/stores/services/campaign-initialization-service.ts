@@ -32,6 +32,10 @@ export class CampaignInitializationService {
       !Array.isArray(activeManifest.nations) ||
       activeManifest.nations.length === 0
     ) {
+      console.error(
+        "CampaignInitializationService: Active manifest is invalid or empty:",
+        activeManifest,
+      );
       throw new Error(
         "Map manifest is invalid or contains no sovereign nations.",
       );
@@ -46,6 +50,10 @@ export class CampaignInitializationService {
     );
 
     if (!detectedNations.includes(normalizedHumanId)) {
+      console.error(
+        `CampaignInitializationService: Selected nation (${normalizedHumanId}) not found in detected nations:`,
+        detectedNations,
+      );
       throw new Error(
         `Selected nation (${nationId}) does not exist in strategic manifest.`,
       );

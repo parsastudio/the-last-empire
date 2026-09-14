@@ -19,6 +19,7 @@ export interface RawTerrainData {
 export class ClientFinalStateLoader {
   private static manifestPromise: Promise<FinalMapManifest | null> | null =
     null;
+  private static cachedManifest: FinalMapManifest | null = null;
   private static cachedTerrainData: RawTerrainData | null = null;
   private static cachedLiveStateRaw: Uint8Array | null = null;
 
@@ -32,7 +33,8 @@ export class ClientFinalStateLoader {
       const blob = new Blob([buffer]);
       const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
       return await new Response(stream).arrayBuffer();
-    } catch {
+    } catch (err) {
+      console.error("Failed to decompress gzip buffer:", err);
       return null;
     }
   }
@@ -40,8 +42,8 @@ export class ClientFinalStateLoader {
   public static async ensureManifestLoaded(
     mapId = "map1",
   ): Promise<FinalMapManifest | null> {
-    if (MapTopologyRegistry.isReady()) {
-      return null;
+    if (this.cachedManifest) {
+      return this.cachedManifest;
     }
 
     if (this.manifestPromise) {
@@ -58,6 +60,7 @@ export class ClientFinalStateLoader {
           const manifest: FinalMapManifest = JSON.parse(text);
           CountryRegistry.initializeFromManifest(manifest);
           MapTopologyRegistry.initializeFromManifest(manifest);
+          this.cachedManifest = manifest;
           return manifest;
         }
 
@@ -67,6 +70,9 @@ export class ClientFinalStateLoader {
         );
         const res = await fetch(url);
         if (!res.ok) {
+          console.error(
+            `Failed to fetch manifest from ${url}, status: ${res.status}`,
+          );
           return null;
         }
 
@@ -74,6 +80,7 @@ export class ClientFinalStateLoader {
         const manifest: FinalMapManifest = JSON.parse(text);
         CountryRegistry.initializeFromManifest(manifest);
         MapTopologyRegistry.initializeFromManifest(manifest);
+        this.cachedManifest = manifest;
 
         const encoded = new TextEncoder().encode(text);
         const copyBuf = encoded.buffer.slice(
@@ -83,7 +90,8 @@ export class ClientFinalStateLoader {
         void BinaryAssetRepository.saveAsset(cacheKey, copyBuf);
 
         return manifest;
-      } catch {
+      } catch (err) {
+        console.error("Failed to load map manifest:", err);
         return null;
       } finally {
         this.manifestPromise = null;
@@ -122,10 +130,6 @@ export class ClientFinalStateLoader {
           mapId,
           "live-state.bin.gz",
         );
-        const rawUrl = ClientMapPathResolver.getMapFinalClientUrl(
-          mapId,
-          "live-state.bin",
-        );
 
         let fetchedGzBuf: ArrayBuffer | null = null;
         try {
@@ -133,20 +137,13 @@ export class ClientFinalStateLoader {
           if (gzRes.ok) {
             fetchedGzBuf = await gzRes.arrayBuffer();
           }
-        } catch {}
+        } catch (err) {
+          console.error(`Failed to fetch ${gzUrl}:`, err);
+        }
 
         if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
           void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
           arrayBuf = await this.decompressGzipBuffer(fetchedGzBuf);
-        }
-
-        if (!arrayBuf || arrayBuf.byteLength === 0) {
-          try {
-            const rawRes = await fetch(rawUrl);
-            if (rawRes.ok) {
-              arrayBuf = await rawRes.arrayBuffer();
-            }
-          } catch {}
         }
       }
 
@@ -161,7 +158,8 @@ export class ClientFinalStateLoader {
 
       BitPackedGridState.getInstance().markDirty();
       return bitBuffer;
-    } catch {
+    } catch (err) {
+      console.error("Failed to load live state buffer:", err);
       return null;
     }
   }
@@ -188,10 +186,6 @@ export class ClientFinalStateLoader {
           mapId,
           "terrain-raw.bin.gz",
         );
-        const rawUrl = ClientMapPathResolver.getMapFinalClientUrl(
-          mapId,
-          "terrain-raw.bin",
-        );
 
         let fetchedGzBuf: ArrayBuffer | null = null;
         try {
@@ -199,20 +193,13 @@ export class ClientFinalStateLoader {
           if (gzRes.ok) {
             fetchedGzBuf = await gzRes.arrayBuffer();
           }
-        } catch {}
+        } catch (err) {
+          console.error(`Failed to fetch ${gzUrl}:`, err);
+        }
 
         if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
           void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
           arrayBuf = await this.decompressGzipBuffer(fetchedGzBuf);
-        }
-
-        if (!arrayBuf || arrayBuf.byteLength < 32) {
-          try {
-            const rawRes = await fetch(rawUrl);
-            if (rawRes.ok) {
-              arrayBuf = await rawRes.arrayBuffer();
-            }
-          } catch {}
         }
       }
 
@@ -253,7 +240,8 @@ export class ClientFinalStateLoader {
       };
 
       return this.cachedTerrainData;
-    } catch {
+    } catch (err) {
+      console.error("Failed to load terrain raw data:", err);
       return null;
     }
   }
