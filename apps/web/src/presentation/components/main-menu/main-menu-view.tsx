@@ -44,10 +44,17 @@ export function MainMenuView() {
   };
 
   return (
-    <div className="w-screen h-screen bg-background overflow-hidden relative flex flex-col justify-between items-center select-none">
+    <div className="w-full h-[100dvh] bg-background overflow-hidden relative flex flex-col justify-between items-center select-none">
       <AmbientTacticalGrid />
 
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-8 pt-4 pb-2 z-30 flex items-center justify-between shrink-0">
+      <header
+        style={{
+          paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+        className="w-full max-w-7xl mx-auto px-4 sm:px-8 pb-2 z-30 flex items-center justify-between shrink-0"
+      >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-inner">
             <Globe2 size={16} />
@@ -92,26 +99,26 @@ export function MainMenuView() {
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-6xl px-4 sm:px-8 z-10 py-2 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col items-center justify-center">
-        <div className="w-full flex flex-col items-center justify-center gap-6 sm:gap-8 my-auto">
-          <div className="text-center space-y-3.5 relative shrink-0">
+      <main className="flex-1 w-full max-w-6xl px-4 sm:px-8 z-10 py-3 sm:py-6 overflow-y-auto overscroll-contain touch-pan-y min-h-0 flex flex-col items-center justify-start sm:justify-center scrollbar-thin scrollbar-thumb-border/40">
+        <div className="w-full flex flex-col items-center justify-center gap-5 sm:gap-7 my-auto">
+          <div className="flex flex-col items-center text-center space-y-3 w-full max-w-3xl shrink-0">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/90 border border-border/80 rounded-full text-[9px] font-mono text-muted-foreground uppercase tracking-widest backdrop-blur-xl shadow-inner">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>{t("version")}</span>
             </div>
 
-            <div className="relative inline-block px-8 sm:px-16 md:px-24 py-3">
-              <div className="absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-emerald-400" />
-              <div className="absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-emerald-400" />
-              <div className="absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-emerald-400" />
-              <div className="absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-emerald-400" />
+            <div className="relative px-6 sm:px-14 md:px-20 py-2 sm:py-3.5 my-0.5">
+              <div className="absolute top-0 start-0 w-3.5 h-3.5 border-t-2 border-s-2 border-emerald-400" />
+              <div className="absolute top-0 end-0 w-3.5 h-3.5 border-t-2 border-e-2 border-emerald-400" />
+              <div className="absolute bottom-0 start-0 w-3.5 h-3.5 border-b-2 border-s-2 border-emerald-400" />
+              <div className="absolute bottom-0 end-0 w-3.5 h-3.5 border-b-2 border-e-2 border-emerald-400" />
 
-              <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-widest text-foreground drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] leading-tight font-sans">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-wider text-foreground drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] leading-tight font-sans text-center">
                 {t("title")}
               </h1>
             </div>
 
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed font-medium px-2">
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed font-medium px-2 text-center">
               {t("hero.prefix")}
               <span className="text-rose-400 font-bold">
                 {t("hero.military")}
@@ -128,7 +135,7 @@ export function MainMenuView() {
             </p>
           </div>
 
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center max-w-4xl">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center max-w-4xl pt-1">
             <div className="md:col-span-6 w-full">
               <CommandConsole
                 onNewCampaign={handleNewCampaign}

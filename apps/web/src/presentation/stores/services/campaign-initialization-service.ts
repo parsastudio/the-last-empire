@@ -3,11 +3,11 @@ import {
   CountryRegistry,
   FinalMapManifest,
   FinalManifestNation,
-  ClientMapPathResolver,
   GameDifficulty,
   MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { GlobalAiInitializer } from "@geopolitics/game-engine";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export class CampaignInitializationService {
   private static aiInitializer = new GlobalAiInitializer();
@@ -23,17 +23,8 @@ export class CampaignInitializationService {
     let activeManifest: FinalMapManifest | null = manifest ?? null;
 
     if (!activeManifest) {
-      const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
-        "map1",
-        "manifest.json",
-      );
-      const res = await fetch(manifestUrl, {
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        throw new Error("Unable to load strategic map manifest from server.");
-      }
-      activeManifest = await res.json();
+      activeManifest =
+        await ClientFinalStateLoader.ensureManifestLoaded("map1");
     }
 
     if (

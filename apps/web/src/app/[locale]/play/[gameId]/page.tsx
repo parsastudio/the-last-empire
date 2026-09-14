@@ -4,11 +4,20 @@ import { NextIntlClientProvider } from "next-intl";
 import { pickMessages } from "@/i18n/pick-messages";
 import { WebGLTacticalWorkspace } from "@/presentation/components/tactical-map/final/layout/webgl-tactical-workspace";
 
-interface PlayPageProps {
+export const dynamicParams = true;
+
+export function generateStaticParams() {
+  return [
+    { locale: "fa", gameId: "default" },
+    { locale: "en", gameId: "default" },
+  ];
+}
+
+interface PageProps {
   params: Promise<{ gameId: string; locale: string }>;
 }
 
-export default async function DynamicPlayPage({ params }: PlayPageProps) {
+export default async function DynamicPlayPage({ params }: PageProps) {
   const { gameId, locale } = await params;
   setRequestLocale(locale);
 

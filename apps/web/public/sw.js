@@ -1,4 +1,4 @@
-const CACHE_NAME = "geopolitics-empire-v1";
+const CACHE_NAME = "geopolitics-empire-v2";
 
 const STATIC_PRECACHE_URLS = [
   "/",
@@ -6,15 +6,30 @@ const STATIC_PRECACHE_URLS = [
   "/en",
   "/fa/select-nation",
   "/en/select-nation",
+  "/fa/play/default",
+  "/en/play/default",
   "/Vazirmatn.woff2",
   "/manifest.webmanifest",
+  "/maps/map1/final/manifest.json",
+  "/maps/map1/final/live-state.bin.gz",
+  "/maps/map1/final/terrain-raw.bin.gz",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_PRECACHE_URLS))
+      .then((cache) =>
+        Promise.allSettled(
+          STATIC_PRECACHE_URLS.map((url) =>
+            fetch(url).then((res) => {
+              if (res.ok) {
+                return cache.put(url, res);
+              }
+            }),
+          ),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
@@ -40,11 +55,7 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (request.method !== "GET") {
-    return;
-  }
-
-  if (url.origin !== self.location.origin) {
+  if (request.method !== "GET" || url.origin !== self.location.origin) {
     return;
   }
 
@@ -61,15 +72,32 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         })
         .catch(async () => {
-          const cachedResponse = await caches.match(request);
-          if (cachedResponse) {
-            return cachedResponse;
+          const directMatch = await caches.match(request);
+          if (directMatch) {
+            return directMatch;
           }
+
           const pathname = url.pathname;
-          if (pathname.startsWith("/en")) {
-            return (await caches.match("/en")) || (await caches.match("/"));
+          const isEn = pathname.startsWith("/en");
+
+          if (pathname.includes("/play/")) {
+            const playShell = await caches.match(
+              isEn ? "/en/play/default" : "/fa/play/default",
+            );
+            if (playShell) return playShell;
           }
-          return (await caches.match("/fa")) || (await caches.match("/"));
+
+          if (pathname.includes("/select-nation")) {
+            const selectShell = await caches.match(
+              isEn ? "/en/select-nation" : "/fa/select-nation",
+            );
+            if (selectShell) return selectShell;
+          }
+
+          return (
+            (await caches.match(isEn ? "/en" : "/fa")) ||
+            (await caches.match("/"))
+          );
         }),
     );
     return;
@@ -82,7 +110,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith(".png") ||
     url.pathname.endsWith(".json") ||
     url.pathname.endsWith(".bin") ||
-    url.pathname.endsWith(".bin.gz")
+    url.pathname.endsWith(".bin.gz") ||
+    url.searchParams.has("_rsc")
   ) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
@@ -90,15 +119,31 @@ self.addEventListener("fetch", (event) => {
           return cachedResponse;
         }
 
-        return fetch(request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return networkResponse;
-        });
+        return fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(request, responseClone);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(async () => {
+            if (url.searchParams.has("_rsc")) {
+              const cleanUrl = url.pathname;
+              const directClean = await caches.match(cleanUrl);
+              if (directClean) return directClean;
+
+              if (cleanUrl.includes("/play/")) {
+                const isEn = cleanUrl.startsWith("/en");
+                return await caches.match(
+                  isEn ? "/en/play/default" : "/fa/play/default",
+                );
+              }
+            }
+            return null;
+          });
       }),
     );
     return;

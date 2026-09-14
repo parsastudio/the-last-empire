@@ -14,6 +14,7 @@
     "files": "python3 debug/file_collector.py",
     "tree": "python3 debug/tree_generator.py",
     "errors": "python3 debug/error_checker.py",
+    "start": "pnpm --filter @geopolitics/web start",
     "skeleton": "tsx debug/generate-skeleton.ts"
   },
   "devDependencies": {

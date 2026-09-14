@@ -12,7 +12,6 @@ import {
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import {
   CountryRegistry,
-  ClientMapPathResolver,
   GameDifficulty,
   MapTopologyRegistry,
   ECONOMY_CONFIG,
@@ -20,6 +19,7 @@ import {
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 function createNationDetailItem(
   canonicalId: string,
@@ -160,25 +160,15 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
-          "map1",
-          "manifest.json",
-        );
-        const res = await fetch(manifestUrl, {
-          cache: "no-store",
-        });
-        if (res.ok) {
-          const json: FinalMapManifest = await res.json();
-          if (
-            active &&
-            json &&
-            Array.isArray(json.nations) &&
-            json.nations.length > 0
-          ) {
-            CountryRegistry.initializeFromManifest(json);
-            MapTopologyRegistry.initializeFromManifest(json);
-            setManifest(json);
-          }
+        const loadedManifest =
+          await ClientFinalStateLoader.ensureManifestLoaded("map1");
+        if (
+          active &&
+          loadedManifest &&
+          Array.isArray(loadedManifest.nations) &&
+          loadedManifest.nations.length > 0
+        ) {
+          setManifest(loadedManifest);
         }
       } catch {}
     }
