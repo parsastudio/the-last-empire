@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { Zap, Wallet, ShieldAlert } from "lucide-react";
 import { useQuickRecruitBatch } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
-import { QuickUnitRecruitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/quick-unit-recruit-card";
+import { ProcurementUnitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/procurement-unit-card";
 import { NavalFleetProcurementCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/naval-fleet-procurement-card";
 import {
   Nation,
@@ -93,9 +93,10 @@ export function QuickMilitaryRecruitmentGrid({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
         {batchList.map((item) => (
-          <QuickUnitRecruitCard
+          <ProcurementUnitCard
             key={item.type}
             info={item}
+            variant="domestic"
             feedbacks={floatingFeedbacks[item.type] || []}
             onBuy={handleBuyBatch}
           />

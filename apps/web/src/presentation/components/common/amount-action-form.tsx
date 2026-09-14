@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Zap, LucideIcon } from "lucide-react";
-import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
+import { TacticalRangeSlider } from "@/presentation/components/common/tactical-range-slider";
 import {
   ActionColorVariant,
   ActionVariantStyleUtility,
@@ -65,18 +65,11 @@ export function AmountActionForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
-  const fillRatio = safeMax > 0 ? (currentAmount / safeMax) * 100 : 0;
 
   const resolvedEmptyStateText = emptyStateText || t("actionUnavailable");
   const resolvedSubmittingText = submittingText || t("submittingOrder");
   const resolvedCeilingLabel = ceilingLabel || t("maxLimit");
   const resolvedRequestedLabel = requestedLabel || t("requestedAmount");
-
-  const handlePercentageSelect = (pct: number) => {
-    if (safeMax <= 0) return;
-    const target = Math.max(step, Math.floor((safeMax * pct) / step) * step);
-    setAmount(target);
-  };
 
   const handleExecute = async () => {
     if (currentAmount <= 0 || isSubmitting) return;
@@ -114,30 +107,15 @@ export function AmountActionForm({
             </span>
           </div>
 
-          <div className="relative flex items-center py-1">
-            <div className="absolute start-0 end-0 h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
-              <div
-                className="h-full bg-gradient-to-r from-primary/70 via-primary to-primary rounded-full transition-all duration-75 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
-                style={{ width: `${fillRatio}%` }}
-              />
-            </div>
-
-            <input
-              type="range"
-              min={safeMax > 0 ? step : 0}
-              max={Math.max(0, safeMax)}
-              step={step}
-              disabled={safeMax === 0}
-              value={currentAmount}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              className="tactical-range-input w-full relative z-10 disabled:opacity-30"
-            />
-          </div>
-
-          <PercentageSelector
+          <TacticalRangeSlider
+            value={currentAmount}
+            max={safeMax}
+            min={safeMax > 0 ? step : 0}
+            step={step}
             disabled={safeMax === 0}
-            onSelect={handlePercentageSelect}
             colorVariant={colorVariant}
+            showPercentageSelector={true}
+            onChange={setAmount}
           />
         </div>
 

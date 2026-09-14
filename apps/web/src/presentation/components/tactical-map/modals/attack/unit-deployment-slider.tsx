@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { LucideIcon } from "lucide-react";
-import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { TacticalRangeSlider } from "@/presentation/components/common/tactical-range-slider";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -27,20 +27,11 @@ export function UnitDeploymentSlider({
   const t = useTranslations("attack.slider");
   const { formatNumber } = useLocaleFormatter();
 
-  const handlePercentageSelect = (pct: number) => {
-    if (availableCount <= 0) return;
-    TacticalSound.playSliderTick();
-    const target = Math.floor(availableCount * pct);
-    onChange(target);
-  };
-
   const clampedCount = Math.min(availableCount, Math.max(0, selectedCount));
-  const fillRatio =
-    availableCount > 0 ? (clampedCount / availableCount) * 100 : 0;
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleValueChange = (val: number) => {
     TacticalSound.playSliderTick();
-    onChange(Number(e.target.value));
+    onChange(val);
   };
 
   return (
@@ -68,29 +59,15 @@ export function UnitDeploymentSlider({
         </div>
       </div>
 
-      <div className="relative flex items-center py-0.5 md:py-1">
-        <div className="absolute start-0 end-0 h-1.5 md:h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
-          <div
-            className="h-full bg-gradient-to-r from-primary/70 via-primary to-primary rounded-full transition-all duration-75 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
-            style={{ width: `${fillRatio}%` }}
-          />
-        </div>
-
-        <input
-          type="range"
-          min="0"
-          max={Math.max(0, availableCount)}
-          disabled={availableCount === 0}
-          value={clampedCount}
-          onChange={handleSliderChange}
-          className="tactical-range-input w-full relative z-10 disabled:opacity-30"
-        />
-      </div>
-
-      <PercentageSelector
+      <TacticalRangeSlider
+        value={clampedCount}
+        max={availableCount}
+        min={0}
+        step={1}
         disabled={availableCount === 0}
-        onSelect={handlePercentageSelect}
         colorVariant="primary"
+        showPercentageSelector={true}
+        onChange={handleValueChange}
       />
     </div>
   );
