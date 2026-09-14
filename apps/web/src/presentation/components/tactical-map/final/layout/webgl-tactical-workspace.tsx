@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { useGameProjections } from "@/presentation/hooks/game/use-game-projections";
@@ -48,6 +49,13 @@ export function WebGLTacticalWorkspace({
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
 
+  const routeParams = useParams();
+  const activeParamGameId = routeParams?.gameId as string | undefined;
+  const effectiveGameId =
+    activeParamGameId && activeParamGameId !== "default"
+      ? activeParamGameId
+      : gameId;
+
   const activeModal = useUiStore((state) => state.activeModal);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
   const openModal = useUiStore((state) => state.openModal);
@@ -61,7 +69,7 @@ export function WebGLTacticalWorkspace({
     advanceNextTurn,
     loading,
     error,
-  } = useBitPackedGame(gameId);
+  } = useBitPackedGame(effectiveGameId);
 
   const projections = useGameProjections(effectiveGameState);
   const metrics = useGameResources(effectiveGameState, projections);
@@ -191,7 +199,7 @@ export function WebGLTacticalWorkspace({
         gameState={effectiveGameState}
       />
 
-      <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />
+      <CampaignNotFoundModal isOpen={isNotFound} gameId={effectiveGameId} />
 
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">
