@@ -2,7 +2,8 @@ import {
   LocaleNumberFormatter,
   AppLocale,
 } from "@/presentation/utils/locale-number-formatter";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { FlagEmojiUtility } from "@/domain/shared/utils/flag-emoji.utility";
+import { ECONOMY_CONFIG } from "@/domain/economy/economy.config";
 
 export type PowerTierKey =
   | "superpower"
@@ -25,7 +26,7 @@ export interface FormattedNationSummary {
 
 export class NationPresentationMapper {
   public static getFlagEmoji(code: string | number): string {
-    return getFlagEmoji(String(code));
+    return FlagEmojiUtility.getFlagEmoji(code);
   }
 
   public static getPowerTierKey(gdp: number): PowerTierKey {
@@ -54,7 +55,8 @@ export class NationPresentationMapper {
     powerLabel: string,
     locale: AppLocale = "fa",
   ): FormattedNationSummary {
-    const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
+    const computedTreasury =
+      treasury ?? Math.floor(gdp * ECONOMY_CONFIG.STARTING_TREASURY_RATIO);
     const cleanCode = code.toUpperCase();
 
     return {

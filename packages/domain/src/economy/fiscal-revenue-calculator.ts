@@ -8,6 +8,7 @@ import { ECONOMIC_DOCTRINE_CONFIGS } from "@/domain/politics/economic-doctrine.c
 import { StabilityBracketUtility } from "@/domain/politics/stability-bracket.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
+import { ECONOMY_CONFIG } from "@/domain/economy/economy.config";
 
 export interface FiscalRevenueBreakdown {
   totalRevenue: number;
@@ -25,13 +26,14 @@ export interface FiscalRevenueBreakdown {
 }
 
 export class FiscalRevenueCalculator {
-  public static readonly DEFAULT_AI_REVENUE_MULTIPLIER = 1.4;
+  public static readonly DEFAULT_AI_REVENUE_MULTIPLIER =
+    ECONOMY_CONFIG.DEFAULT_AI_REVENUE_MULTIPLIER;
 
   public static calculate(
     nation: Nation,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, ProvinceDynamicState>,
-    aiRevenueMultiplier: number = FiscalRevenueCalculator.DEFAULT_AI_REVENUE_MULTIPLIER,
+    aiRevenueMultiplier: number = ECONOMY_CONFIG.DEFAULT_AI_REVENUE_MULTIPLIER,
     precomputedGdpMap?: Map<string, number>,
     precomputedTotalWorldGdp?: number,
   ): FiscalRevenueBreakdown {
@@ -50,7 +52,11 @@ export class FiscalRevenueCalculator {
         "factoryYieldBonusMultiplier",
       );
 
-    const domesticBase = Math.floor(gdp * 0.08 * factoryYieldProjectMultiplier);
+    const domesticBase = Math.floor(
+      gdp *
+        ECONOMY_CONFIG.DOMESTIC_REVENUE_RATIO *
+        factoryYieldProjectMultiplier,
+    );
 
     let totalPeaceGdp = 0;
     let totalWorldGdp = precomputedTotalWorldGdp ?? 0;
@@ -93,11 +99,15 @@ export class FiscalRevenueCalculator {
 
     const marketAccessRatio =
       totalWorldGdp > 0 ? totalPeaceGdp / totalWorldGdp : 0;
-    const exportPower = Math.floor(gdp * 0.1 * marketAccessRatio);
+    const exportPower = Math.floor(
+      gdp * ECONOMY_CONFIG.EXPORT_POWER_RATIO * marketAccessRatio,
+    );
 
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaFactor = hasSea ? 1.0 : 0.5;
-    const transitGateway = Math.floor(totalPeaceGdp * 0.0003 * seaFactor);
+    const transitGateway = Math.floor(
+      totalPeaceGdp * ECONOMY_CONFIG.TRANSIT_GATEWAY_RATIO * seaFactor,
+    );
     const globalBase = exportPower + transitGateway;
 
     const globalTradeProjectMultiplier =

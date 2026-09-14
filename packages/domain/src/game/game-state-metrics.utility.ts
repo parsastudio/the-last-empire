@@ -2,8 +2,20 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
+import { CountryRegistry } from "@/domain/data/countries/country-registry";
 
 export class GameStateMetricsUtility {
+  public static isHumanNation(
+    humanNationId: string | undefined | null,
+    targetNationId: string | undefined | null,
+  ): boolean {
+    if (!humanNationId || !targetNationId) return false;
+    return (
+      CountryRegistry.resolveCanonicalId(humanNationId) ===
+      CountryRegistry.resolveCanonicalId(targetNationId)
+    );
+  }
+
   public static getTotalWorldTerritoryPixels(
     provinces?: Record<string, ProvinceDynamicState> | ProvinceDynamicState[],
   ): number {
