@@ -1,6 +1,5 @@
 import { useMemo, useCallback, useRef, useEffect } from "react";
 import {
-  UnitType,
   MILITARY_UNIT_STATS,
   MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
@@ -9,29 +8,13 @@ import {
   Nation,
   Province,
   ProcurementBatchCalculator,
+  ALL_MILITARY_UNIT_TYPES,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { ProcurementUnitItemInfo } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/procurement-unit-card";
 
-export interface AlliedUnitProcurementInfo {
-  type: UnitType;
-  unitPrice: number;
-  techMultiplier: number;
-  techDelta: number;
-  batchQuantity: number;
-  batchCost: number;
-  canAfford: boolean;
-  remainingRoom: number;
-  isCapReached: boolean;
-}
-
-const ALL_TYPES: UnitType[] = [
-  "INFANTRY",
-  "ARMOR",
-  "AIR_DEFENSE",
-  "AIR_FORCE",
-  "DRONE_MISSILE",
-];
+export type AlliedUnitProcurementInfo = ProcurementUnitItemInfo;
 
 interface UseAlliedArmsProcurementProps {
   buyerNation: Nation;
@@ -103,7 +86,7 @@ export function useAlliedArmsProcurement({
   }, [buyerNation.military.techLevel, sellerNation.military.techLevel]);
 
   const batchList = useMemo<AlliedUnitProcurementInfo[]>(() => {
-    return ALL_TYPES.map((type) => {
+    return ALL_MILITARY_UNIT_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
       const baseUnitPrice = stat.moneyCost;
       const marketUnitPrice =

@@ -7,6 +7,14 @@ import {
 import { DIPLOMACY_CONFIG } from "@/domain/diplomacy/diplomacy.config";
 import { TerritoryClaimsUtility } from "@/domain/nation/territory-claims.utility";
 
+export interface BilateralUmbrellaState {
+  isEmergencyGuarantorOfHuman: boolean;
+  isHumanEmergencyGuarantorOfTarget: boolean;
+  isDefenseGuarantorOfHuman: boolean;
+  isHumanDefenseGuarantorOfTarget: boolean;
+  hasSecurityGuarantee: boolean;
+}
+
 export class NationRelationResolver {
   public static getRelation(
     relationsMap: Record<string, RelationProfile> | undefined,
@@ -164,6 +172,74 @@ export class NationRelationResolver {
     return hasRemainingActiveWars
       ? 0
       : DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS;
+  }
+
+  public static resolveBilateralUmbrellaState(
+    humanNation:
+      | {
+          id: string;
+          securityGuarantorId?: string | null;
+          isEmergencyProtectorate?: boolean;
+          defenseGuarantorIds?: string[];
+        }
+      | null
+      | undefined,
+    targetNation:
+      | {
+          id: string;
+          securityGuarantorId?: string | null;
+          isEmergencyProtectorate?: boolean;
+          defenseGuarantorIds?: string[];
+        }
+      | null
+      | undefined,
+  ): BilateralUmbrellaState {
+    if (!humanNation || !targetNation) {
+      return {
+        isEmergencyGuarantorOfHuman: false,
+        isHumanEmergencyGuarantorOfTarget: false,
+        isDefenseGuarantorOfHuman: false,
+        isHumanDefenseGuarantorOfTarget: false,
+        hasSecurityGuarantee: false,
+      };
+    }
+
+    const humanCanonical = CountryRegistry.resolveCanonicalId(humanNation.id);
+    const targetCanonical = CountryRegistry.resolveCanonicalId(targetNation.id);
+
+    const isEmergencyGuarantorOfHuman =
+      Boolean(humanNation.securityGuarantorId) &&
+      CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
+        targetCanonical &&
+      Boolean(humanNation.isEmergencyProtectorate);
+
+    const isHumanEmergencyGuarantorOfTarget =
+      Boolean(targetNation.securityGuarantorId) &&
+      CountryRegistry.resolveCanonicalId(targetNation.securityGuarantorId) ===
+        humanCanonical &&
+      Boolean(targetNation.isEmergencyProtectorate);
+
+    const isDefenseGuarantorOfHuman = (
+      humanNation.defenseGuarantorIds || []
+    ).some((id) => CountryRegistry.resolveCanonicalId(id) === targetCanonical);
+
+    const isHumanDefenseGuarantorOfTarget = (
+      targetNation.defenseGuarantorIds || []
+    ).some((id) => CountryRegistry.resolveCanonicalId(id) === humanCanonical);
+
+    const hasSecurityGuarantee =
+      isEmergencyGuarantorOfHuman ||
+      isHumanEmergencyGuarantorOfTarget ||
+      isDefenseGuarantorOfHuman ||
+      isHumanDefenseGuarantorOfTarget;
+
+    return {
+      isEmergencyGuarantorOfHuman,
+      isHumanEmergencyGuarantorOfTarget,
+      isDefenseGuarantorOfHuman,
+      isHumanDefenseGuarantorOfTarget,
+      hasSecurityGuarantee,
+    };
   }
 }
 

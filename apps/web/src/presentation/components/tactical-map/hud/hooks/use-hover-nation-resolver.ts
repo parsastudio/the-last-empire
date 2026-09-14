@@ -92,40 +92,11 @@ export function useHoverNationResolver({
             canonicalOwnerId,
           );
 
-          const isEmergencyGuarantorOfHuman =
-            Boolean(humanNation?.securityGuarantorId) &&
-            CountryRegistry.resolveCanonicalId(
-              humanNation?.securityGuarantorId,
-            ) === canonicalOwnerId &&
-            Boolean(humanNation?.isEmergencyProtectorate);
-
-          const isHumanEmergencyGuarantorOfTarget =
-            Boolean(ownerNation.securityGuarantorId) &&
-            CountryRegistry.resolveCanonicalId(
-              ownerNation.securityGuarantorId,
-            ) === canonicalHuman &&
-            Boolean(ownerNation.isEmergencyProtectorate);
-
-          const isDefenseGuarantorOfHuman = (
-            humanNation?.defenseGuarantorIds || []
-          ).some(
-            (id) => CountryRegistry.resolveCanonicalId(id) === canonicalOwnerId,
+          const umbrella = NationRelationResolver.resolveBilateralUmbrellaState(
+            humanNation,
+            ownerNation,
           );
-
-          const isHumanDefenseGuarantorOfTarget = (
-            ownerNation.defenseGuarantorIds || []
-          ).some(
-            (id) => CountryRegistry.resolveCanonicalId(id) === canonicalHuman,
-          );
-
-          if (
-            isEmergencyGuarantorOfHuman ||
-            isHumanEmergencyGuarantorOfTarget ||
-            isDefenseGuarantorOfHuman ||
-            isHumanDefenseGuarantorOfTarget
-          ) {
-            hasSecurityGuarantee = true;
-          }
+          hasSecurityGuarantee = umbrella.hasSecurityGuarantee;
         }
       }
 

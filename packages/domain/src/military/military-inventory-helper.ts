@@ -2,6 +2,7 @@ import {
   MilitaryStack,
   UnitType,
   BranchTechRating,
+  ALL_MILITARY_UNIT_TYPES,
 } from "@/domain/military/military.schema";
 
 export type MilitaryStackKey =
@@ -25,6 +26,14 @@ export class MilitaryInventoryHelper {
       case "DRONE_MISSILE":
         return "droneMissile";
     }
+  }
+
+  public static getUnitCount(
+    military: Partial<Record<MilitaryStackKey, number>>,
+    unitType: UnitType,
+  ): number {
+    const key = this.getStackKey(unitType);
+    return military[key] ?? 0;
   }
 
   public static getBranchTech(
@@ -61,16 +70,9 @@ export class MilitaryInventoryHelper {
       ? { ...military.branchTech }
       : this.initializeBranchTech(military.techLevel);
 
-    const keys: MilitaryStackKey[] = [
-      "infantry",
-      "armor",
-      "airDefense",
-      "airForce",
-      "droneMissile",
-    ];
-
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]!;
+    for (let i = 0; i < ALL_MILITARY_UNIT_TYPES.length; i++) {
+      const type = ALL_MILITARY_UNIT_TYPES[i]!;
+      const key = this.getStackKey(type);
       const currentVal = currentBranchTech[key] ?? military.techLevel ?? 1;
       if (currentVal < safeTech) {
         currentBranchTech[key] = safeTech;

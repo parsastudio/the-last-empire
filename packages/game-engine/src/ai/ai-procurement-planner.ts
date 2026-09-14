@@ -5,6 +5,7 @@ import {
   MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
   AI_DOCTRINE_PRESETS,
+  ALL_MILITARY_UNIT_TYPES,
 } from "@geopolitics/domain";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import { AIWartimeLoanEvaluator } from "@/engine/ai/procurement/ai-wartime-loan-evaluator";
@@ -101,13 +102,7 @@ export class AIProcurementPlanner {
       };
     }
 
-    const unitTypes: UnitType[] = [
-      "AIR_FORCE",
-      "AIR_DEFENSE",
-      "ARMOR",
-      "DRONE_MISSILE",
-      "INFANTRY",
-    ];
+    const unitTypes: UnitType[] = [...ALL_MILITARY_UNIT_TYPES];
 
     let importBudget = wallets.globalMarket;
     let domesticBudget = wallets.domesticInfra;

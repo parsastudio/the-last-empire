@@ -2,6 +2,8 @@ import { Province, Nation } from "@geopolitics/domain";
 import { PaletteBufferBuilder } from "@/presentation/components/tactical-map/final/utils/palette-buffer-builder";
 
 export class WebGLPaletteTextureManager {
+  private static readonly BUFFER_SIZE = 256 * 256 * 4;
+
   private static createTextureFromBuffer(
     gl: WebGL2RenderingContext,
     data: Uint8Array,
@@ -49,12 +51,21 @@ export class WebGLPaletteTextureManager {
     );
   }
 
+  private static createBufferAndFill(
+    fillFn: (data: Uint8Array) => void,
+  ): Uint8Array {
+    const data = new Uint8Array(this.BUFFER_SIZE);
+    fillFn(data);
+    return data;
+  }
+
   public static createPaletteTexture(
     gl: WebGL2RenderingContext,
     provincesMap?: Record<string, Province>,
   ): WebGLTexture | null {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillPoliticalBuffer(data, provincesMap);
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillPoliticalBuffer(buf, provincesMap),
+    );
     return this.createTextureFromBuffer(gl, data);
   }
 
@@ -63,8 +74,9 @@ export class WebGLPaletteTextureManager {
     texture: WebGLTexture,
     provincesMap?: Record<string, Province>,
   ): void {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillPoliticalBuffer(data, provincesMap);
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillPoliticalBuffer(buf, provincesMap),
+    );
     this.updateTextureFromBuffer(gl, texture, data);
   }
 
@@ -74,12 +86,13 @@ export class WebGLPaletteTextureManager {
     nationsMap?: Record<string, Nation>,
     humanNationId?: string,
   ): WebGLTexture | null {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillDiplomaticBuffer(
-      data,
-      provincesMap,
-      nationsMap,
-      humanNationId,
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillDiplomaticBuffer(
+        buf,
+        provincesMap,
+        nationsMap,
+        humanNationId,
+      ),
     );
     return this.createTextureFromBuffer(gl, data);
   }
@@ -91,12 +104,13 @@ export class WebGLPaletteTextureManager {
     nationsMap?: Record<string, Nation>,
     humanNationId?: string,
   ): void {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillDiplomaticBuffer(
-      data,
-      provincesMap,
-      nationsMap,
-      humanNationId,
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillDiplomaticBuffer(
+        buf,
+        provincesMap,
+        nationsMap,
+        humanNationId,
+      ),
     );
     this.updateTextureFromBuffer(gl, texture, data);
   }
@@ -105,8 +119,9 @@ export class WebGLPaletteTextureManager {
     gl: WebGL2RenderingContext,
     provincesMap?: Record<string, Province>,
   ): WebGLTexture | null {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillGdpBuffer(data, provincesMap);
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillGdpBuffer(buf, provincesMap),
+    );
     return this.createTextureFromBuffer(gl, data);
   }
 
@@ -115,8 +130,9 @@ export class WebGLPaletteTextureManager {
     texture: WebGLTexture,
     provincesMap?: Record<string, Province>,
   ): void {
-    const data = new Uint8Array(256 * 256 * 4);
-    PaletteBufferBuilder.fillGdpBuffer(data, provincesMap);
+    const data = this.createBufferAndFill((buf) =>
+      PaletteBufferBuilder.fillGdpBuffer(buf, provincesMap),
+    );
     this.updateTextureFromBuffer(gl, texture, data);
   }
 }

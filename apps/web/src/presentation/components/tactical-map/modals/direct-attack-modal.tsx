@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation, GameState } from "@geopolitics/domain";
+import { Nation, GameState, UnitType } from "@geopolitics/domain";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 import { AttackHeader } from "@/presentation/components/tactical-map/modals/attack/attack-header";
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
@@ -41,6 +41,47 @@ export function DirectAttackModal({
     isOpen,
     onClose,
   });
+
+  const deploymentSliders = useMemo(() => {
+    if (!humanNation) return [];
+
+    return [
+      {
+        type: "INFANTRY" as UnitType,
+        available: humanNation.military.infantry,
+        selected: form.infantryToDeploy,
+        onChange: form.setInfantryToDeploy,
+      },
+      {
+        type: "ARMOR" as UnitType,
+        available: humanNation.military.armor || 0,
+        selected: form.armorToDeploy,
+        onChange: form.setArmorToDeploy,
+      },
+      {
+        type: "AIR_FORCE" as UnitType,
+        available: humanNation.military.airForce,
+        selected: form.airForceToDeploy,
+        onChange: form.setAirForceToDeploy,
+      },
+      {
+        type: "DRONE_MISSILE" as UnitType,
+        available: humanNation.military.droneMissile,
+        selected: form.dronesToLaunch,
+        onChange: form.setDronesToLaunch,
+      },
+    ];
+  }, [
+    humanNation,
+    form.infantryToDeploy,
+    form.armorToDeploy,
+    form.airForceToDeploy,
+    form.dronesToLaunch,
+    form.setInfantryToDeploy,
+    form.setArmorToDeploy,
+    form.setAirForceToDeploy,
+    form.setDronesToLaunch,
+  ]);
 
   if (!isOpen || !form.targetNation || !humanNation) return null;
 
@@ -110,45 +151,21 @@ export function DirectAttackModal({
           </span>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-2.5">
-            <UnitDeploymentSlider
-              label={tMil("INFANTRY.name")}
-              unitName={tMil("INFANTRY.unit")}
-              icon={MILITARY_UNIT_VISUALS.INFANTRY.icon}
-              iconColorClass={MILITARY_UNIT_VISUALS.INFANTRY.colorClass}
-              availableCount={humanNation.military.infantry}
-              selectedCount={form.infantryToDeploy}
-              onChange={form.setInfantryToDeploy}
-            />
-
-            <UnitDeploymentSlider
-              label={tMil("ARMOR.name")}
-              unitName={tMil("ARMOR.unit")}
-              icon={MILITARY_UNIT_VISUALS.ARMOR.icon}
-              iconColorClass={MILITARY_UNIT_VISUALS.ARMOR.colorClass}
-              availableCount={humanNation.military.armor || 0}
-              selectedCount={form.armorToDeploy}
-              onChange={form.setArmorToDeploy}
-            />
-
-            <UnitDeploymentSlider
-              label={tMil("AIR_FORCE.name")}
-              unitName={tMil("AIR_FORCE.unit")}
-              icon={MILITARY_UNIT_VISUALS.AIR_FORCE.icon}
-              iconColorClass={MILITARY_UNIT_VISUALS.AIR_FORCE.colorClass}
-              availableCount={humanNation.military.airForce}
-              selectedCount={form.airForceToDeploy}
-              onChange={form.setAirForceToDeploy}
-            />
-
-            <UnitDeploymentSlider
-              label={tMil("DRONE_MISSILE.name")}
-              unitName={tMil("DRONE_MISSILE.unit")}
-              icon={MILITARY_UNIT_VISUALS.DRONE_MISSILE.icon}
-              iconColorClass={MILITARY_UNIT_VISUALS.DRONE_MISSILE.colorClass}
-              availableCount={humanNation.military.droneMissile}
-              selectedCount={form.dronesToLaunch}
-              onChange={form.setDronesToLaunch}
-            />
+            {deploymentSliders.map((slider) => {
+              const visual = MILITARY_UNIT_VISUALS[slider.type];
+              return (
+                <UnitDeploymentSlider
+                  key={slider.type}
+                  label={tMil(`${slider.type}.name`)}
+                  unitName={tMil(`${slider.type}.unit`)}
+                  icon={visual.icon}
+                  iconColorClass={visual.colorClass}
+                  availableCount={slider.available}
+                  selectedCount={slider.selected}
+                  onChange={slider.onChange}
+                />
+              );
+            })}
           </div>
         </div>
 

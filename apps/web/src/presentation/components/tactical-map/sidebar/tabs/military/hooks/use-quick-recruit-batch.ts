@@ -1,33 +1,17 @@
 import { useMemo, useCallback, useRef, useEffect } from "react";
 import {
-  UnitType,
-  MILITARY_UNIT_STATS,
   MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
   ActionFactory,
   Nation,
   ProcurementBatchCalculator,
+  ALL_MILITARY_UNIT_TYPES,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { ProcurementUnitItemInfo } from "../components/procurement-unit-card";
 
-export interface QuickUnitBatchInfo {
-  type: UnitType;
-  unitPrice: number;
-  batchQuantity: number;
-  batchCost: number;
-  canAfford: boolean;
-  remainingRoom: number;
-  isCapReached: boolean;
-}
-
-const ALL_TYPES: UnitType[] = [
-  "INFANTRY",
-  "ARMOR",
-  "AIR_DEFENSE",
-  "AIR_FORCE",
-  "DRONE_MISSILE",
-];
+export type QuickUnitBatchInfo = ProcurementUnitItemInfo;
 
 interface UseQuickRecruitBatchProps {
   nationId: string;
@@ -68,8 +52,7 @@ export function useQuickRecruitBatch({
   }, [currentGdp, nation.military]);
 
   const batchList = useMemo<QuickUnitBatchInfo[]>(() => {
-    return ALL_TYPES.map((type) => {
-      const stat = MILITARY_UNIT_STATS[type];
+    return ALL_MILITARY_UNIT_TYPES.map((type) => {
       const unitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
         type,
         nation.government?.type,
@@ -81,7 +64,7 @@ export function useQuickRecruitBatch({
         baselineTreasury: baselineTreasuryRef.current,
         budgetPercentage: 0.1,
         unitPrice,
-        baseValuationPrice: stat.moneyCost,
+        baseValuationPrice: unitPrice,
         remainingQuotaRoom: q.remainingRoom,
         remainingValuationCapacity,
         minQuantity: 1,

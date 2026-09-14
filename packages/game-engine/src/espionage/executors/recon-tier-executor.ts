@@ -47,29 +47,26 @@ export class ReconTierExecutor {
             true,
           );
       }
-    } else if ((target.defenseGuarantorIds || []).length > 0 && allNations) {
-      const gNames: string[] = [];
-      let maxTech = 1.0;
-      let primaryFlag = "IR";
-      let primaryId = "";
+    } else if (allNations) {
+      const liveGuarantors = NationGettersUtility.getLiveDefenseGuarantors(
+        target,
+        allNations,
+      );
+      if (liveGuarantors.length > 0) {
+        let maxTech = 1.0;
+        let primary = liveGuarantors[0]!;
 
-      for (let i = 0; i < target.defenseGuarantorIds.length; i++) {
-        const gId = target.defenseGuarantorIds[i]!;
-        const gNation = NationGettersUtility.resolveNation(gId, allNations);
-        if (gNation && gNation.isAlive) {
-          gNames.push(gNation.id);
-          if (gNation.military.techLevel > maxTech) {
-            maxTech = gNation.military.techLevel;
-            primaryFlag = gNation.flagCode;
-            primaryId = gNation.id;
+        for (let i = 0; i < liveGuarantors.length; i++) {
+          const g = liveGuarantors[i]!;
+          if (g.military.techLevel > maxTech) {
+            maxTech = g.military.techLevel;
+            primary = g;
           }
         }
-      }
 
-      if (gNames.length > 0) {
-        guarantorNationId = primaryId;
-        guarantorName = gNames.join(" - ");
-        guarantorFlagCode = primaryFlag;
+        guarantorNationId = primary.id;
+        guarantorName = liveGuarantors.map((g) => g.id).join(" - ");
+        guarantorFlagCode = primary.flagCode;
         guarantorTechLevel = maxTech;
         guarantorAuxiliaryValuation = 0;
       }

@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { UnitType } from "@/domain/military/military.schema";
-import { GameError, GovernmentTraitsUtility } from "@geopolitics/domain";
+import { GameError } from "@geopolitics/domain";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -19,21 +19,17 @@ export class DomesticRecruitmentManager {
       throw new GameError("INVALID_QUANTITY");
     }
 
-    const govModifiers = GovernmentTraitsUtility.getModifiers(
-      nation.government?.type,
-    );
-
     const projectDiscount =
       NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
         nation.completedProjectIds,
         "procurementCostDiscountMultiplier",
       );
 
-    const baseUnitPrice =
-      MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
-    const unitPrice = Math.floor(
-      baseUnitPrice * govModifiers.procurementCostMultiplier * projectDiscount,
+    const baseUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+      unitType,
+      nation.government?.type,
     );
+    const unitPrice = Math.floor(baseUnitPrice * projectDiscount);
     const totalMoney = unitPrice * quantity;
 
     if (nation.treasury < totalMoney) {

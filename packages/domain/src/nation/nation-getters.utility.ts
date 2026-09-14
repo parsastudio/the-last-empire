@@ -16,9 +16,40 @@ export class NationGettersUtility {
     targetIdentifier: string,
     allNations?: Record<string, Nation>,
   ): Nation | null {
-    if (!allNations) return null;
+    if (!allNations || !targetIdentifier) return null;
     const canonical = CountryRegistry.resolveCanonicalId(targetIdentifier);
     return allNations[canonical] || allNations[targetIdentifier] || null;
+  }
+
+  public static getLiveDefenseGuarantors(
+    nation: Nation,
+    allNations?: Record<string, Nation>,
+  ): Nation[] {
+    if (
+      !nation.defenseGuarantorIds ||
+      nation.defenseGuarantorIds.length === 0 ||
+      !allNations
+    ) {
+      return [];
+    }
+
+    const seen = new Set<string>();
+    const guarantors: Nation[] = [];
+    const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
+
+    for (let i = 0; i < nation.defenseGuarantorIds.length; i++) {
+      const gId = nation.defenseGuarantorIds[i]!;
+      const canonicalG = CountryRegistry.resolveCanonicalId(gId);
+      if (canonicalG !== canonicalNation && !seen.has(canonicalG)) {
+        seen.add(canonicalG);
+        const gNation = this.resolveNation(canonicalG, allNations);
+        if (gNation && gNation.isAlive) {
+          guarantors.push(gNation);
+        }
+      }
+    }
+
+    return guarantors;
   }
 
   public static isAlive(

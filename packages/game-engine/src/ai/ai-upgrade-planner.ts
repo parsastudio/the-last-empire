@@ -130,30 +130,28 @@ export class AIUpgradePlanner {
 
       const costRatio = nextMilCost / Math.max(1, nextIndCost);
 
-      if (costRatio <= threshold) {
-        if (currentTreasury >= nextMilCost && innovationBudget >= nextMilCost) {
-          actions.push(ActionFactory.investResearch(nation.id));
-          currentTreasury -= nextMilCost;
-          innovationBudget -= nextMilCost;
-          simulatedMilTech = Number(
-            (simulatedMilTech + ResearchManager.RESEARCH_STEP).toFixed(1),
-          );
-          stepsTaken++;
-        } else if (
-          currentTreasury >= nextIndCost &&
-          innovationBudget >= nextIndCost
-        ) {
-          actions.push(ActionFactory.investIndustrialResearch(nation.id));
-          currentTreasury -= nextIndCost;
-          innovationBudget -= nextIndCost;
-          simulatedIndTech = Number(
-            (simulatedIndTech + IndustryCalculator.RESEARCH_STEP).toFixed(2),
-          );
-          stepsTaken++;
-        } else {
-          break;
+      const isMilPriority = costRatio <= threshold;
+      const primaryType: "MIL" | "IND" = isMilPriority ? "MIL" : "IND";
+      const secondaryType: "MIL" | "IND" = isMilPriority ? "IND" : "MIL";
+
+      const tryStep = (type: "MIL" | "IND"): boolean => {
+        if (type === "MIL") {
+          if (
+            currentTreasury >= nextMilCost &&
+            innovationBudget >= nextMilCost
+          ) {
+            actions.push(ActionFactory.investResearch(nation.id));
+            currentTreasury -= nextMilCost;
+            innovationBudget -= nextMilCost;
+            simulatedMilTech = Number(
+              (simulatedMilTech + ResearchManager.RESEARCH_STEP).toFixed(1),
+            );
+            stepsTaken++;
+            return true;
+          }
+          return false;
         }
-      } else {
+
         if (currentTreasury >= nextIndCost && innovationBudget >= nextIndCost) {
           actions.push(ActionFactory.investIndustrialResearch(nation.id));
           currentTreasury -= nextIndCost;
@@ -162,20 +160,13 @@ export class AIUpgradePlanner {
             (simulatedIndTech + IndustryCalculator.RESEARCH_STEP).toFixed(2),
           );
           stepsTaken++;
-        } else if (
-          currentTreasury >= nextMilCost &&
-          innovationBudget >= nextMilCost
-        ) {
-          actions.push(ActionFactory.investResearch(nation.id));
-          currentTreasury -= nextMilCost;
-          innovationBudget -= nextMilCost;
-          simulatedMilTech = Number(
-            (simulatedMilTech + ResearchManager.RESEARCH_STEP).toFixed(1),
-          );
-          stepsTaken++;
-        } else {
-          break;
+          return true;
         }
+        return false;
+      };
+
+      if (!tryStep(primaryType) && !tryStep(secondaryType)) {
+        break;
       }
     }
 
