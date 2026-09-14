@@ -6,6 +6,7 @@ import { Award } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { ResearchManager } from "@/engine/politics/research-manager";
+import { TechProgressionUtility } from "@geopolitics/domain";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { TacticalTechProgressCard } from "@/presentation/components/common/tactical-tech-progress-card";
 
@@ -33,8 +34,9 @@ export function MilitaryTechUpgradeCard({
   );
   const canAffordTech = treasury >= stepResearchCost;
 
-  const nextStepLevel = Number((techLevel + 0.1).toFixed(1));
-  const subLevelIndex = Math.round((techLevel - Math.floor(techLevel)) * 10);
+  const nextStepLevel = TechProgressionUtility.getNextStepLevel(techLevel);
+  const subLevelIndex = TechProgressionUtility.getSubLevelIndex(techLevel);
+  const progressPercent = TechProgressionUtility.getProgressPercent(techLevel);
 
   const handleInvestTech = async () => {
     if (!canAffordTech || isSubmittingTech) return;
@@ -54,7 +56,7 @@ export function MilitaryTechUpgradeCard({
       stepCostLabel={t("stepCost")}
       stepCostFormatted={formatCurrency(stepResearchCost, true)}
       progressToNextLabel={t("progressToNext")}
-      progressPercentFormatted={formatPercent(subLevelIndex * 10)}
+      progressPercentFormatted={formatPercent(progressPercent)}
       subLevelIndex={subLevelIndex}
       upgradeBtnText={t("upgradeBtn", { level: formatLevel(nextStepLevel) })}
       insufficientFundsText={t("insufficientFunds")}

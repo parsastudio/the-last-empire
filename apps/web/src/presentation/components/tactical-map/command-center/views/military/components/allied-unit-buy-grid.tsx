@@ -4,7 +4,7 @@ import { ArrowLeft, Wallet, Award, TrendingUp, Info } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
-import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
+import { ProcurementUnitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/procurement-unit-card";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -102,9 +102,10 @@ export function AlliedUnitBuyGrid({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
         {batchList.map((item) => (
-          <AlliedUnitBuyCard
+          <ProcurementUnitCard
             key={item.type}
             info={item}
+            variant="allied"
             feedbacks={floatingFeedbacks[item.type] || []}
             onBuy={handleBuyAlliedBatch}
           />

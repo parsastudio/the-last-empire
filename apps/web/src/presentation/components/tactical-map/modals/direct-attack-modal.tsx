@@ -45,32 +45,39 @@ export function DirectAttackModal({
   const deploymentSliders = useMemo(() => {
     if (!humanNation) return [];
 
-    return [
+    const configs: {
+      type: UnitType;
+      available: number;
+      selected: number;
+      onChange: (val: number) => void;
+    }[] = [
       {
-        type: "INFANTRY" as UnitType,
+        type: "INFANTRY",
         available: humanNation.military.infantry,
         selected: form.infantryToDeploy,
         onChange: form.setInfantryToDeploy,
       },
       {
-        type: "ARMOR" as UnitType,
+        type: "ARMOR",
         available: humanNation.military.armor || 0,
         selected: form.armorToDeploy,
         onChange: form.setArmorToDeploy,
       },
       {
-        type: "AIR_FORCE" as UnitType,
+        type: "AIR_FORCE",
         available: humanNation.military.airForce,
         selected: form.airForceToDeploy,
         onChange: form.setAirForceToDeploy,
       },
       {
-        type: "DRONE_MISSILE" as UnitType,
+        type: "DRONE_MISSILE",
         available: humanNation.military.droneMissile,
         selected: form.dronesToLaunch,
         onChange: form.setDronesToLaunch,
       },
     ];
+
+    return configs;
   }, [
     humanNation,
     form.infantryToDeploy,
