@@ -42,9 +42,7 @@ export class MapBuildOrchestrator {
 
     const finalFiles = [
       "manifest.json",
-      "live-state.bin",
       "live-state.bin.gz",
-      "terrain-raw.bin",
       "terrain-raw.bin.gz",
     ];
 
@@ -142,12 +140,9 @@ export class MapBuildOrchestrator {
 
     const rawTerrainGzSrc = path.join(visualDir, "terrain-raw.bin.gz");
     const rawTerrainGzDest = path.join(finalDir, "terrain-raw.bin.gz");
-    const rawTerrainSrc = path.join(visualDir, "terrain-raw.bin");
-    const rawTerrainDest = path.join(finalDir, "terrain-raw.bin");
 
     try {
       await fs.copyFile(rawTerrainGzSrc, rawTerrainGzDest);
-      await fs.copyFile(rawTerrainSrc, rawTerrainDest);
     } catch {}
 
     await MaritimeEnricherEngine.enrichManifestMaritimeTopology(mapId);

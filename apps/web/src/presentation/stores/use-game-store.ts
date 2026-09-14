@@ -66,7 +66,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         loading: false,
       });
       return false;
-    } catch {
+    } catch (err) {
+      console.error("Failed to load state from storage:", err);
       set({
         error: "Failed to load state from storage.",
         loading: false,
@@ -105,7 +106,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         loading: false,
       });
       return true;
-    } catch {
+    } catch (err) {
+      console.error("Failed to initialize new campaign:", err);
       set({
         error: "Failed to initialize new campaign.",
         loading: false,
@@ -173,7 +175,8 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
 
       void GamePersistenceService.saveGameState(activeGameId, newState);
       return newState;
-    } catch {
+    } catch (err) {
+      console.error("Failed to advance turn:", err);
       return null;
     }
   },
