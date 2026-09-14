@@ -138,6 +138,28 @@
   --color-intel: var(--intel);
 }
 
+@media (max-height: 520px) and (orientation: landscape) {
+  html {
+    font-size: 11.5px;
+  }
+
+  svg.lucide {
+    transform: scale(0.88);
+    transform-origin: center;
+  }
+}
+
+@media (max-height: 400px) and (orientation: landscape) {
+  html {
+    font-size: 10.25px;
+  }
+
+  svg.lucide {
+    transform: scale(0.82);
+    transform-origin: center;
+  }
+}
+
 .tactical-range-input {
   -webkit-appearance: none;
   appearance: none;

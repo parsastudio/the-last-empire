@@ -37,6 +37,19 @@ export class GamePersistenceService {
     return await this.storageAdapter.loadGameState(gameId);
   }
 
+  public static async saveGameStateImmediate(
+    gameId: string,
+    state: GameState,
+  ): Promise<void> {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = null;
+    }
+    this.pendingState = null;
+    await this.saveQueue;
+    await this.storageAdapter.saveGameState(gameId, state);
+  }
+
   public static saveGameState(gameId: string, state: GameState): Promise<void> {
     this.pendingState = { gameId, state };
 

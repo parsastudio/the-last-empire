@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { Award, Coins, Users, Landmark } from "lucide-react";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface NationOverviewStatsProps {
   nation: NationDetail;
@@ -9,12 +10,13 @@ interface NationOverviewStatsProps {
 
 export function NationOverviewStats({ nation }: NationOverviewStatsProps) {
   const t = useTranslations("selectNation.stats");
+  const { toDigits } = useLocaleFormatter();
 
   const statCards = [
     {
       id: "rank",
       label: t("rank"),
-      value: `#${nation.rank}`,
+      value: `#${toDigits(nation.rank)}`,
       icon: Award,
       iconColor: "text-amber-500",
     },

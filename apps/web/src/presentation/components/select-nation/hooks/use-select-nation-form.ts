@@ -20,6 +20,7 @@ import { NationPresentationMapper } from "@/presentation/utils/nation-presentati
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
+import { AppLocale } from "@/presentation/utils/locale-number-formatter";
 
 function createNationDetailItem(
   canonicalId: string,
@@ -33,6 +34,7 @@ function createNationDetailItem(
   formatCountryName: (code: string) => string,
   tPowerTiers: (key: string) => string,
   tDossier: (values: { name: string; rank: number }) => string,
+  locale: AppLocale,
 ): NationDetail {
   const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
   const powerLabel = tPowerTiers(powerTierKey);
@@ -48,6 +50,7 @@ function createNationDetailItem(
     treasury,
     displayName,
     powerLabel,
+    locale,
   );
 
   return {
@@ -69,6 +72,7 @@ function mapManifestToNationDetails(
   tDossier: (values: { name: string; rank: number }) => string,
   tPowerTiers: (key: string) => string,
   formatCountryName: (code: string) => string,
+  locale: AppLocale,
 ): NationDetail[] {
   const manifestItems = manifest?.nations?.length
     ? manifest.nations
@@ -95,6 +99,7 @@ function mapManifestToNationDetails(
         formatCountryName,
         tPowerTiers,
         tDossier,
+        locale,
       );
     });
   }
@@ -132,6 +137,7 @@ function mapManifestToNationDetails(
       formatCountryName,
       tPowerTiers,
       tDossier,
+      locale,
     );
   });
 }
@@ -144,7 +150,7 @@ export function useSelectNationForm() {
   const { showToast } = useToast();
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
-  const { formatCountryName } = useLocaleFormatter();
+  const { formatCountryName, locale } = useLocaleFormatter();
 
   const [manifest, setManifest] = useState<FinalMapManifest | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,8 +194,9 @@ export function useSelectNationForm() {
         (values) => tDossier("template", values),
         (key) => tPowerTiers(key),
         formatCountryName,
+        locale,
       ),
-    [manifest, tDossier, tPowerTiers, formatCountryName],
+    [manifest, tDossier, tPowerTiers, formatCountryName, locale],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {
