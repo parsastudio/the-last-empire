@@ -7,6 +7,8 @@ import {
   getNationGdp,
   FiscalRevenueCalculator,
   FiscalRevenueBreakdown,
+  GameStateProjections,
+  CountryRegistry,
 } from "@geopolitics/domain";
 
 export interface EconomicDoctrinePreviewViewModel {
@@ -23,7 +25,9 @@ export function selectEconomicDoctrinePreview(
   selectedStance: EconomicDoctrineStance,
   nationsMap?: Record<string, Nation>,
   provincesMap?: Record<string, Province>,
+  projections?: GameStateProjections | null,
 ): EconomicDoctrinePreviewViewModel {
+  const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
   const previewNation: Nation = {
     ...nation,
     economicStance: selectedStance,
@@ -33,14 +37,20 @@ export function selectEconomicDoctrinePreview(
     previewNation,
     nationsMap,
     provincesMap,
+    FiscalRevenueCalculator.DEFAULT_AI_REVENUE_MULTIPLIER,
+    projections?.gdpMap,
+    projections?.totalWorldGdp,
   );
 
   const hasSeaAccess = NationGettersUtility.hasSeaAccess(
     nation.id,
     provincesMap,
+    undefined,
+    projections?.provincesByOwnerMap,
   );
 
-  const nationGdp = getNationGdp(nation, provincesMap);
+  const nationGdp =
+    projections?.gdpMap.get(canonicalId) ?? getNationGdp(nation, provincesMap);
   const gdpPercentage =
     nationGdp > 0
       ? Number(((preview.totalRevenue / nationGdp) * 100).toFixed(2))

@@ -37,6 +37,8 @@ export * from "./game/game-state.schema";
 export * from "./game/game-state-metrics.utility";
 export * from "./game/turn-log-window.utility";
 export * from "./game/turn-log-filter.utility";
+export * from "./game/projections/game-state-projections.schema";
+export * from "./game/projections/turn-projections-calculator";
 export * from "./map/bit-packed-buffer";
 export * from "./map/bit-packed-cell.utility";
 export * from "./map/client-map-path-resolver";

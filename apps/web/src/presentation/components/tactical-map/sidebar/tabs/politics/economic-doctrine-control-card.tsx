@@ -3,7 +3,12 @@
 import React, { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Coins, Zap, Anchor, Compass, CheckCircle2 } from "lucide-react";
-import { Nation, Province, EconomicDoctrineStance } from "@geopolitics/domain";
+import {
+  Nation,
+  Province,
+  EconomicDoctrineStance,
+  GameStateProjections,
+} from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { selectEconomicDoctrinePreview } from "@/presentation/selectors/politics-view-model.selector";
@@ -15,12 +20,14 @@ interface EconomicDoctrineControlCardProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
   provincesMap?: Record<string, Province>;
+  projections?: GameStateProjections | null;
 }
 
 export function EconomicDoctrineControlCard({
   nation,
   nationsMap,
   provincesMap,
+  projections,
 }: EconomicDoctrineControlCardProps) {
   const t = useTranslations("politics");
   const currentStance = nation.economicStance || "BALANCED_MIXED";
@@ -35,8 +42,9 @@ export function EconomicDoctrineControlCard({
         selectedStance,
         nationsMap,
         provincesMap,
+        projections,
       ),
-    [nation, selectedStance, nationsMap, provincesMap],
+    [nation, selectedStance, nationsMap, provincesMap, projections],
   );
 
   const activeConfig = previewModel.activeConfig;

@@ -1,6 +1,7 @@
 {
   "version": "Strategic Core v0.1.0",
   "title": "THE LAST EMPIRE",
+  "github": "Project GitHub Repository",
   "hero": {
     "prefix": "The destiny of the world is in your hands; forge your realm through ",
     "military": "military might",
@@ -12,135 +13,88 @@
   },
   "console": {
     "newCampaign": "Forge New Empire",
-    "loadCampaign": "Open Archived Dossier"
+    "newCampaignSub": "Establish sovereignty and commence conquest",
+    "loadCampaign": "Open Archived Dossier",
+    "loadCampaignSub": "Resume campaign from last recorded state"
   },
   "briefing": {
     "title": "Live Command Feed",
+    "liveStatus": "Orbital Recon Online",
     "feed": [
       {
         "id": "1",
         "type": "info",
-        "text": "Fresh arms shipment delivered to frontline garrison depots.",
+        "tag": "MILITARY",
+        "text": "Satellite Recon: Heavy armored formation movements tracked near shared border.",
         "time": "Just now"
       },
       {
         "id": "2",
         "type": "danger",
-        "text": "Crisis report: High inflation sparks labor strikes across capital.",
+        "tag": "CRISIS",
+        "text": "Intelligence Alert: Heightened risk of containment coalition formed by superpowers.",
         "time": "2 min ago"
       },
       {
         "id": "3",
-        "type": "warning",
-        "text": "Infrastructure alert: Industrial slot saturation in central provinces.",
+        "type": "info",
+        "tag": "INDUSTRY",
+        "text": "Defense Arsenal: Automated missile and strike drone lines operating at peak quota.",
         "time": "5 min ago"
       },
       {
         "id": "4",
-        "type": "info",
-        "text": "Intel surveillance: Military convoys tracked near shared border.",
+        "type": "warning",
+        "tag": "TREASURY",
+        "text": "National Treasury: Maritime transit throughput surged with positive revenue balance.",
         "time": "8 min ago"
       },
       {
         "id": "5",
         "type": "info",
-        "text": "Air wing patrol: Persistent fighter sorties launched over perimeter.",
+        "tag": "DEFENSE",
+        "text": "Aerospace Command: Phased-array radars synchronized with integrated missile dome.",
         "time": "12 min ago"
       },
       {
         "id": "6",
-        "type": "warning",
-        "text": "Fiscal warning: National budget deficit nearing external credit limit.",
-        "time": "15 min ago"
+        "type": "danger",
+        "tag": "SECURITY",
+        "text": "Counter-Intel: Hostile sabotage cell intercepted and neutralized in manufacturing hub.",
+        "time": "18 min ago"
       },
       {
         "id": "7",
         "type": "info",
-        "text": "Official proposal received from neighbor for Non-Aggression Pact.",
-        "time": "20 min ago"
-      },
-      {
-        "id": "8",
-        "type": "danger",
-        "text": "Security Code Red: Civil unrest triggers sharp drop in regime stability.",
+        "tag": "DIPLOMACY",
+        "text": "Chancellery: Formal proposal for bilateral strategic partnership received from neighbor.",
         "time": "25 min ago"
       },
       {
-        "id": "9",
+        "id": "8",
         "type": "warning",
-        "text": "Budget pressure: Armed forces payroll maintenance burdens treasury.",
-        "time": "30 min ago"
+        "tag": "STABILITY",
+        "text": "Civic Governance: Domestic political stability index elevated under fiscal discipline.",
+        "time": "32 min ago"
+      },
+      {
+        "id": "9",
+        "type": "info",
+        "tag": "FLEET",
+        "text": "Naval Command: Battleship patrols maintaining open transit through critical chokepoints.",
+        "time": "40 min ago"
       },
       {
         "id": "10",
         "type": "info",
-        "text": "General Staff: Combat readiness audits finalized across all commands.",
-        "time": "35 min ago"
-      },
-      {
-        "id": "11",
-        "type": "info",
-        "text": "Industrial milestone: Heavy manufacturing modernization phase complete.",
-        "time": "40 min ago"
-      },
-      {
-        "id": "12",
-        "type": "danger",
-        "text": "Demographic contraction recorded amid civil friction and unrest.",
-        "time": "45 min ago"
-      },
-      {
-        "id": "13",
-        "type": "warning",
-        "text": "World Bank ultimatum: Overdue interest settlement notice delivered.",
+        "tag": "COMBAT",
+        "text": "War Room: Ground assault simulation concluded forecasting minimal casualties.",
         "time": "50 min ago"
-      },
-      {
-        "id": "14",
-        "type": "info",
-        "text": "Labor output boom: Positive productivity index across facilities.",
-        "time": "1 hour ago"
-      },
-      {
-        "id": "15",
-        "type": "info",
-        "text": "Border checkpoint report: Trade corridors secure and flowing.",
-        "time": "1 hour ago"
-      },
-      {
-        "id": "16",
-        "type": "danger",
-        "text": "Counter-intel alert: Infiltration ring neutralized inside ministries.",
-        "time": "1 hour ago"
-      },
-      {
-        "id": "17",
-        "type": "warning",
-        "text": "Merchant protests erupt following border tariff adjustments.",
-        "time": "2 hours ago"
-      },
-      {
-        "id": "18",
-        "type": "info",
-        "text": "Air Defense directive drafted for immediate missile dome upgrade.",
-        "time": "2 hours ago"
-      },
-      {
-        "id": "19",
-        "type": "danger",
-        "text": "Covert black ops: Sabotage team disabled adversary radar network.",
-        "time": "3 hours ago"
-      },
-      {
-        "id": "20",
-        "type": "info",
-        "text": "National Golden Age: Steadfast governance solidifies civic stability.",
-        "time": "3 hours ago"
       }
     ]
   },
   "ticker": {
-    "radar": "Air Defense Radar Online 100%",
+    "radar": "Air Defense Radar: 100% Ready",
     "satellite": "Satellite Uplink: Connected",
     "border": "Border Surveillance: Active",
     "logistics": "Supply Chain: Stable"

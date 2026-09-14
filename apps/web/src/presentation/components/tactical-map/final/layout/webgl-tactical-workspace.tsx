@@ -4,6 +4,7 @@ import React, { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
+import { useGameProjections } from "@/presentation/hooks/game/use-game-projections";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
 import { TacticalModalOrchestrator } from "@/presentation/components/tactical-map/modals/tactical-modal-orchestrator";
@@ -62,7 +63,8 @@ export function WebGLTacticalWorkspace({
     error,
   } = useBitPackedGame(gameId);
 
-  const metrics = useGameResources(effectiveGameState);
+  const projections = useGameProjections(effectiveGameState);
+  const metrics = useGameResources(effectiveGameState, projections);
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isProcessingTurn, setIsProcessingTurn] = useState(false);
 
