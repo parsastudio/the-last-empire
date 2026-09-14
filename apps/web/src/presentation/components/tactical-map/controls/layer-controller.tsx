@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Layers, Loader2, Eye, Coins } from "lucide-react";
+import { Layers, Eye, Coins } from "lucide-react";
 
 export type TacticalLayer = "political" | "gdp";
 
@@ -28,13 +28,11 @@ export const LAYER_OPTIONS: LayerOption[] = [
 
 interface LayerControllerProps {
   activeLayer: TacticalLayer;
-  isRendering?: boolean;
   onChangeLayer: (layer: TacticalLayer) => void;
 }
 
 export function LayerController({
   activeLayer,
-  isRendering = false,
   onChangeLayer,
 }: LayerControllerProps) {
   const t = useTranslations("map.layers");
@@ -52,13 +50,9 @@ export function LayerController({
     >
       <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-xl md:rounded-2xl p-1 md:p-1.5 shadow-2xl flex items-center gap-1 md:gap-1.5">
         <div className="p-1.5 md:p-2 text-muted-foreground border-e border-border/60 flex items-center gap-1.5">
-          {isRendering ? (
-            <Loader2 size={13} className="animate-spin text-primary" />
-          ) : (
-            <Layers size={13} />
-          )}
+          <Layers size={13} />
           <span className="text-[9px] md:text-[10px] font-extrabold font-sans hidden sm:inline">
-            {isRendering ? t("updating") : t("layersLabel")}
+            {t("layersLabel")}
           </span>
         </div>
 
@@ -68,9 +62,8 @@ export function LayerController({
           return (
             <button
               key={opt.id}
-              disabled={isRendering}
               onClick={() => onChangeLayer(opt.id)}
-              className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold transition-all cursor-pointer disabled:opacity-50 ${
+              className={`flex items-center gap-1 md:gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold transition-all cursor-pointer ${
                 isActive
                   ? "bg-secondary text-foreground shadow-sm border border-border/60"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"

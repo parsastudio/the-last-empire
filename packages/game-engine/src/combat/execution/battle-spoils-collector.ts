@@ -26,7 +26,6 @@ export class BattleSpoilsCollector {
       conqueredPixels,
       conqueredProvincesCount,
       conqueredProvinceIds,
-      conqueredProvincesNames: [],
       gainedPopulation,
       gainedGdp,
       lootedTreasury: calcResult.treasuryLooted || 0,

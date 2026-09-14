@@ -22,7 +22,6 @@ import {
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 
 export interface DirectAttackReachEvaluation {
-  targetProvince: ProvinceDynamicState | null;
   targetProvinceId: number | null;
   isLandNeighbor: boolean;
   isNavalValid: boolean;
@@ -42,7 +41,6 @@ export interface DirectAttackGuarantorIdsEvaluation {
 }
 
 export interface DirectAttackLogisticsEvaluation {
-  totalForceCost: number;
   totalLogisticsCost: number;
   navalFleetCount: number;
   hasNavalCapacity: boolean;
@@ -90,7 +88,6 @@ export class DirectAttackSelector {
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
     return {
-      targetProvince,
       targetProvinceId,
       isLandNeighbor,
       isNavalValid,
@@ -239,7 +236,6 @@ export class DirectAttackSelector {
     const hasSelectedInfantry = infantry > 0;
 
     return {
-      totalForceCost,
       totalLogisticsCost,
       navalFleetCount,
       hasNavalCapacity,

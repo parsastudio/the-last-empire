@@ -20,6 +20,7 @@ interface WideDiplomacyViewProps {
   humanNationId?: string;
   provincesMap?: Record<string, Province>;
   turnActivity?: NationTurnActivity;
+  currentTurn?: number;
   onNavigateTab?: (
     tab: SidebarTabType,
     subTab?: string,
@@ -33,6 +34,7 @@ export function WideDiplomacyView({
   humanNationId,
   provincesMap,
   turnActivity,
+  currentTurn,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
   const t = useTranslations("diplomacy.view");
@@ -207,6 +209,7 @@ export function WideDiplomacyView({
               clientNation={humanNation}
               targetNation={diplomacy.selectedTargetNation}
               turnActivity={turnActivity}
+              currentTurn={currentTurn}
               onOpenProxy={handleOpenEspionage}
             />
           </div>

@@ -13,7 +13,6 @@ import {
   LayerController,
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
-import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
@@ -47,8 +46,6 @@ export function WebGLTacticalWorkspace({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
-
-  useMapDimensions(containerRef);
 
   const activeModal = useUiStore((state) => state.activeModal);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
@@ -174,7 +171,6 @@ export function WebGLTacticalWorkspace({
       <GameOverDialogWrapper gameState={effectiveGameState} />
       <LayerController
         activeLayer={activeLayer}
-        isRendering={false}
         onChangeLayer={setActiveLayer}
       />
 

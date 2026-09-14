@@ -17,9 +17,6 @@ export interface UnitBudgetQuota {
 }
 
 export class MilitaryQuotaCalculator {
-  public static readonly MAX_VALUATION_GDP_RATIO =
-    MilitaryPricingCalculator.MAX_ARMY_VALUATION_GDP_RATIO;
-
   public static getUnitRatios(): Record<UnitType, number> {
     return {
       ARMOR: 0.3,
