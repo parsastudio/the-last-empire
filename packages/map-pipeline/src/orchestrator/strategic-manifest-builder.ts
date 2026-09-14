@@ -191,9 +191,18 @@ export class StrategicManifestBuilder {
     };
 
     const targetDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
+    const manifestJson = JSON.stringify(manifest, null, 2);
+
     await fs.writeFile(
       path.join(targetDir, "manifest.json"),
-      JSON.stringify(manifest, null, 2),
+      manifestJson,
+      "utf-8",
+    );
+
+    await fs.writeFile(
+      path.join(finalDir, "manifest.json"),
+      manifestJson,
       "utf-8",
     );
 

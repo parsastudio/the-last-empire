@@ -1,4 +1,3 @@
-import path from "path";
 import { TerrainBinaryBuilder } from "@/infrastructure/visual-pipeline/compression/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/visual-pipeline/compression/terrain-binary-serializer";
 import { BinaryFileExportHelper } from "@/infrastructure/core/io/binary-file-export-helper";
@@ -9,6 +8,7 @@ export class TerrainBinaryExportService {
     width: number,
     height: number,
     outputDir: string,
+    secondaryDir?: string,
   ): Promise<string> {
     const built = TerrainBinaryBuilder.buildFromRgba(rgbaData, width, height);
     const rawBuffer = TerrainBinarySerializer.serializeRaw(
@@ -22,6 +22,14 @@ export class TerrainBinaryExportService {
       "terrain-raw.bin",
       rawBuffer,
     );
+
+    if (secondaryDir) {
+      await BinaryFileExportHelper.exportRawAndGzip(
+        secondaryDir,
+        "terrain-raw.bin",
+        rawBuffer,
+      );
+    }
 
     return rawPath;
   }
