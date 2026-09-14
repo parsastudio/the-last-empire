@@ -23,16 +23,45 @@ export function useBitPackedGame(gameId = "default_game") {
       try {
         await ClientFinalStateLoader.ensureManifestLoaded("map1");
 
+        let targetGameId = gameId;
+
+        if (targetGameId === "default" || targetGameId === "default_game") {
+          const activeStoreId = useGameStore.getState().activeGameId;
+          if (
+            activeStoreId &&
+            activeStoreId !== "default" &&
+            activeStoreId !== "default_game"
+          ) {
+            targetGameId = activeStoreId;
+          } else {
+            const allSaves = await storageAdapter.getAllSaves();
+            if (allSaves.length > 0 && allSaves[0]) {
+              targetGameId = allSaves[0].gameId;
+            }
+          }
+        }
+
         const gridState = BitPackedGridState.getInstance();
-        gridState.initializeSession(gameId);
+        gridState.initializeSession(targetGameId);
 
         const buffer = gridState.getBuffer();
         await storageAdapter.ensureBitBufferLoaded(buffer);
 
         if (active) {
-          await loadGame(gameId);
+          const currentMemoryState = useGameStore.getState().gameState;
+          if (
+            currentMemoryState &&
+            currentMemoryState.gameId === targetGameId &&
+            !useGameStore.getState().error
+          ) {
+            setIsInitializing(false);
+            return;
+          }
+
+          await loadGame(targetGameId);
         }
-      } catch {
+      } catch (err) {
+        console.error("useBitPackedGame initialization error:", err);
       } finally {
         if (active) {
           setIsInitializing(false);

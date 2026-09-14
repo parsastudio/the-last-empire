@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -51,10 +51,37 @@ export function WebGLTacticalWorkspace({
 
   const routeParams = useParams();
   const activeParamGameId = routeParams?.gameId as string | undefined;
-  const effectiveGameId =
-    activeParamGameId && activeParamGameId !== "default"
-      ? activeParamGameId
-      : gameId;
+
+  const effectiveGameId = useMemo(() => {
+    if (typeof window !== "undefined") {
+      const segments = window.location.pathname.split("/").filter(Boolean);
+      const playIndex = segments.indexOf("play");
+      if (playIndex !== -1 && segments[playIndex + 1]) {
+        const pathParam = decodeURIComponent(segments[playIndex + 1]!);
+        if (
+          pathParam &&
+          pathParam !== "default" &&
+          pathParam !== "default_game"
+        ) {
+          return pathParam;
+        }
+      }
+    }
+
+    if (
+      activeParamGameId &&
+      activeParamGameId !== "default" &&
+      activeParamGameId !== "default_game"
+    ) {
+      return activeParamGameId;
+    }
+
+    if (gameId && gameId !== "default" && gameId !== "default_game") {
+      return gameId;
+    }
+
+    return "default_game";
+  }, [activeParamGameId, gameId]);
 
   const activeModal = useUiStore((state) => state.activeModal);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);

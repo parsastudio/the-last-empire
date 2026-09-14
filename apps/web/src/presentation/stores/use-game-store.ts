@@ -99,7 +99,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
           difficulty,
         );
 
-      await GamePersistenceService.saveGameState(gameId, initialState);
+      await GamePersistenceService.saveGameStateImmediate(gameId, initialState);
 
       set({
         gameState: initialState,

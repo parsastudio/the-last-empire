@@ -53,7 +53,7 @@ export function MainMenuView() {
           paddingLeft: "max(1rem, env(safe-area-inset-left))",
           paddingRight: "max(1rem, env(safe-area-inset-right))",
         }}
-        className="w-full max-w-7xl mx-auto px-4 sm:px-8 pb-2 z-30 flex items-center justify-between shrink-0"
+        className="w-full max-w-7xl mx-auto px-4 sm:px-8 pb-1 sm:pb-2 z-30 flex items-center justify-between shrink-0"
       >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-inner">
@@ -99,21 +99,21 @@ export function MainMenuView() {
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-6xl px-4 sm:px-8 z-10 py-3 sm:py-6 overflow-y-auto overscroll-contain touch-pan-y min-h-0 flex flex-col items-center justify-start sm:justify-center scrollbar-thin scrollbar-thumb-border/40">
-        <div className="w-full flex flex-col items-center justify-center gap-5 sm:gap-7 my-auto">
-          <div className="flex flex-col items-center text-center space-y-3 w-full max-w-3xl shrink-0">
+      <main className="flex-1 w-full max-w-6xl px-4 sm:px-8 z-10 overflow-y-auto overscroll-contain touch-pan-y min-h-0 scrollbar-thin scrollbar-thumb-border/40">
+        <div className="w-full min-h-full flex flex-col items-center justify-start lg:justify-center gap-3 sm:gap-5 py-2 sm:py-6">
+          <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 w-full max-w-3xl shrink-0">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/90 border border-border/80 rounded-full text-[9px] font-mono text-muted-foreground uppercase tracking-widest backdrop-blur-xl shadow-inner">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>{t("version")}</span>
             </div>
 
-            <div className="relative px-6 sm:px-14 md:px-20 py-2 sm:py-3.5 my-0.5">
+            <div className="relative px-6 sm:px-14 md:px-16 py-1.5 sm:py-3 my-0.5">
               <div className="absolute top-0 start-0 w-3.5 h-3.5 border-t-2 border-s-2 border-emerald-400" />
               <div className="absolute top-0 end-0 w-3.5 h-3.5 border-t-2 border-e-2 border-emerald-400" />
               <div className="absolute bottom-0 start-0 w-3.5 h-3.5 border-b-2 border-s-2 border-emerald-400" />
               <div className="absolute bottom-0 end-0 w-3.5 h-3.5 border-b-2 border-e-2 border-emerald-400" />
 
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-wider text-foreground drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] leading-tight font-sans text-center">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-wider text-foreground drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)] leading-tight font-sans text-center">
                 {t("title")}
               </h1>
             </div>
@@ -135,7 +135,7 @@ export function MainMenuView() {
             </p>
           </div>
 
-          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center max-w-4xl pt-1">
+          <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6 items-center max-w-4xl pt-1">
             <div className="md:col-span-6 w-full">
               <CommandConsole
                 onNewCampaign={handleNewCampaign}
