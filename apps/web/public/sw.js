@@ -1,4 +1,4 @@
-const CACHE_NAME = "geopolitics-empire-v5";
+const CACHE_NAME = "geopolitics-empire-v7";
 
 const PRECACHE_ROUTES = [
   "/",

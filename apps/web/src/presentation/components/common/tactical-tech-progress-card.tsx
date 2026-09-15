@@ -56,6 +56,8 @@ export function TacticalTechProgressCard({
           "bg-gdp hover:bg-gdp/90 shadow-gdp/20 text-primary-foreground",
       };
 
+  const isOperable = canAfford && !isSubmitting;
+
   return (
     <div className="space-y-2.5 text-start font-sans">
       <div className="flex items-center justify-between px-1">
@@ -105,9 +107,14 @@ export function TacticalTechProgressCard({
         </div>
 
         <button
+          type="button"
           onClick={onUpgrade}
-          disabled={!canAfford || isSubmitting}
-          className={`w-full py-3 disabled:bg-secondary disabled:text-muted-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5 ${themeClasses.buttonBg}`}
+          disabled={!isOperable}
+          className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            isOperable
+              ? `${themeClasses.buttonBg} cursor-pointer shadow-sm active:scale-[0.99]`
+              : "bg-secondary text-muted-foreground border border-border/60 opacity-50 cursor-not-allowed shadow-none"
+          }`}
         >
           {isSubmitting ? (
             <Loader2 size={14} className="animate-spin" />

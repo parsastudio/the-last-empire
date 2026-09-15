@@ -12,6 +12,7 @@ import {
   getNationGdp,
   GuarantorBudgetCalculatorUtility,
   TerritorialSaturationCalculatorUtility,
+  MILITARY_UNIT_STATS,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -143,17 +144,22 @@ export class GeopoliticalVectorCalculator {
           guarantorGdp,
           true,
         );
-        const auxiliaryPower = Math.floor(
-          budget * 0.000000001 * guarantorTechMult * 4,
-        );
-        tPower += auxiliaryPower;
+        const auxUnits =
+          GuarantorBudgetCalculatorUtility.calculateAuxiliaryUnits(budget);
+        const auxPower =
+          (auxUnits.auxInf * MILITARY_UNIT_STATS.INFANTRY.weightPower +
+            auxUnits.auxArm * MILITARY_UNIT_STATS.ARMOR.weightPower +
+            auxUnits.auxAD * MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower +
+            auxUnits.auxAir * MILITARY_UNIT_STATS.AIR_FORCE.weightPower) *
+          guarantorTechMult;
+        tPower += Math.round(auxPower);
       }
     }
 
     if (
       source.isAi &&
-      !target.isAi &&
       target.defenseGuarantorIds &&
+      target.defenseGuarantorIds.length > 0 &&
       allNations
     ) {
       for (let i = 0; i < target.defenseGuarantorIds.length; i++) {

@@ -124,9 +124,14 @@ export class AIUpgradePlanner {
     let stepsTaken = 0;
 
     while (stepsTaken < 4 && innovationBudget > 0 && currentTreasury > 0) {
-      const nextMilCost = ResearchManager.getMilitaryTechCost(simulatedMilTech);
-      const nextIndCost =
-        IndustryCalculator.calculateResearchStepCost(simulatedIndTech);
+      const nextMilCost = ResearchManager.getMilitaryTechCost(
+        simulatedMilTech,
+        nation.government?.type,
+      );
+      const nextIndCost = IndustryCalculator.calculateResearchStepCost(
+        simulatedIndTech,
+        nation.government?.type,
+      );
 
       const costRatio = nextMilCost / Math.max(1, nextIndCost);
 

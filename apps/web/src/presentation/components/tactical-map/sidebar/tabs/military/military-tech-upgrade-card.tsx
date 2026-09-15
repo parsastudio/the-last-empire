@@ -19,7 +19,7 @@ interface MilitaryTechUpgradeCardProps {
 
 export function MilitaryTechUpgradeCard({
   nationId,
-  treasury = 100000,
+  treasury = 0,
   techLevel = 1.0,
   governmentType,
 }: MilitaryTechUpgradeCardProps) {
