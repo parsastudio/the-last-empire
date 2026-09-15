@@ -21,7 +21,7 @@ interface IndustryTechUpgradeCardProps {
 
 export function IndustryTechUpgradeCard({
   nationId,
-  treasury = 100000,
+  treasury = 0,
   industrialLevel = 1.0,
   governmentType,
 }: IndustryTechUpgradeCardProps) {

@@ -1,15 +1,10 @@
 node_modules
-.next
-.turbo
-dist
-build
 .git
-.gitignore
+.turbo
 *.tar.gz
 .DS_Store
 *.log
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
-apps/web/.next
-apps/web/out
+apps/web/.next/cache

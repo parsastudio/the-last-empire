@@ -33,8 +33,7 @@ export class ClientFinalStateLoader {
       const blob = new Blob([buffer]);
       const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
       return await new Response(stream).arrayBuffer();
-    } catch (err) {
-      console.error("Failed to decompress gzip buffer:", err);
+    } catch {
       return null;
     }
   }
@@ -70,9 +69,6 @@ export class ClientFinalStateLoader {
         );
         const res = await fetch(url);
         if (!res.ok) {
-          console.error(
-            `Failed to fetch manifest from ${url}, status: ${res.status}`,
-          );
           return null;
         }
 
@@ -90,8 +86,7 @@ export class ClientFinalStateLoader {
         void BinaryAssetRepository.saveAsset(cacheKey, copyBuf);
 
         return manifest;
-      } catch (err) {
-        console.error("Failed to load map manifest:", err);
+      } catch {
         return null;
       } finally {
         this.manifestPromise = null;
@@ -137,9 +132,7 @@ export class ClientFinalStateLoader {
           if (gzRes.ok) {
             fetchedGzBuf = await gzRes.arrayBuffer();
           }
-        } catch (err) {
-          console.error(`Failed to fetch ${gzUrl}:`, err);
-        }
+        } catch {}
 
         if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
           void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
@@ -158,8 +151,7 @@ export class ClientFinalStateLoader {
 
       BitPackedGridState.getInstance().markDirty();
       return bitBuffer;
-    } catch (err) {
-      console.error("Failed to load live state buffer:", err);
+    } catch {
       return null;
     }
   }
@@ -193,9 +185,7 @@ export class ClientFinalStateLoader {
           if (gzRes.ok) {
             fetchedGzBuf = await gzRes.arrayBuffer();
           }
-        } catch (err) {
-          console.error(`Failed to fetch ${gzUrl}:`, err);
-        }
+        } catch {}
 
         if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
           void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
@@ -240,8 +230,7 @@ export class ClientFinalStateLoader {
       };
 
       return this.cachedTerrainData;
-    } catch (err) {
-      console.error("Failed to load terrain raw data:", err);
+    } catch {
       return null;
     }
   }

@@ -86,23 +86,40 @@ export class ProposalAcceptanceEvaluator {
         }
 
         let score = -50;
+        const stability = receiver.government?.stability ?? 50;
 
-        if (receiver.government.stability < 30) {
-          score += Math.round((30 - receiver.government.stability) * 1.5);
+        if (stability < 30) {
+          score += Math.round((30 - stability) * 2.5);
+        }
+        if (stability < 15) {
+          score += Math.round((15 - stability) * 3.0);
         }
 
         if (vector.powerRatio > 1.8) {
-          score += Math.min(60, Math.round((vector.powerRatio - 1.0) * 35));
-        } else if (vector.powerRatio < 0.9) {
-          score -= Math.min(50, Math.round((1.0 - vector.powerRatio) * 50));
+          score += Math.min(70, Math.round((vector.powerRatio - 1.0) * 40));
+        } else if (vector.powerRatio > 1.2) {
+          score += Math.round((vector.powerRatio - 1.0) * 25);
+        } else if (vector.powerRatio < 0.85) {
+          const powerConfidencePenalty = Math.min(
+            45,
+            Math.round((1.0 - vector.powerRatio) * 45),
+          );
+          const penaltyDampener =
+            stability < 25 ? Math.max(0, stability / 25) : 1.0;
+          score -= Math.round(powerConfidencePenalty * penaltyDampener);
         }
 
+        const crisisDampener =
+          stability < 30 ? Math.max(0.1, stability / 30) : 1.0;
+
         if (vector.reasons.revanchismPenalty > 0) {
-          score -= Math.round(vector.reasons.revanchismPenalty * 1.0);
+          score -= Math.round(
+            vector.reasons.revanchismPenalty * crisisDampener,
+          );
         }
 
         if (vector.alignment < 0) {
-          score += Math.round(vector.alignment * 0.35);
+          score += Math.round(vector.alignment * 0.2 * crisisDampener);
         }
 
         return { willAccept: score >= 0 };

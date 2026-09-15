@@ -55,6 +55,8 @@ export class AIPeaceEvaluator {
         continue;
       }
 
+      const vector = context.getVector(nation, targetNation);
+
       const sourceTwmi = PeaceTermsCalculator.calculateTwmi(
         nation,
         context.state.nations,
@@ -66,9 +68,12 @@ export class AIPeaceEvaluator {
         context.state.provinces,
       );
 
-      const ratio = sourceTwmi / targetTwmi;
+      const ratio = targetTwmi > 0 ? sourceTwmi / targetTwmi : 1.0;
+      const isPowerDeficit =
+        ratio < 1.0 || (vector !== undefined && vector.powerRatio > 1.2);
+      const isStabilityCollapsing = (nation.government?.stability ?? 50) <= 25;
 
-      if (ratio < 1.0) {
+      if (isPowerDeficit || isStabilityCollapsing) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,
