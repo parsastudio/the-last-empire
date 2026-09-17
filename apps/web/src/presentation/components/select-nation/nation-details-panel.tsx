@@ -70,15 +70,6 @@ export function NationDetailsPanel({
       <div className="relative z-10 space-y-3.5 sm:space-y-5">
         <NationOverviewStats nation={nation} />
 
-        <div className="space-y-1.5 sm:space-y-2">
-          <span className="text-[11px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            {t("dossier.title")}
-          </span>
-          <div className="text-[11px] sm:text-xs text-foreground/90 leading-relaxed bg-background/60 border border-border/60 p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-inner font-sans">
-            {nation.desc}
-          </div>
-        </div>
-
         <GovernmentTypeSelector
           options={governmentOptions}
           selectedType={selectedGovernment}
