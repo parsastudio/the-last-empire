@@ -92,14 +92,21 @@ export class PeaceSettlementExecutor {
       const paying = updatedNations[loserNation.id]!;
       const receiving = updatedNations[winnerNation.id]!;
 
-      const actualPaid = Math.min(
-        paying.treasury + Math.max(0, Math.floor(paying.treasury * 0.5)),
-        terms.moneyAmount,
+      const loserGdp = getNationGdp(loserNation, updatedProvinces);
+      const availableLoan = DebtCalculatorUtility.getAvailableLoanHeadroom(
+        paying.nationalDebt,
+        loserGdp,
       );
+      const maxSpendable = Math.max(0, paying.treasury + availableLoan);
+      const actualPaid = Math.min(maxSpendable, terms.moneyAmount);
+
+      const fromTreasury = Math.min(paying.treasury, actualPaid);
+      const fromDebt = Math.max(0, actualPaid - fromTreasury);
 
       updatedNations[loserNation.id] = {
         ...paying,
-        treasury: Math.max(0, paying.treasury - actualPaid),
+        treasury: Math.max(0, paying.treasury - fromTreasury),
+        nationalDebt: paying.nationalDebt + fromDebt,
       };
       updatedNations[winnerNation.id] = {
         ...receiving,
@@ -194,7 +201,7 @@ export class PeaceSettlementExecutor {
             provinceId: prov.provinceId,
             factoriesCount: prov.factoriesCount,
             ownerNationId: winnerCanonical,
-            originalNationId: winnerCanonical,
+            originalNationId: prov.originalNationId || loserCanonical,
             factoryTiers: flooredTiers,
           };
         }

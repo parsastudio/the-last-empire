@@ -51,6 +51,15 @@ export class DilemmaActionExecutor {
 
     const nextTreasury = Math.max(0, nation.treasury + effectiveTreasuryDelta);
 
+    const effectiveDebtDelta = DilemmaCalculator.resolveNationalDebtDelta(
+      effect,
+      nationGdp,
+    );
+    const nextNationalDebt = Math.max(
+      0,
+      nation.nationalDebt + effectiveDebtDelta,
+    );
+
     const nextStability = Math.max(
       0,
       Math.min(100, nation.government.stability + (effect.stabilityDelta || 0)),
@@ -109,6 +118,7 @@ export class DilemmaActionExecutor {
     const updatedNation: Nation = {
       ...nation,
       treasury: nextTreasury,
+      nationalDebt: nextNationalDebt,
       globalReputation: nextReputation,
       industrialLevel: nextIndustrialLevel,
       military: updatedMilitary,

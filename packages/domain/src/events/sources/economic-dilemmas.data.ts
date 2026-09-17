@@ -74,6 +74,7 @@ export const ECONOMIC_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
         id: "repay_bulk",
         effect: {
           treasuryGdpPercent: -0.03,
+          nationalDebtGdpPercent: -0.05,
           globalReputationDelta: 12,
           stabilityDelta: 4,
         },

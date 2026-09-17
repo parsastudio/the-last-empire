@@ -5,7 +5,9 @@ import {
   GameError,
   NationRelationResolver,
   GeopoliticalReachResolver,
+  MilitaryPricingCalculator,
 } from "@geopolitics/domain";
+import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class BattleInitiationValidator {
@@ -61,17 +63,37 @@ export class BattleInitiationValidator {
       throw new GameError("POST_WAR_COOLDOWN");
     }
 
+    const requestedInfantry =
+      action.infantryToDeploy ?? nation.military.infantry;
+    if (requestedInfantry > nation.military.infantry) {
+      throw new GameError("INSUFFICIENT_RESOURCES");
+    }
+
+    const requestedArmor = action.armorToDeploy ?? (nation.military.armor || 0);
+    if (requestedArmor > (nation.military.armor || 0)) {
+      throw new GameError("INSUFFICIENT_RESOURCES");
+    }
+
+    const requestedAirForce =
+      action.airForceToDeploy ?? nation.military.airForce;
+    if (requestedAirForce > nation.military.airForce) {
+      throw new GameError("INSUFFICIENT_RESOURCES");
+    }
+
+    const requestedDrones = action.dronesToLaunch || 0;
+    if (requestedDrones > (nation.military.droneMissile || 0)) {
+      throw new GameError("INSUFFICIENT_RESOURCES");
+    }
+
     if (action.attackType === "NAVAL") {
       const fleetCount = nation.navalFleet || 0;
       const maxCapacityPoints = NavalDeploymentClamper.calculateMaxCapacity(
         "NAVAL",
         fleetCount,
       );
-      const infantryCount = action.infantryToDeploy || 0;
-      const armorCount = action.armorToDeploy || 0;
       const requiredPoints = NavalDeploymentClamper.calculateRequiredCapacity(
-        infantryCount,
-        armorCount,
+        requestedInfantry,
+        requestedArmor,
       );
 
       if (fleetCount <= 0 || requiredPoints > maxCapacityPoints) {
@@ -79,12 +101,23 @@ export class BattleInitiationValidator {
       }
     }
 
-    if (nation.military.infantry <= 0) {
+    if (nation.military.infantry <= 0 || requestedInfantry <= 0) {
       throw new GameError("INFANTRY_REQUIRED");
     }
 
-    if ((action.dronesToLaunch || 0) > (nation.military.droneMissile || 0)) {
-      throw new GameError("INSUFFICIENT_RESOURCES");
+    const totalForceCost =
+      MilitaryPricingCalculator.calculateTotalArmyValuation({
+        infantry: requestedInfantry,
+        armor: requestedArmor,
+        airForce: requestedAirForce,
+        droneMissile: requestedDrones,
+      });
+
+    const { moneyCost: deploymentCost } =
+      CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
+
+    if (nation.treasury < deploymentCost) {
+      throw new GameError("INSUFFICIENT_FUNDS");
     }
   }
 }

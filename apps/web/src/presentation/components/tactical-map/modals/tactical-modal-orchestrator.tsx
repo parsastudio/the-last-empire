@@ -30,7 +30,7 @@ export function TacticalModalOrchestrator({
         isOpen={true}
         dilemma={gameState.activeDilemma}
         humanNationId={humanNation.id}
-        onClose={closeModal}
+        onClose={() => {}}
       />
     );
   }

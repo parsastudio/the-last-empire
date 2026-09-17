@@ -20,6 +20,7 @@ export interface NationalBudgetBreakdown {
   fiscalRevenue: FiscalRevenueBreakdown;
   navalSecurityIncome: number;
   partnershipIncome: number;
+  protectorateTributeIncome: number;
   grossRevenue: number;
   payrollBreakdown: BreakdownMilitaryPayroll;
   debtInterest: number;
@@ -68,6 +69,8 @@ export class NationalBudgetCalculator {
     );
 
     let partnershipIncome = 0;
+    let protectorateTributeIncome = 0;
+
     if (allNations) {
       for (const rel of Object.values(nation.relations || {})) {
         if (rel.stance === "STRATEGIC_PARTNERSHIP") {
@@ -87,10 +90,36 @@ export class NationalBudgetCalculator {
           }
         }
       }
+
+      for (const other of Object.values(allNations)) {
+        if (
+          other.isAlive &&
+          other.isEmergencyProtectorate &&
+          other.securityGuarantorId
+        ) {
+          const targetGuarantorCanonical = CountryRegistry.resolveCanonicalId(
+            other.securityGuarantorId,
+          );
+          if (targetGuarantorCanonical === canonicalId) {
+            const otherCanonical = CountryRegistry.resolveCanonicalId(other.id);
+            const clientGdp =
+              precomputedGdpMap?.get(otherCanonical) ??
+              getNationGdp(other, provincesMap);
+            protectorateTributeIncome +=
+              SecurityFeeCalculatorUtility.calculateSecurityFee(
+                clientGdp,
+                true,
+              );
+          }
+        }
+      }
     }
 
     const grossRevenue =
-      fiscalRevenue.totalRevenue + navalSecurityIncome + partnershipIncome;
+      fiscalRevenue.totalRevenue +
+      navalSecurityIncome +
+      partnershipIncome +
+      protectorateTributeIncome;
 
     const debtInterest = DebtCalculatorUtility.calculateInterest(
       nation.nationalDebt,
@@ -112,6 +141,7 @@ export class NationalBudgetCalculator {
       fiscalRevenue,
       navalSecurityIncome,
       partnershipIncome,
+      protectorateTributeIncome,
       grossRevenue,
       payrollBreakdown,
       debtInterest,

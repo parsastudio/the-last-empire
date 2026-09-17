@@ -120,7 +120,10 @@ export function DiplomaticStampsOverlay({
   }, [dimensions]);
 
   useEffect(() => {
-    let animId: number;
+    let animId: number | null = null;
+    let isLoopRunning = false;
+    let idleFrameCount = 0;
+
     let lastX = Number.NaN;
     let lastY = Number.NaN;
     let lastScale = Number.NaN;
@@ -128,7 +131,8 @@ export function DiplomaticStampsOverlay({
     const render = () => {
       const canvas = canvasRef.current;
       if (!canvas || !positionRef?.current || !scaleRef?.current) {
-        animId = requestAnimationFrame(render);
+        animId = null;
+        isLoopRunning = false;
         return;
       }
 
@@ -140,8 +144,14 @@ export function DiplomaticStampsOverlay({
       const scaleDelta = Math.abs(scale - (lastScale || 0));
 
       if (posDelta === 0 && scaleDelta === 0) {
-        animId = requestAnimationFrame(render);
-        return;
+        idleFrameCount++;
+        if (idleFrameCount >= 3) {
+          animId = null;
+          isLoopRunning = false;
+          return;
+        }
+      } else {
+        idleFrameCount = 0;
       }
 
       lastX = posX;
@@ -154,7 +164,8 @@ export function DiplomaticStampsOverlay({
 
       const ctx = canvas.getContext("2d", { alpha: true });
       if (!ctx) {
-        animId = requestAnimationFrame(render);
+        animId = null;
+        isLoopRunning = false;
         return;
       }
 
@@ -327,8 +338,33 @@ export function DiplomaticStampsOverlay({
       animId = requestAnimationFrame(render);
     };
 
-    animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
+    const wakeUpAndRender = () => {
+      idleFrameCount = 0;
+      if (!isLoopRunning) {
+        isLoopRunning = true;
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    wakeUpAndRender();
+
+    window.addEventListener("pointermove", wakeUpAndRender, { passive: true });
+    window.addEventListener("touchmove", wakeUpAndRender, { passive: true });
+    window.addEventListener("wheel", wakeUpAndRender, { passive: true });
+    window.addEventListener("resize", wakeUpAndRender, { passive: true });
+
+    return () => {
+      window.removeEventListener("pointermove", wakeUpAndRender);
+      window.removeEventListener("touchmove", wakeUpAndRender);
+      window.removeEventListener("wheel", wakeUpAndRender);
+      window.removeEventListener("resize", wakeUpAndRender);
+
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      isLoopRunning = false;
+    };
   }, [
     stamps,
     positionRef,

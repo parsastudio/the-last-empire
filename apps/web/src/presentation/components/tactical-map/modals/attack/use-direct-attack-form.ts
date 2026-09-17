@@ -85,19 +85,20 @@ export function useDirectAttackForm({
       humanNation,
       targetProvinceId,
       gameState,
+      canonicalTargetId,
     );
-  }, [humanNation, targetProvinceId, gameState]);
+  }, [humanNation, targetProvinceId, gameState, canonicalTargetId]);
 
   const targetRegionName = useMemo(() => {
-    if (targetProvinceId) {
-      return formatProvinceName(targetProvinceId);
+    if (reach.targetProvinceId) {
+      return formatProvinceName(reach.targetProvinceId);
     }
     const defenderName = formatCountryName(targetNation);
     return targetNation
       ? tAttack("regions.mainlandOf", { name: defenderName })
       : "";
   }, [
-    targetProvinceId,
+    reach.targetProvinceId,
     targetNation,
     formatProvinceName,
     formatCountryName,
@@ -238,6 +239,7 @@ export function useDirectAttackForm({
       targetGuarantorNation,
       reach.attackType,
       logistics.navalFleetCount,
+      reach.targetProvinceId ?? undefined,
     );
 
     setDronesToLaunch(result.drones);
@@ -258,6 +260,7 @@ export function useDirectAttackForm({
     gameState?.provinces,
     targetGuarantorNation,
     reach.attackType,
+    reach.targetProvinceId,
     logistics.navalFleetCount,
     showToast,
     tAlerts,
@@ -281,7 +284,7 @@ export function useDirectAttackForm({
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,
-      targetProvinceId || undefined,
+      reach.targetProvinceId || undefined,
       reach.attackType,
     );
 
@@ -311,7 +314,7 @@ export function useDirectAttackForm({
     infantryToDeploy,
     armorToDeploy,
     airForceToDeploy,
-    targetProvinceId,
+    reach.targetProvinceId,
     reach.attackType,
     dispatchAction,
     onClose,

@@ -59,36 +59,97 @@ export class DirectAttackSelector {
     humanNation: Nation | null,
     targetProvinceId: number | null,
     gameState: GameState | null,
+    targetNationId?: string | null,
   ): DirectAttackReachEvaluation {
-    const targetProvince =
-      gameState && targetProvinceId
-        ? gameState.provinces[targetProvinceId.toString()] || null
-        : null;
+    if (!humanNation || !gameState) {
+      return {
+        targetProvinceId: null,
+        isLandNeighbor: false,
+        isNavalValid: false,
+        attackType: "LAND",
+      };
+    }
 
-    const isLandNeighbor =
-      humanNation && targetProvinceId && gameState
-        ? LandNeighborResolver.hasProvinceLandBorder(
-            targetProvinceId,
+    const canonicalTargetNation = targetNationId
+      ? CountryRegistry.resolveCanonicalId(targetNationId)
+      : null;
+
+    let effectiveProvinceId = targetProvinceId;
+
+    let isLandNeighbor = false;
+    if (effectiveProvinceId) {
+      isLandNeighbor = LandNeighborResolver.hasProvinceLandBorder(
+        effectiveProvinceId,
+        humanNation.id,
+        gameState.provinces,
+      );
+    }
+
+    if (!isLandNeighbor && canonicalTargetNation && gameState.provinces) {
+      const ownedProvinces = Object.values(gameState.provinces).filter(
+        (p) =>
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+          canonicalTargetNation,
+      );
+
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        const p = ownedProvinces[i]!;
+        if (
+          LandNeighborResolver.hasProvinceLandBorder(
+            p.provinceId,
             humanNation.id,
             gameState.provinces,
           )
-        : false;
+        ) {
+          effectiveProvinceId = p.provinceId;
+          isLandNeighbor = true;
+          break;
+        }
+      }
+    }
 
-    const attackerHasSea =
-      humanNation && gameState
-        ? NationGettersUtility.hasSeaAccess(humanNation.id, gameState.provinces)
-        : false;
+    const attackerHasSea = NationGettersUtility.hasSeaAccess(
+      humanNation.id,
+      gameState.provinces,
+    );
 
-    const targetProvinceHasSea = targetProvince
-      ? MapTopologyRegistry.hasSeaAccess(targetProvince.provinceId, false)
-      : false;
+    let targetProvinceHasSea = false;
+    if (effectiveProvinceId) {
+      targetProvinceHasSea = MapTopologyRegistry.hasSeaAccess(
+        effectiveProvinceId,
+        false,
+      );
+    }
+
+    if (
+      !isLandNeighbor &&
+      !targetProvinceHasSea &&
+      canonicalTargetNation &&
+      attackerHasSea &&
+      gameState.provinces
+    ) {
+      const ownedProvinces = Object.values(gameState.provinces).filter(
+        (p) =>
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+          canonicalTargetNation,
+      );
+
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        const p = ownedProvinces[i]!;
+        if (MapTopologyRegistry.hasSeaAccess(p.provinceId, false)) {
+          effectiveProvinceId = p.provinceId;
+          targetProvinceHasSea = true;
+          break;
+        }
+      }
+    }
 
     const isNavalValid =
       !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
     return {
-      targetProvinceId,
+      targetProvinceId: effectiveProvinceId,
       isLandNeighbor,
       isNavalValid,
       attackType,

@@ -83,20 +83,11 @@ export class TurnProgressionOrchestrator {
           );
 
         if (executedCount > 0) {
-          const hasTerritorialChange =
-            TurnContext.hasTerritorialOwnershipChange(
-              workingState,
-              executedState,
-            );
-
           workingState = executedState;
-
-          if (hasTerritorialChange) {
-            turnContext = TurnContext.create(
-              workingState,
-              lockedDiplomacyTargets,
-            );
-          }
+          turnContext = TurnContext.create(
+            workingState,
+            lockedDiplomacyTargets,
+          );
         }
       }
     }
@@ -134,7 +125,7 @@ export class TurnProgressionOrchestrator {
     const prunedLogs = TurnLogWindowUtility.pruneLogs(
       workingState.turnLogs,
       workingState.currentTurn,
-      1,
+      TurnLogWindowUtility.MAX_RETAINED_TURNS,
     );
 
     const finalState: GameState = {

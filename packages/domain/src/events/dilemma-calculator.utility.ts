@@ -13,4 +13,17 @@ export class DilemmaCalculator {
     }
     return effect.treasuryDelta || 0;
   }
+
+  public static resolveNationalDebtDelta(
+    effect: Pick<DilemmaEffect, "nationalDebtDelta" | "nationalDebtGdpPercent">,
+    nationGdp: number,
+  ): number {
+    if (
+      effect.nationalDebtGdpPercent !== undefined &&
+      effect.nationalDebtGdpPercent !== 0
+    ) {
+      return Math.floor(nationGdp * effect.nationalDebtGdpPercent);
+    }
+    return effect.nationalDebtDelta || 0;
+  }
 }

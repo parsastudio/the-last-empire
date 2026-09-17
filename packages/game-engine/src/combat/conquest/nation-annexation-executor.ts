@@ -56,7 +56,7 @@ export class NationAnnexationExecutor {
         provinceId: p.provinceId,
         factoriesCount: p.factoriesCount,
         ownerNationId: winnerCanonical,
-        originalNationId: winnerCanonical,
+        originalNationId: p.originalNationId || loserCanonical,
         factoryTiers: flooredTiers,
       };
     }

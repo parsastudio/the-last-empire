@@ -12,14 +12,27 @@ export class TreatyTerminationExecutor {
     nation: Nation,
     receiver: Nation,
   ): { newState: GameState; resultData: unknown } {
+    const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
     const canonicalReceiver = CountryRegistry.resolveCanonicalId(receiver.id);
-    const updatedGuarantorIds = (nation.defenseGuarantorIds || []).filter(
+
+    const updatedNationGuarantors = (nation.defenseGuarantorIds || []).filter(
       (id) => CountryRegistry.resolveCanonicalId(id) !== canonicalReceiver,
+    );
+
+    const updatedReceiverGuarantors = (
+      receiver.defenseGuarantorIds || []
+    ).filter(
+      (id) => CountryRegistry.resolveCanonicalId(id) !== canonicalNation,
     );
 
     const updatedNation = {
       ...nation,
-      defenseGuarantorIds: updatedGuarantorIds,
+      defenseGuarantorIds: updatedNationGuarantors,
+    };
+
+    const updatedReceiver = {
+      ...receiver,
+      defenseGuarantorIds: updatedReceiverGuarantors,
     };
 
     const newState = {
@@ -27,6 +40,7 @@ export class TreatyTerminationExecutor {
       nations: {
         ...state.nations,
         [nation.id]: updatedNation,
+        [receiver.id]: updatedReceiver,
       },
       turnLogs: [
         ...state.turnLogs,

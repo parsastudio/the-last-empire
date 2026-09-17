@@ -18,6 +18,8 @@ export const DilemmaUrgencySchema = z.enum([
 export const DilemmaEffectSchema = z.object({
   treasuryGdpPercent: z.number().optional(),
   treasuryDelta: z.number().optional(),
+  nationalDebtGdpPercent: z.number().optional(),
+  nationalDebtDelta: z.number().optional(),
   stabilityDelta: z.number().optional(),
   globalReputationDelta: z.number().optional(),
   militaryTechDelta: z.number().optional(),

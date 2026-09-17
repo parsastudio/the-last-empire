@@ -61,22 +61,81 @@ export class FactorySlotDistributorUtility {
       })
       .filter((p) => p.max > p.current);
 
-    let remaining = quantity;
-    while (remaining > 0) {
-      candidates.sort((a, b) => a.current + a.added - (b.current + b.added));
-      let allocated = false;
+    if (candidates.length === 0) return allocations;
 
-      for (let i = 0; i < candidates.length && remaining > 0; i++) {
+    let remaining = quantity;
+
+    while (remaining > 0) {
+      let minTotal = Infinity;
+      let minCount = 0;
+
+      for (let i = 0; i < candidates.length; i++) {
         const item = candidates[i]!;
         if (item.current + item.added < item.max) {
-          item.added += 1;
-          remaining -= 1;
-          allocated = true;
-          break;
+          const total = item.current + item.added;
+          if (total < minTotal) {
+            minTotal = total;
+            minCount = 1;
+          } else if (total === minTotal) {
+            minCount++;
+          }
         }
       }
 
-      if (!allocated) break;
+      if (minTotal === Infinity || minCount === 0) {
+        break;
+      }
+
+      let nextMin = Infinity;
+      for (let i = 0; i < candidates.length; i++) {
+        const item = candidates[i]!;
+        if (item.current + item.added < item.max) {
+          const total = item.current + item.added;
+          if (total > minTotal && total < nextMin) {
+            nextMin = total;
+          }
+        }
+      }
+
+      const stepCapacity =
+        nextMin !== Infinity
+          ? nextMin - minTotal
+          : Math.ceil(remaining / minCount);
+      const perCandidateAllocation = Math.max(
+        1,
+        Math.min(stepCapacity, Math.floor(remaining / minCount)),
+      );
+
+      let anyAllocated = false;
+
+      for (let i = 0; i < candidates.length && remaining > 0; i++) {
+        const item = candidates[i]!;
+        const currentTotal = item.current + item.added;
+        if (currentTotal === minTotal && currentTotal < item.max) {
+          const availableRoom = item.max - currentTotal;
+          const toAdd = Math.min(
+            remaining,
+            Math.min(availableRoom, perCandidateAllocation),
+          );
+          if (toAdd > 0) {
+            item.added += toAdd;
+            remaining -= toAdd;
+            anyAllocated = true;
+          }
+        }
+      }
+
+      if (!anyAllocated) {
+        for (let i = 0; i < candidates.length && remaining > 0; i++) {
+          const item = candidates[i]!;
+          if (item.current + item.added < item.max) {
+            item.added += 1;
+            remaining -= 1;
+            anyAllocated = true;
+          }
+        }
+        if (!anyAllocated) break;
+      }
     }
 
     for (let i = 0; i < candidates.length; i++) {

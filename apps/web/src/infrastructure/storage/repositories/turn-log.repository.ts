@@ -105,8 +105,12 @@ export class TurnLogRepository {
     } = options;
 
     const collection = this.getFilteredCollection(gameId, turn, scope);
-    let records = await collection.sortBy("timestamp");
-    records = records.reverse();
+    let records = await collection.toArray();
+
+    records.sort((a, b) => {
+      if (b.turn !== a.turn) return b.turn - a.turn;
+      return (b.timestamp || 0) - (a.timestamp || 0);
+    });
 
     records = this.filterRecordsByScopeAndNational(
       records,

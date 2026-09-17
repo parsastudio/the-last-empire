@@ -15,16 +15,10 @@ export class GameStorageAdapter {
       turnLogs: state.turnLogs.slice(-10),
     };
 
-    await db.transaction("rw", db.gameStates, db.turnLogs, async () => {
-      await db.gameStates.put({
-        gameId,
-        state: cleanState,
-        timestamp: now,
-      });
-
-      if (state.turnLogs.length > 0) {
-        await TurnLogRepository.appendLogs(gameId, state.turnLogs);
-      }
+    await db.gameStates.put({
+      gameId,
+      state: cleanState,
+      timestamp: now,
     });
   }
 

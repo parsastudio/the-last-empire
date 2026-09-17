@@ -64,8 +64,6 @@ export class GuarantorRetaliationApplier {
     const retaliationLogs: TurnLogEntry[] = [];
     const retaliatingGuarantors: RetaliatingGuarantorInfo[] = [];
 
-    const attackerGuarantors = attacker.defenseGuarantorIds || [];
-
     for (let i = 0; i < targetGuarantors.length; i++) {
       const guarantorId = targetGuarantors[i]!;
       const canonicalGuarantor =
@@ -81,26 +79,34 @@ export class GuarantorRetaliationApplier {
         continue;
       }
 
-      const isMutual = attackerGuarantors.some(
+      const currentAttackerNation =
+        updatedNations[canonicalAttacker] || attacker;
+      const currentTargetNation = updatedNations[canonicalTarget] || target;
+
+      const isMutual = (currentAttackerNation.defenseGuarantorIds || []).some(
         (aId) => CountryRegistry.resolveCanonicalId(aId) === canonicalGuarantor,
       );
 
       if (isMutual) {
-        const newAttackerGuarantors = attackerGuarantors.filter(
+        const newAttackerGuarantors = (
+          currentAttackerNation.defenseGuarantorIds || []
+        ).filter(
           (aId) =>
             CountryRegistry.resolveCanonicalId(aId) !== canonicalGuarantor,
         );
-        const newTargetGuarantors = (target.defenseGuarantorIds || []).filter(
+        const newTargetGuarantors = (
+          currentTargetNation.defenseGuarantorIds || []
+        ).filter(
           (tId) =>
             CountryRegistry.resolveCanonicalId(tId) !== canonicalGuarantor,
         );
 
         updatedNations[canonicalAttacker] = {
-          ...attacker,
+          ...currentAttackerNation,
           defenseGuarantorIds: newAttackerGuarantors,
         };
         updatedNations[canonicalTarget] = {
-          ...target,
+          ...currentTargetNation,
           defenseGuarantorIds: newTargetGuarantors,
         };
 
@@ -121,7 +127,8 @@ export class GuarantorRetaliationApplier {
 
       const guarantorRelWithAttacker =
         guarantorNation.relations?.[canonicalAttacker];
-      const attackerRelWithGuarantor = attacker.relations?.[canonicalGuarantor];
+      const attackerRelWithGuarantor =
+        currentAttackerNation.relations?.[canonicalGuarantor];
 
       const hasStrategicPartnership =
         guarantorRelWithAttacker?.stance === "STRATEGIC_PARTNERSHIP" ||
@@ -179,7 +186,8 @@ export class GuarantorRetaliationApplier {
         },
       };
 
-      const freshAttacker = updatedNations[canonicalAttacker] || attacker;
+      const freshAttacker =
+        updatedNations[canonicalAttacker] || currentAttackerNation;
       const updatedAttackerRelations: Record<string, RelationProfile> = {
         ...(freshAttacker.relations || {}),
         [canonicalGuarantor]: {

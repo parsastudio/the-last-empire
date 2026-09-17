@@ -17,7 +17,7 @@ export interface CoalitionAlertData {
   turn: number;
 }
 
-export type ActiveModalState =
+export type ModalPayload =
   | {
       type: "COMMAND_CENTER";
       activeTab: SidebarTabType;
@@ -47,19 +47,22 @@ export type ActiveModalState =
     }
   | {
       type: "VICTORY_DEBRIEF";
-    }
-  | null;
+    };
+
+export type ActiveModalState = ModalPayload | null;
 
 interface UiStoreState {
   activeModal: ActiveModalState;
+  modalStack: ModalPayload[];
   isRailCollapsed: boolean;
-  openModal: (modal: NonNullable<ActiveModalState>) => void;
+  openModal: (modal: ModalPayload) => void;
   openCommandCenter: (
     activeTab: SidebarTabType,
     activeSubTab?: string | null,
     selectedTargetCode?: string | null,
   ) => void;
   closeModal: () => void;
+  closeAllModals: () => void;
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
@@ -67,29 +70,63 @@ interface UiStoreState {
 
 export const useUiStore = create<UiStoreState>((set) => ({
   activeModal: null,
+  modalStack: [],
   isRailCollapsed: true,
 
   openModal: (modal) =>
-    set({
-      activeModal: modal,
+    set((state) => {
+      const nextStack = [
+        ...state.modalStack.filter((m) => m.type !== modal.type),
+        modal,
+      ];
+      return {
+        modalStack: nextStack,
+        activeModal: modal,
+      };
     }),
 
   openCommandCenter: (
     activeTab,
     activeSubTab = null,
     selectedTargetCode = null,
-  ) =>
-    set({
-      activeModal: {
-        type: "COMMAND_CENTER",
-        activeTab,
-        activeSubTab,
-        selectedTargetCode,
-      },
-    }),
+  ) => {
+    const modal: ModalPayload = {
+      type: "COMMAND_CENTER",
+      activeTab,
+      activeSubTab,
+      selectedTargetCode,
+    };
+    set((state) => {
+      const filtered = state.modalStack.filter(
+        (m) => m.type !== "COMMAND_CENTER",
+      );
+      const nextStack = [...filtered, modal];
+      return {
+        modalStack: nextStack,
+        activeModal: modal,
+      };
+    });
+  },
 
   closeModal: () =>
+    set((state) => {
+      if (state.modalStack.length <= 1) {
+        return {
+          modalStack: [],
+          activeModal: null,
+        };
+      }
+      const nextStack = state.modalStack.slice(0, -1);
+      const nextActive = nextStack[nextStack.length - 1] ?? null;
+      return {
+        modalStack: nextStack,
+        activeModal: nextActive,
+      };
+    }),
+
+  closeAllModals: () =>
     set({
+      modalStack: [],
       activeModal: null,
     }),
 

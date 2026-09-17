@@ -47,8 +47,7 @@ export class GuarantorBudgetCalculatorUtility {
         MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
     );
     const auxArm = Math.floor(
-      (effectiveDefenseBudget * 0.25) /
-        MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
+      (effectiveDefenseBudget * 0.25) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
     );
     const auxInf = Math.floor(
       (effectiveDefenseBudget * 0.1) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,

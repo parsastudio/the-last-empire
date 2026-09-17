@@ -87,6 +87,7 @@ export class BattleExecutionEngine {
     }
 
     let achievedConquestCount = 1;
+    let finalCalcResult = calcResult;
 
     if (calcResult.isAttackerVictory && !attacker.isAi) {
       const candidateDefenderProvinces =
@@ -120,6 +121,7 @@ export class BattleExecutionEngine {
 
         if (tierTest.isAttackerVictory) {
           achievedConquestCount = tier;
+          finalCalcResult = tierTest;
         } else {
           break;
         }
@@ -130,7 +132,7 @@ export class BattleExecutionEngine {
       updatedProvinces,
       attacker.id,
       defender.id,
-      calcResult.isAttackerVictory,
+      finalCalcResult.isAttackerVictory,
       action.targetProvinceId,
       attacker.industrialLevel,
       achievedConquestCount,
@@ -138,12 +140,12 @@ export class BattleExecutionEngine {
 
     updatedProvinces = conquestResult.updatedProvinces;
     const isDefenderAnnexed =
-      calcResult.isAttackerVictory &&
+      finalCalcResult.isAttackerVictory &&
       conquestResult.remainingDefenderProvinces.length === 0;
 
     const spoilsData = BattleSpoilsCollector.collectSpoils(
       conquestResult,
-      calcResult,
+      finalCalcResult,
     );
 
     const destroyedFactoriesGdp =
@@ -156,7 +158,7 @@ export class BattleExecutionEngine {
       state.nations,
       attacker,
       defender,
-      calcResult,
+      finalCalcResult,
       spoilsData,
       isDefenderAnnexed,
       conquestResult.conqueredFactoriesCount,
@@ -197,7 +199,7 @@ export class BattleExecutionEngine {
       state.currentTurn,
       attacker,
       defender,
-      calcResult,
+      finalCalcResult,
       betrayalPenaltyText,
       state.humanNationId,
       isDefenderAnnexed,
@@ -209,7 +211,7 @@ export class BattleExecutionEngine {
     const reportData = BattleLogFactory.assembleReportData(
       attacker,
       defender,
-      calcResult,
+      finalCalcResult,
       targetProvince,
       attackType,
       isDefenderAnnexed,

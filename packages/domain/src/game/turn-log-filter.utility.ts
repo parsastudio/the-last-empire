@@ -11,10 +11,6 @@ export class TurnLogFilterUtility {
     scope: TurnLogScope,
     humanNationId?: string,
   ): boolean {
-    if (this.isDilemmaLog(log)) {
-      return false;
-    }
-
     if (scope === "GLOBAL") {
       return log.scope === "GLOBAL";
     }

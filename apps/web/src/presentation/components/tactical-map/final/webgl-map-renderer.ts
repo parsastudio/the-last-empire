@@ -236,6 +236,8 @@ export class WebGLMapRenderer {
     const gl = this.gl;
     if (!this.program || !this.vao) return;
 
+    gl.viewport(0, 0, Math.round(width), Math.round(height));
+
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
 
