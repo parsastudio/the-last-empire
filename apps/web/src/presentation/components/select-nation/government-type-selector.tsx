@@ -44,26 +44,19 @@ export function GovernmentTypeSelector({
 
   return (
     <div className="space-y-3 sm:space-y-4 text-start font-sans">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
-          {t("selectorTitle")}
-        </span>
-      </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
         {options.map((gov) => {
           const isSelected = selectedType === gov.type;
           const govType = gov.type as GovernmentType;
           const Icon = GOVERNMENT_ICONS[govType] ?? Landmark;
           const name = t(`${govType}.name`);
-          const headline = t(`${govType}.headline`);
 
           return (
             <button
               key={gov.type}
               type="button"
               onClick={() => onSelect(gov.type)}
-              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl text-start transition-all border flex items-center justify-between gap-2.5 cursor-pointer relative overflow-hidden group ${
+              className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl text-start transition-all border flex items-center justify-between gap-2.5 cursor-pointer relative overflow-hidden group ${
                 isSelected
                   ? "bg-primary/15 border-primary shadow-md ring-1 ring-primary/40 scale-[1.005]"
                   : "bg-background/50 border-border/70 hover:bg-secondary/60 hover:border-border"
@@ -71,15 +64,15 @@ export function GovernmentTypeSelector({
             >
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <div
-                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-secondary text-muted-foreground border-border/60 group-hover:text-foreground group-hover:border-primary/40"
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon size={16} />
                 </div>
-                <div className="space-y-0.5 overflow-hidden">
+                <div className="overflow-hidden">
                   <span
                     className={`text-[11px] sm:text-xs font-black block truncate transition-colors ${
                       isSelected
@@ -88,9 +81,6 @@ export function GovernmentTypeSelector({
                     }`}
                   >
                     {name}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-muted-foreground block truncate">
-                    {headline}
                   </span>
                 </div>
               </div>

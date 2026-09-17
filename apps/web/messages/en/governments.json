@@ -1,6 +1,6 @@
 {
   "selectorTitle": "Political Structure & Governance System",
-  "doctrinesAndEffects": "Governance Doctrine & Outcomes: {name}",
+  "doctrinesAndEffects": "Traits: {name}",
   "prosTitle": "Strategic Advantages ({count})",
   "consTitle": "Governance Challenges ({count})",
   "PLURALIST_PARLIAMENTARY": {

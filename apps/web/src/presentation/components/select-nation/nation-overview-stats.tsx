@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Award, Coins, Users, Landmark } from "lucide-react";
+import { Award, Coins, Users } from "lucide-react";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
@@ -34,17 +34,10 @@ export function NationOverviewStats({ nation }: NationOverviewStatsProps) {
       icon: Users,
       iconColor: "text-primary",
     },
-    {
-      id: "treasury",
-      label: t("treasury"),
-      value: nation.treasury,
-      icon: Landmark,
-      iconColor: "text-treasury",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-start">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 text-start">
       {statCards.map((card) => {
         const Icon = card.icon;
         return (
