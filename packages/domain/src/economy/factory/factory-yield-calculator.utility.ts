@@ -136,6 +136,7 @@ export class FactoryYieldCalculatorUtility {
   public static calculateResearchStepCost(
     industrialLevel: number,
     governmentType?: string,
+    projectDiscountMultiplier = 1.0,
   ): number {
     const k = Math.floor(industrialLevel);
     const fullTierCost =
@@ -144,6 +145,8 @@ export class FactoryYieldCalculatorUtility {
       ? GovernmentTraitsUtility.getModifiers(governmentType)
           .industrialResearchCostMultiplier
       : 1.0;
-    return Math.floor((fullTierCost / 10) * modifier);
+    return Math.floor(
+      (fullTierCost / 10) * modifier * projectDiscountMultiplier,
+    );
   }
 }

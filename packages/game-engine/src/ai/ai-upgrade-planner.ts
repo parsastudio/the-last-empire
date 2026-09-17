@@ -5,6 +5,7 @@ import {
   IndustryCalculator,
   AI_DOCTRINE_PRESETS,
   NationGettersUtility,
+  NationalProjectEffectApplierUtility,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
@@ -119,6 +120,8 @@ export class AIUpgradePlanner {
       AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
     const threshold = weights.researchDisparityThreshold ?? 1.0;
+    const researchDiscount =
+      NationalProjectEffectApplierUtility.getResearchDiscountMultiplier(nation);
     let simulatedMilTech = nation.military.techLevel;
     let simulatedIndTech = nation.industrialLevel;
     let stepsTaken = 0;
@@ -127,10 +130,12 @@ export class AIUpgradePlanner {
       const nextMilCost = ResearchManager.getMilitaryTechCost(
         simulatedMilTech,
         nation.government?.type,
+        researchDiscount,
       );
       const nextIndCost = IndustryCalculator.calculateResearchStepCost(
         simulatedIndTech,
         nation.government?.type,
+        researchDiscount,
       );
 
       const costRatio = nextMilCost / Math.max(1, nextIndCost);

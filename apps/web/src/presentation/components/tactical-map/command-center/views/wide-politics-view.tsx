@@ -7,6 +7,7 @@ import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
 
 interface WidePoliticsViewProps {
   nation: Nation;
@@ -20,6 +21,8 @@ export function WidePoliticsView({
   provincesMap,
 }: WidePoliticsViewProps) {
   const gdp = getNationGdp(nation, provincesMap);
+  const researchDiscount =
+    NationalProjectEffectApplierUtility.getResearchDiscountMultiplier(nation);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 text-start font-sans">
@@ -38,6 +41,7 @@ export function WidePoliticsView({
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
           governmentType={nation.government?.type}
+          projectDiscountMultiplier={researchDiscount}
         />
 
         <MilitaryTechUpgradeCard
@@ -45,6 +49,7 @@ export function WidePoliticsView({
           treasury={nation.treasury}
           techLevel={nation.military.techLevel}
           governmentType={nation.government?.type}
+          projectDiscountMultiplier={researchDiscount}
         />
 
         <ImfLoanCard

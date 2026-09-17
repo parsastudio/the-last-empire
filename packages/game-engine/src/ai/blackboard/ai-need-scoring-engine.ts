@@ -151,48 +151,37 @@ export class AiNeedScoringEngine {
     context: TurnContext,
     posture: AIPosture,
   ): number {
-    let score = 15;
+    let score = 20;
 
     const boostedProjectIds =
       context.state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
-    const completedIds = nation.completedProjectIds || [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;
 
     if (boostedProjectIds.length >= maxBoosts) {
       return 0;
     }
 
-    const candidateProjects = NATIONAL_PROJECTS_CATALOG.filter(
-      (p) => !completedIds.includes(p.id) && !boostedProjectIds.includes(p.id),
-    );
+    const progressSteps = nation.projectProgressSteps || {};
+    const candidateProjects = NATIONAL_PROJECTS_CATALOG.filter((p) => {
+      const current = progressSteps[p.id] || 0;
+      return (
+        current < p.totalStepsRequired && !boostedProjectIds.includes(p.id)
+      );
+    });
 
     if (candidateProjects.length === 0) {
       return 0;
     }
 
-    const progressSteps = nation.projectProgressSteps || {};
     const hasPartiallyFinished = candidateProjects.some(
       (p) => (progressSteps[p.id] || 0) > 0,
     );
     if (hasPartiallyFinished) {
-      score += 30;
-    }
-
-    if (nation.government.stability < 40) {
       score += 25;
     }
 
     if (posture === "PEACE") {
       score += 20;
-    } else {
-      score -= 10;
-    }
-
-    if (
-      nation.doctrine === "GLOBAL_HEGEMON" ||
-      nation.doctrine === "MERCANTILE_ECONOMIC"
-    ) {
-      score += 15;
     }
 
     return Math.max(0, Math.min(100, score));

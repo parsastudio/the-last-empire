@@ -47,10 +47,7 @@ export class FiscalRevenueCalculator {
     const config = ECONOMIC_DOCTRINE_CONFIGS[stance];
 
     const factoryYieldProjectMultiplier =
-      NationalProjectEffectApplierUtility.getCombinedMultiplier(
-        nation.completedProjectIds,
-        "factoryYieldBonusMultiplier",
-      );
+      NationalProjectEffectApplierUtility.getFactoryYieldMultiplier(nation);
 
     const domesticBase = Math.floor(
       gdp *
@@ -110,21 +107,12 @@ export class FiscalRevenueCalculator {
     );
     const globalBase = exportPower + transitGateway;
 
-    const globalTradeProjectMultiplier =
-      NationalProjectEffectApplierUtility.getCombinedMultiplier(
-        nation.completedProjectIds,
-        "globalTradeIncomeBonusMultiplier",
-      );
-
     const appliedAiMultiplier = nation.isAi ? aiRevenueMultiplier : 1.0;
     const domesticRevenue = Math.floor(
       domesticBase * config.domesticWeight * appliedAiMultiplier,
     );
     const globalRevenue = Math.floor(
-      globalBase *
-        config.globalWeight *
-        appliedAiMultiplier *
-        globalTradeProjectMultiplier,
+      globalBase * config.globalWeight * appliedAiMultiplier,
     );
     const baseTotalRevenue = domesticRevenue + globalRevenue;
 

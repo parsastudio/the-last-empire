@@ -15,6 +15,7 @@ interface MilitaryTechUpgradeCardProps {
   treasury?: number;
   techLevel?: number;
   governmentType?: string;
+  projectDiscountMultiplier?: number;
 }
 
 export function MilitaryTechUpgradeCard({
@@ -22,6 +23,7 @@ export function MilitaryTechUpgradeCard({
   treasury = 0,
   techLevel = 1.0,
   governmentType,
+  projectDiscountMultiplier = 1.0,
 }: MilitaryTechUpgradeCardProps) {
   const t = useTranslations("overview.militaryTechUpgrade");
   const { formatCurrency, formatLevel, formatPercent } = useLocaleFormatter();
@@ -31,6 +33,7 @@ export function MilitaryTechUpgradeCard({
   const stepResearchCost = ResearchManager.getMilitaryTechCost(
     techLevel,
     governmentType,
+    projectDiscountMultiplier,
   );
   const canAffordTech = treasury >= stepResearchCost;
 

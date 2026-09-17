@@ -13,8 +13,6 @@ import { NAVAL_FLEET_CONFIG } from "@/domain/military/naval-fleet.config";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
 import { SecurityFeeCalculatorUtility } from "@/domain/diplomacy/security-fee-calculator.utility";
 import { StrategicPartnershipCalculatorUtility } from "@/domain/diplomacy/strategic-partnership-calculator.utility";
-import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
-import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export interface NationalBudgetBreakdown {
@@ -22,7 +20,6 @@ export interface NationalBudgetBreakdown {
   fiscalRevenue: FiscalRevenueBreakdown;
   navalSecurityIncome: number;
   partnershipIncome: number;
-  petroTributeIncome: number;
   grossRevenue: number;
   payrollBreakdown: BreakdownMilitaryPayroll;
   debtInterest: number;
@@ -92,35 +89,8 @@ export class NationalBudgetCalculator {
       }
     }
 
-    const petroTributeRate =
-      NationalProjectEffectApplierUtility.getCombinedBonus(
-        nation.completedProjectIds,
-        "petroTributeShare",
-      );
-
-    let petroTributeIncome = 0;
-    if (petroTributeRate > 0 && allNations) {
-      for (const other of Object.values(allNations)) {
-        if (!other.isAlive || other.id === nation.id) continue;
-        const isAtWar = NationRelationResolver.isWar(
-          nation.relations,
-          other.id,
-        );
-        if (!isAtWar) {
-          const otherCanonical = CountryRegistry.resolveCanonicalId(other.id);
-          const otherGdp =
-            precomputedGdpMap?.get(otherCanonical) ??
-            getNationGdp(other, provincesMap);
-          petroTributeIncome += Math.floor(otherGdp * petroTributeRate);
-        }
-      }
-    }
-
     const grossRevenue =
-      fiscalRevenue.totalRevenue +
-      navalSecurityIncome +
-      partnershipIncome +
-      petroTributeIncome;
+      fiscalRevenue.totalRevenue + navalSecurityIncome + partnershipIncome;
 
     const debtInterest = DebtCalculatorUtility.calculateInterest(
       nation.nationalDebt,
@@ -142,7 +112,6 @@ export class NationalBudgetCalculator {
       fiscalRevenue,
       navalSecurityIncome,
       partnershipIncome,
-      petroTributeIncome,
       grossRevenue,
       payrollBreakdown,
       debtInterest,
