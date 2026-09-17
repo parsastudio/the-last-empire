@@ -11,12 +11,7 @@
   "stats": {
     "rank": "رتبه قدرت جهانی",
     "gdp": "تولید ناخالص (GDP)",
-    "population": "جمعیت کل",
-    "treasury": "خزانه اولیه ملی"
-  },
-  "dossier": {
-    "title": "شناسنامه استراتژیک",
-    "template": "شناسنامه استراتژیک رسمی {name} با رتبه جهانی #{rank}."
+    "population": "جمعیت کل"
   },
   "powerTiers": {
     "superpower": "ابرقدرت جهانی",

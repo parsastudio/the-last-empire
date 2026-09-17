@@ -11,10 +11,7 @@ import { AIWartimeLoanEvaluator } from "@/engine/ai/procurement/ai-wartime-loan-
 import { AIArmsImportPlanner } from "@/engine/ai/procurement/ai-arms-import-planner";
 import { AIDomesticRecruitmentPlanner } from "@/engine/ai/procurement/ai-domestic-recruitment-planner";
 import { AINavalProcurementPlanner } from "@/engine/ai/procurement/ai-naval-procurement-planner";
-import {
-  AiWalletBudgetAllocator,
-  AiStrategicWallets,
-} from "@/engine/ai/procurement/ai-wallet-budget-allocator";
+import { AiStrategicWallets } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export interface RecruitmentPlanResult {
@@ -54,17 +51,15 @@ export class AIProcurementPlanner {
       }
     }
 
-    const wallets =
-      precomputedWallets ??
-      AiWalletBudgetAllocator.calculateWallets(
-        nation,
-        context.state.nations,
-        context.state.provinces,
-        posture,
-        effectiveTreasury,
-        context.gdpMap,
-        context.totalWorldGdp,
-      );
+    const wallets: AiStrategicWallets = precomputedWallets ?? {
+      innovation: 0,
+      globalMarket: Math.floor(effectiveTreasury * 0.5),
+      domesticInfra: Math.floor(effectiveTreasury * 0.5),
+      geopolitics: 0,
+      totalDisposable: effectiveTreasury,
+      isEmbargoed: false,
+      posture,
+    };
 
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,

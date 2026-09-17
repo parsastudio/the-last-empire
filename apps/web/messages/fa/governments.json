@@ -1,8 +1,5 @@
 {
-  "selectorTitle": "انتخاب ساختار سیاسی و نظام حاکمیت",
   "doctrinesAndEffects": "ویژگی‌ها: {name}",
-  "prosTitle": "مزایای استراتژیک ({count})",
-  "consTitle": "چالش‌های حکمرانی ({count})",
   "PLURALIST_PARLIAMENTARY": {
     "name": "جمهوری کثرت‌گرا و پارلمانی",
     "headline": "شکوفایی علمی و رفاه در صلح • فرسودگی شدید در جنگ",

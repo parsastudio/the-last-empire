@@ -1,5 +1,4 @@
 import Dexie, { type Table } from "dexie";
-import { z } from "zod";
 import { GameState, TurnLogEntry } from "@geopolitics/domain";
 
 export interface SavedGameStateRecord {
@@ -18,13 +17,11 @@ export interface SavedTurnLogRecord {
   log: TurnLogEntry;
 }
 
-export const BinaryAssetRecordSchema = z.object({
-  key: z.string().min(1),
-  data: z.instanceof(ArrayBuffer),
-  timestamp: z.number().int().positive(),
-});
-
-export type SavedBinaryAssetRecord = z.infer<typeof BinaryAssetRecordSchema>;
+export interface SavedBinaryAssetRecord {
+  key: string;
+  data: ArrayBuffer;
+  timestamp: number;
+}
 
 export class GameDatabase extends Dexie {
   public gameStates!: Table<SavedGameStateRecord, string>;

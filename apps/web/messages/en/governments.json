@@ -1,8 +1,5 @@
 {
-  "selectorTitle": "Political Structure & Governance System",
   "doctrinesAndEffects": "Traits: {name}",
-  "prosTitle": "Strategic Advantages ({count})",
-  "consTitle": "Governance Challenges ({count})",
   "PLURALIST_PARLIAMENTARY": {
     "name": "Pluralist Parliamentary Republic",
     "headline": "Scientific surge & peacetime prosperity • Rapid wartime fatigue",

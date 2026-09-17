@@ -15,8 +15,6 @@
   },
   "tiers": {
     "headerTitle": "National Production Lines & Industrial Tiers",
-    "headerSubtitleDomestic": "Track categorized industrial tiers and immediately upgrade facilities to peak domestic tech",
-    "headerSubtitleImport": "Select an equipment tier for foreign machinery imports and industrial leapfrogging",
     "activeTiersCount": "{count} Active Tiers",
     "lineTier": "Production Line Tier #{rank}",
     "maxEfficiency": "Equipment operating at peak efficiency ceiling",

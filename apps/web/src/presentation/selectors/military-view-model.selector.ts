@@ -20,7 +20,6 @@ export interface MilitaryUnitItemViewModel {
 
 export interface MilitaryForcesViewModel {
   units: MilitaryUnitItemViewModel[];
-  techLevel: number;
 }
 
 export interface MilitaryValuationViewModel {
@@ -103,7 +102,6 @@ export function selectMilitaryForcesViewModel(
 
   return {
     units,
-    techLevel: activeNation.military.techLevel,
   };
 }
 

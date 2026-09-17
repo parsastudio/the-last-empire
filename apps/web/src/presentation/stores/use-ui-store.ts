@@ -62,7 +62,6 @@ interface UiStoreState {
     selectedTargetCode?: string | null,
   ) => void;
   closeModal: () => void;
-  closeAllModals: () => void;
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
@@ -122,12 +121,6 @@ export const useUiStore = create<UiStoreState>((set) => ({
         modalStack: nextStack,
         activeModal: nextActive,
       };
-    }),
-
-  closeAllModals: () =>
-    set({
-      modalStack: [],
-      activeModal: null,
     }),
 
   setIsRailCollapsed: (collapsed) =>

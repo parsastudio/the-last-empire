@@ -9,7 +9,6 @@
   "layers": {
     "political": "نقشه سیاسی",
     "gdp": "پایش اقتصاد GDP",
-    "updating": "در حال به‌روزرسانی...",
     "layersLabel": "لایه‌ها:"
   },
   "contextMenu": {
@@ -31,16 +30,7 @@
     "provinceFallback": "استان #{id}",
     "stances": {
       "yourEmpire": "امپراتوری شما",
-      "warState": "وضعیت نبرد",
-      "strategicPartnership": "شراکت استراتژیک",
-      "nonAggression": "عدم تخاصم",
-      "normalDiplomacy": "دیپلماسی عادی",
-      "underSuperpowerProtectorate": "تحت استمداد ابرقدرت",
-      "targetUnderYourProtectorate": "کشور تحت استمداد شما",
-      "defenseGuarantorOfHuman": "ضامن دفاعی شما (پیمان دفاعی)",
-      "humanDefenseGuarantorOfTarget": "تحت ضمانت دفاعی شما",
-      "unknownCountry": "کشور نامشخص",
-      "unknownRegion": "منطقه نامشخص"
+      "unknownCountry": "کشور نامشخص"
     }
   }
 }

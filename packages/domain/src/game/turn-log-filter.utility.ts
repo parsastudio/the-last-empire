@@ -2,10 +2,6 @@ import { TurnLogEntry, TurnLogScope } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries/country-registry";
 
 export class TurnLogFilterUtility {
-  public static isDilemmaLog(log: TurnLogEntry): boolean {
-    return log.eventCode === "DILEMMA_RESOLVED";
-  }
-
   public static matchesScope(
     log: TurnLogEntry,
     scope: TurnLogScope,

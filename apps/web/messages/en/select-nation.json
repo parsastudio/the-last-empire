@@ -11,12 +11,7 @@
   "stats": {
     "rank": "Global Power Rank",
     "gdp": "Gross Domestic Product (GDP)",
-    "population": "Total Population",
-    "treasury": "Initial Sovereign Treasury"
-  },
-  "dossier": {
-    "title": "Strategic Dossier",
-    "template": "Official strategic dossier of {name} with global rank #{rank}."
+    "population": "Total Population"
   },
   "powerTiers": {
     "superpower": "Global Superpower",
