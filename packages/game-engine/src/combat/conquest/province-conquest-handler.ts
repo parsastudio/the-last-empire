@@ -29,6 +29,7 @@ export class ProvinceConquestHandler {
     isAttackerVictory: boolean,
     targetProvinceId?: number,
     attackerIndustrialLevel?: number,
+    maxProvincesToConquer = 1,
   ): ProvinceConquestResult {
     const updatedProvinces: Record<string, ProvinceDynamicState> = {
       ...provinces,
@@ -54,7 +55,7 @@ export class ProvinceConquestHandler {
     const conqueredProvincesList: ProvinceDynamicState[] = [];
 
     if (isAttackerVictory && defenderProvincesBefore.length > 0) {
-      let conqueredProvId: number | null = null;
+      let primaryProvince: ProvinceDynamicState | null = null;
 
       if (targetProvinceId && updatedProvinces[targetProvinceId.toString()]) {
         const targetedProv = updatedProvinces[targetProvinceId.toString()]!;
@@ -62,58 +63,67 @@ export class ProvinceConquestHandler {
           targetedProv.ownerNationId,
         );
         if (actualOwner === cleanDefenderId) {
-          conqueredProvId = targetProvinceId;
+          primaryProvince = targetedProv;
         }
       }
 
-      if (!conqueredProvId) {
-        const sorted = [...defenderProvincesBefore].sort((a, b) => {
-          const pixelA = MapTopologyRegistry.getPixelCount(a.provinceId);
-          const pixelB = MapTopologyRegistry.getPixelCount(b.provinceId);
-          return pixelB - pixelA;
-        });
-        conqueredProvId = sorted[0]!.provinceId;
-      }
+      const restProvinces = defenderProvincesBefore.filter(
+        (p) => !primaryProvince || p.provinceId !== primaryProvince.provinceId,
+      );
 
-      if (conqueredProvId) {
-        const targetProv = updatedProvinces[conqueredProvId.toString()];
-        if (
-          targetProv &&
-          CountryRegistry.resolveCanonicalId(targetProv.ownerNationId) ===
-            cleanDefenderId
-        ) {
-          originalFactoriesCount = targetProv.factoriesCount;
-          const survivingFactories = Math.floor(
-            targetProv.factoriesCount * 0.8,
-          );
-          conqueredFactoriesCount = survivingFactories;
+      restProvinces.sort((a, b) => {
+        const gdpA = getProvinceGdp(a);
+        const gdpB = getProvinceGdp(b);
+        if (gdpB !== gdpA) return gdpB - gdpA;
+        return (
+          MapTopologyRegistry.getPixelCount(b.provinceId) -
+          MapTopologyRegistry.getPixelCount(a.provinceId)
+        );
+      });
 
-          const remainingTiers = targetProv.factoryTiers
-            ? targetProv.factoryTiers.map((t) => ({
-                ...t,
-                count: Math.floor(t.count * 0.8),
-              }))
-            : [];
+      const candidateList = primaryProvince
+        ? [primaryProvince, ...restProvinces]
+        : restProvinces;
 
-          const flooredTiers =
-            attackerIndustrialLevel !== undefined
-              ? IndustryCalculator.applyIndustrialFloor(
-                  remainingTiers,
-                  attackerIndustrialLevel,
-                )
-              : remainingTiers;
+      const provincesToTake = candidateList.slice(
+        0,
+        Math.max(1, maxProvincesToConquer),
+      );
 
-          const conqueredProv: ProvinceDynamicState = {
-            ...targetProv,
-            ownerNationId: cleanAttackerId,
-            factoriesCount: survivingFactories,
-            factoryTiers: flooredTiers,
-          };
-          updatedProvinces[conqueredProvId.toString()] = conqueredProv;
-          conqueredPixels = MapTopologyRegistry.getPixelCount(conqueredProvId);
-          conqueredProvincesGdp = getProvinceGdp(conqueredProv);
-          conqueredProvincesList.push(conqueredProv);
-        }
+      for (let i = 0; i < provincesToTake.length; i++) {
+        const targetProv = provincesToTake[i]!;
+        originalFactoriesCount += targetProv.factoriesCount;
+        const survivingFactories = Math.floor(targetProv.factoriesCount * 0.8);
+        conqueredFactoriesCount += survivingFactories;
+
+        const remainingTiers = targetProv.factoryTiers
+          ? targetProv.factoryTiers.map((t) => ({
+              ...t,
+              count: Math.floor(t.count * 0.8),
+            }))
+          : [];
+
+        const flooredTiers =
+          attackerIndustrialLevel !== undefined
+            ? IndustryCalculator.applyIndustrialFloor(
+                remainingTiers,
+                attackerIndustrialLevel,
+              )
+            : remainingTiers;
+
+        const conqueredProv: ProvinceDynamicState = {
+          ...targetProv,
+          ownerNationId: cleanAttackerId,
+          factoriesCount: survivingFactories,
+          factoryTiers: flooredTiers,
+        };
+
+        updatedProvinces[targetProv.provinceId.toString()] = conqueredProv;
+        conqueredPixels += MapTopologyRegistry.getPixelCount(
+          targetProv.provinceId,
+        );
+        conqueredProvincesGdp += getProvinceGdp(conqueredProv);
+        conqueredProvincesList.push(conqueredProv);
       }
     }
 

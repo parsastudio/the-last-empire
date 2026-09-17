@@ -51,6 +51,7 @@ export * from "./combat/optimizer/helpers/binary-search-optimizer";
 export * from "./combat/optimizer/helpers/guarantor-multiplier-blender";
 export * from "./combat/optimizer/helpers/air-missile-deployment-optimizer";
 export * from "./combat/attack-deployment-optimizer";
+export * from "./combat/calculator/breakthrough-defense-calculator";
 export * from "./combat/calculator/guarantor-intervention-calculator";
 export * from "./combat/calculator/battle-loot-evaluator";
 export * from "./combat/calculator/battle-phase-orchestrator";

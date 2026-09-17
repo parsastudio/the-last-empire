@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
+import { MilitaryStack } from "@/domain/military/military.schema";
 import {
   CasualtyMetrics,
   ReportSeverity,
@@ -41,7 +42,12 @@ export class BattleCalculator {
     airForceToDeploy?: number,
     provincesMap?: Record<string, Province>,
     guarantorNation?: Nation | null,
+    overrideDefenderStack?: MilitaryStack,
   ): BattleCalculationResult {
+    const effectiveDefender: Nation = overrideDefenderStack
+      ? { ...defender, military: overrideDefenderStack }
+      : defender;
+
     const deployedInfantry = Math.min(
       attacker.military.infantry,
       Math.max(1, infantryToDeploy ?? attacker.military.infantry),
@@ -74,7 +80,7 @@ export class BattleCalculator {
 
     const blendedDef = GuarantorMultiplierBlender.blend(
       attacker,
-      defender,
+      effectiveDefender,
       provincesMap,
       guarantorNation,
     );
@@ -154,7 +160,7 @@ export class BattleCalculator {
     });
 
     const treasuryLooted = BattleLootEvaluator.calculateLoot(
-      defender,
+      effectiveDefender,
       phasesResult.groundPhaseOutput.isAttackerVictory,
       provincesMap,
     );

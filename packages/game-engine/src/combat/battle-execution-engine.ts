@@ -14,6 +14,7 @@ import {
   DEFAULT_NATION_TURN_ACTIVITY,
 } from "@geopolitics/domain";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
+import { BreakthroughDefenseCalculator } from "@/engine/combat/calculator/breakthrough-defense-calculator";
 
 export interface BattleExecutionResult {
   state: GameState;
@@ -85,6 +86,46 @@ export class BattleExecutionEngine {
       actualDestroyedFactories = destructionResult.actualDestroyed;
     }
 
+    let achievedConquestCount = 1;
+
+    if (calcResult.isAttackerVictory && !attacker.isAi) {
+      const candidateDefenderProvinces =
+        BreakthroughDefenseCalculator.getCandidateDefenderProvinces(
+          defender.id,
+          updatedProvinces,
+          action.targetProvinceId,
+        );
+
+      const maxPossibleTier = Math.min(3, candidateDefenderProvinces.length);
+
+      for (let tier = 2; tier <= maxPossibleTier; tier++) {
+        const tierDefenderStack =
+          BreakthroughDefenseCalculator.calculateTierDefenderStack(
+            defender,
+            tier,
+            candidateDefenderProvinces,
+          );
+
+        const tierTest = BattleCalculator.calculateBattle(
+          attacker,
+          defender,
+          action.dronesToLaunch || 0,
+          action.infantryToDeploy,
+          action.armorToDeploy,
+          action.airForceToDeploy,
+          updatedProvinces,
+          guarantorNation,
+          tierDefenderStack,
+        );
+
+        if (tierTest.isAttackerVictory) {
+          achievedConquestCount = tier;
+        } else {
+          break;
+        }
+      }
+    }
+
     const conquestResult = ProvinceConquestHandler.handleConquest(
       updatedProvinces,
       attacker.id,
@@ -92,6 +133,7 @@ export class BattleExecutionEngine {
       calcResult.isAttackerVictory,
       action.targetProvinceId,
       attacker.industrialLevel,
+      achievedConquestCount,
     );
 
     updatedProvinces = conquestResult.updatedProvinces;

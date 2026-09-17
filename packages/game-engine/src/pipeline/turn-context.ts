@@ -35,7 +35,7 @@ export class TurnContext {
 
     const difficultyKey = state.difficulty ?? "NORMAL";
     this.aiRevenueMultiplier =
-      DIFFICULTY_CONFIGS[difficultyKey]?.aiRevenueMultiplier ?? 1.4;
+      DIFFICULTY_CONFIGS[difficultyKey]?.aiRevenueMultiplier ?? 1.1;
 
     this.matrixCache = GeopoliticalMatrixCache.build(
       state.nations,

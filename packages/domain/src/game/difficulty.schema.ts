@@ -19,18 +19,18 @@ export type DifficultyConfig = z.infer<typeof DifficultyConfigSchema>;
 export const DIFFICULTY_CONFIGS: Record<GameDifficulty, DifficultyConfig> = {
   EASY: {
     id: "EASY",
-    aiRevenueMultiplier: 1.0,
+    aiRevenueMultiplier: 0.85,
   },
   NORMAL: {
     id: "NORMAL",
-    aiRevenueMultiplier: 1.4,
+    aiRevenueMultiplier: 1.1,
   },
   HARD: {
     id: "HARD",
-    aiRevenueMultiplier: 1.8,
+    aiRevenueMultiplier: 1.3,
   },
   IMPOSSIBLE: {
     id: "IMPOSSIBLE",
-    aiRevenueMultiplier: 2.2,
+    aiRevenueMultiplier: 1.4,
   },
 };
