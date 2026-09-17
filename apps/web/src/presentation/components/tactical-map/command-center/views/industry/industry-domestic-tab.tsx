@@ -10,7 +10,6 @@ import {
   NationGettersUtility,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
 import { IndustryStatsOverview } from "./components/industry-stats-overview";
 import { IndustrySmartBuildCard } from "./components/industry-smart-build-card";
 import { FactoryTiersGrid } from "./components/factory-tiers-grid";
@@ -122,25 +121,16 @@ export function IndustryDomesticTab({
         actionType="DOMESTIC"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-        <IndustrySmartBuildCard
-          totalActiveFactories={capacity.totalActiveFactories}
-          totalMaxSlots={capacity.totalMaxSlots}
-          totalEmptySlots={capacity.totalEmptySlots}
-          batchQuantity={buildBatch.batchQuantity}
-          batchCost={buildBatch.batchCost}
-          canAfford={buildBatch.canAfford}
-          isBuilding={isBatchBuilding}
-          onBuild={handleSmartBatchBuild}
-        />
-
-        <IndustryTechUpgradeCard
-          nationId={nation.id}
-          treasury={nation.treasury}
-          industrialLevel={nation.industrialLevel}
-          governmentType={nation.government?.type}
-        />
-      </div>
+      <IndustrySmartBuildCard
+        totalActiveFactories={capacity.totalActiveFactories}
+        totalMaxSlots={capacity.totalMaxSlots}
+        totalEmptySlots={capacity.totalEmptySlots}
+        batchQuantity={buildBatch.batchQuantity}
+        batchCost={buildBatch.batchCost}
+        canAfford={buildBatch.canAfford}
+        isBuilding={isBatchBuilding}
+        onBuild={handleSmartBatchBuild}
+      />
     </div>
   );
 }

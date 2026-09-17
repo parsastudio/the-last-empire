@@ -1,12 +1,14 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Coins } from "lucide-react";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface MilitaryForceUnitCardProps {
   icon: LucideIcon;
   iconColorClass: string;
+  bgClass: string;
   name: string;
+  unitLabel: string;
   payrollCost: number;
   count: number;
   techRating: number;
@@ -15,7 +17,9 @@ interface MilitaryForceUnitCardProps {
 export function MilitaryForceUnitCard({
   icon: Icon,
   iconColorClass,
+  bgClass,
   name,
+  unitLabel,
   payrollCost,
   count,
   techRating,
@@ -24,32 +28,43 @@ export function MilitaryForceUnitCard({
   const { formatCurrency, formatNumber, formatLevel } = useLocaleFormatter();
 
   return (
-    <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex flex-col justify-between space-y-2 text-start font-sans">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Icon size={14} className={`${iconColorClass} shrink-0`} />
-          <div className="space-y-0.5">
-            <span className="text-foreground font-bold block font-sans">
+    <div className="bg-gradient-to-b from-card via-secondary/70 to-card/95 border border-border/80 hover:border-primary/50 p-4 rounded-3xl flex flex-col justify-between space-y-3 text-start font-sans shadow-lg hover:shadow-xl transition-all duration-200 ring-1 ring-white/5 group relative overflow-hidden">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 shadow-md transition-transform group-hover:scale-105 ${bgClass} ${iconColorClass}`}
+          >
+            <Icon size={20} />
+          </div>
+
+          <div className="space-y-0.5 min-w-0">
+            <span className="text-xs font-black text-foreground block truncate">
               {name}
             </span>
-            <span className="text-[9px] text-muted-foreground block font-sans">
-              {formatCurrency(payrollCost)}
+            <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-1 truncate">
+              <Coins size={11} className="text-amber-400 shrink-0" />
+              <span>{formatCurrency(payrollCost, true)}</span>
+              <span className="text-[9px] opacity-75">{t("perTurn")}</span>
             </span>
           </div>
         </div>
-        <span className="text-xs font-extrabold text-foreground font-mono">
-          {formatNumber(count)}
-        </span>
+
+        <div className="text-end font-mono shrink-0">
+          <span className="text-base sm:text-lg font-black text-foreground block leading-tight tracking-tight">
+            {formatNumber(count)}
+          </span>
+          <span className="text-[9px] text-muted-foreground font-sans font-medium block">
+            {unitLabel}
+          </span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px] font-mono">
-        <span className="text-muted-foreground font-sans text-[9px]">
+      <div className="flex items-center justify-between pt-2.5 border-t border-border/50 text-[10px] font-mono">
+        <span className="text-muted-foreground font-sans text-[10px]">
           {t("averageTech")}
         </span>
-        <span className="font-bold text-amber-500 bg-secondary/80 px-2 py-0.5 rounded-md border border-border/50">
-          {t("techLevelBadge", {
-            level: formatLevel(techRating),
-          })}
+        <span className="font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-lg shadow-sm">
+          {formatLevel(techRating)}
         </span>
       </div>
     </div>

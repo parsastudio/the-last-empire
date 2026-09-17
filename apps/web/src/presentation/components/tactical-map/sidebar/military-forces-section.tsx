@@ -4,7 +4,6 @@ import { Swords } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { MilitaryForceUnitCard } from "@/presentation/components/tactical-map/sidebar/components/military-force-unit-card";
-import { MilitaryReadinessCard } from "@/presentation/components/tactical-map/sidebar/components/military-readiness-card";
 import { selectMilitaryForcesViewModel } from "@/presentation/selectors/military-view-model.selector";
 import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
 
@@ -33,25 +32,23 @@ export function MilitaryForcesSection({
         </span>
       </div>
 
-      <div className="space-y-2.5 font-mono">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {model.units.map((unit) => {
-            const visual = MILITARY_UNIT_VISUALS[unit.type];
-            return (
-              <MilitaryForceUnitCard
-                key={unit.type}
-                icon={visual.icon}
-                iconColorClass={visual.colorClass}
-                name={t(`${unit.type}.name`)}
-                payrollCost={unit.payrollCost}
-                count={unit.count}
-                techRating={unit.techLevel}
-              />
-            );
-          })}
-        </div>
-
-        <MilitaryReadinessCard techLevel={model.techLevel} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {model.units.map((unit) => {
+          const visual = MILITARY_UNIT_VISUALS[unit.type];
+          return (
+            <MilitaryForceUnitCard
+              key={unit.type}
+              icon={visual.icon}
+              iconColorClass={visual.colorClass}
+              bgClass={visual.bgClass}
+              name={t(`${unit.type}.name`)}
+              unitLabel={t(`${unit.type}.unit`)}
+              payrollCost={unit.payrollCost}
+              count={unit.count}
+              techRating={unit.techLevel}
+            />
+          );
+        })}
       </div>
     </div>
   );
