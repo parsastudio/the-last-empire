@@ -35,7 +35,6 @@ export function WideDiplomacyView({
   provincesMap,
   turnActivity,
   currentTurn,
-  onNavigateTab,
 }: WideDiplomacyViewProps) {
   const t = useTranslations("diplomacy.view");
   const { toDigits, countryTranslator, locale } = useLocaleFormatter();
@@ -79,12 +78,6 @@ export function WideDiplomacyView({
     countryTranslator,
     locale,
   ]);
-
-  const handleOpenEspionage = () => {
-    if (onNavigateTab) {
-      onNavigateTab("espionage", undefined, diplomacy.selectedRelation.code);
-    }
-  };
 
   const handleSelectCountry = (code: string) => {
     diplomacy.setActiveCode(code);
@@ -210,7 +203,6 @@ export function WideDiplomacyView({
               targetNation={diplomacy.selectedTargetNation}
               turnActivity={turnActivity}
               currentTurn={currentTurn}
-              onOpenProxy={handleOpenEspionage}
             />
           </div>
         </div>

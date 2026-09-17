@@ -32,14 +32,9 @@ export function AttackFogReconCard({
           <div className="p-2 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/25 shrink-0">
             <AlertTriangle size={16} />
           </div>
-          <div className="space-y-0.5">
-            <span className="text-xs font-black text-foreground block">
-              {t("blindTitle")}
-            </span>
-            <span className="text-[10px] text-muted-foreground block font-sans">
-              {t("osintSubtitle")}
-            </span>
-          </div>
+          <span className="text-xs font-black text-foreground block">
+            {t("blindTitle")}
+          </span>
         </div>
 
         <button

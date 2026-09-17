@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   ShieldAlert,
   Radio,
-  Flame,
   Swords,
   ShieldCheck,
   Clock,
@@ -143,43 +142,33 @@ export function AttackStatusAlerts({
       )}
 
       {isAccessible && !isWarStance && (
-        <div className="relative overflow-hidden bg-gradient-to-r from-amber-950/60 via-card to-amber-950/40 border-2 border-amber-500/60 p-4 rounded-2xl shadow-xl shadow-amber-500/10 space-y-2.5 animate-fade-smooth">
+        <div className="relative overflow-hidden bg-gradient-to-r from-amber-950/40 via-card to-amber-950/30 border border-amber-500/50 p-3.5 rounded-2xl shadow-lg shadow-amber-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-smooth">
           <div className="absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
-                <AlertTriangle size={18} className="animate-pulse" />
-              </div>
-              <div>
-                <span className="text-xs font-black text-amber-400 block">
-                  {t("surpriseAttackTitle")}
-                </span>
-                <span className="text-[10px] text-muted-foreground font-mono block">
-                  {t("currentStance", {
-                    stance: stanceLabel,
-                  })}
-                </span>
-              </div>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
+              <AlertTriangle size={18} className="animate-pulse" />
             </div>
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-xs font-black text-amber-400 block truncate">
+                {t("surpriseAttackTitle")}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                {t("currentStance", {
+                  stance: stanceLabel,
+                })}
+              </span>
+            </div>
+          </div>
 
-            <span className="text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1 shrink-0 animate-pulse">
-              <Radio size={12} className="animate-ping text-amber-400" />
+          <span className="text-[10px] font-mono font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0 shadow-sm">
+            <Radio size={12} className="animate-ping text-amber-400" />
+            <span>
               {t("reputationPenaltyBadge", {
                 points: toDigits(reputationPenalty),
               })}
             </span>
-          </div>
-
-          <div className="bg-background/80 border border-amber-500/30 p-2.5 rounded-xl text-[11px] leading-relaxed text-foreground/90 font-medium flex items-center gap-2 shadow-inner">
-            <Flame size={15} className="text-amber-400 shrink-0" />
-            <span>
-              {t("surpriseAttackDesc", {
-                name: targetNationName,
-                points: toDigits(reputationPenalty),
-              })}
-            </span>
-          </div>
+          </span>
         </div>
       )}
     </div>

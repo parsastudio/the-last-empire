@@ -34,8 +34,8 @@ export interface DiplomaticPactChecklistModalProps {
   targetName: string;
   targetFlagEmoji: string;
   roleLabel: string;
-  costLabel: string;
-  costFormatted: string;
+  costLabel?: string;
+  costFormatted?: string;
   calloutIcon: LucideIcon;
   calloutTitle?: string;
   calloutDescription: string;
@@ -132,19 +132,21 @@ export function DiplomaticPactChecklistModal({
             </div>
           </div>
 
-          <div
-            className={`text-end font-mono px-3 py-1.5 rounded-xl border ${bannerBorderClass} bg-secondary/60 shrink-0`}
-          >
-            <span className="text-[9px] text-muted-foreground block font-sans">
-              {costLabel}
-            </span>
-            <span
-              className={`text-xs font-black flex items-center gap-1 justify-end ${bannerTextClass}`}
+          {costLabel && costFormatted && (
+            <div
+              className={`text-end font-mono px-3 py-1.5 rounded-xl border ${bannerBorderClass} bg-secondary/60 shrink-0`}
             >
-              <Coins size={12} />
-              <span>{costFormatted}</span>
-            </span>
-          </div>
+              <span className="text-[9px] text-muted-foreground block font-sans">
+                {costLabel}
+              </span>
+              <span
+                className={`text-xs font-black flex items-center gap-1 justify-end ${bannerTextClass}`}
+              >
+                <Coins size={12} />
+                <span>{costFormatted}</span>
+              </span>
+            </div>
+          )}
         </div>
 
         {concessions && concessions.length > 0 && (
