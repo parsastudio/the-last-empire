@@ -6,7 +6,6 @@ import { Coins, Volume2, VolumeX } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import { ResourceBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/resource-badge";
-import { CapacityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/capacity-meter-badge";
 import { StabilityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/stability-meter-badge";
 import { ThreatRadarBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/threat-radar-badge";
 import { LanguageSwitcher } from "@/presentation/components/common/language-switcher";
@@ -65,11 +64,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
           subValueColor={
             metrics.netIncomePerTurn >= 0 ? "text-gdp" : "text-military"
           }
-        />
-
-        <CapacityMeterBadge
-          totalActiveFactories={metrics.totalActiveFactories}
-          totalMaxSlots={metrics.totalMaxSlots}
         />
 
         <div className="w-[1px] h-5 md:h-6 bg-gradient-to-b from-transparent via-border to-transparent shrink-0 hidden sm:block" />

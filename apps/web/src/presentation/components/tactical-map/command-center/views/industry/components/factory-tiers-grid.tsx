@@ -57,16 +57,9 @@ export function FactoryTiersGrid({
           <div className="p-1.5 rounded-xl bg-gdp/15 border border-gdp/30 text-gdp">
             <Layers size={15} />
           </div>
-          <div>
-            <h3 className="text-xs font-black text-foreground">
-              {t("headerTitle")}
-            </h3>
-            <span className="text-[10px] text-muted-foreground">
-              {actionType === "IMPORT"
-                ? t("headerSubtitleImport")
-                : t("headerSubtitleDomestic")}
-            </span>
-          </div>
+          <h3 className="text-xs font-black text-foreground">
+            {t("headerTitle")}
+          </h3>
         </div>
 
         <span className="text-[11px] font-mono bg-secondary/80 border border-border/80 px-3 py-1 rounded-xl font-bold text-muted-foreground flex items-center gap-1.5 shadow-sm">
