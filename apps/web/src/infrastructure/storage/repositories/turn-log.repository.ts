@@ -31,35 +31,6 @@ export interface TurnLogStatsSummary {
 }
 
 export class TurnLogRepository {
-  private static getFilteredCollection(
-    gameId: string,
-    turn: number | "ALL" = "ALL",
-    scope?: TurnLogScope,
-  ) {
-    if (scope && turn !== "ALL") {
-      return db.turnLogs
-        .where("[gameId+scope+turn]")
-        .equals([gameId, scope, turn]);
-    }
-    if (turn !== "ALL") {
-      return db.turnLogs.where("[gameId+turn]").equals([gameId, turn]);
-    }
-    if (scope) {
-      return db.turnLogs.where("[gameId+scope]").equals([gameId, scope]);
-    }
-    return db.turnLogs.where("gameId").equals(gameId);
-  }
-
-  private static filterRecordsByScopeAndNational(
-    records: SavedTurnLogRecord[],
-    scope: TurnLogScope = "NATIONAL",
-    humanNationId?: string,
-  ): SavedTurnLogRecord[] {
-    return records.filter((r) =>
-      TurnLogFilterUtility.matchesScope(r.log, scope, humanNationId),
-    );
-  }
-
   public static async appendLogs(
     gameId: string,
     logs: TurnLogEntry[],
@@ -100,51 +71,33 @@ export class TurnLogRepository {
       scope = "NATIONAL",
       searchQuery = "",
       page = 1,
-      pageSize = 25,
+      pageSize = 50,
       humanNationId,
     } = options;
 
-    const collection = this.getFilteredCollection(gameId, turn, scope);
-    let records = await collection.toArray();
+    const records = await db.turnLogs.where("gameId").equals(gameId).toArray();
 
-    records.sort((a, b) => {
+    const rawLogs = records.map((r) => r.log);
+    const filteredLogs = TurnLogFilterUtility.filterLogs(
+      rawLogs,
+      scope,
+      humanNationId,
+      turn,
+      searchQuery,
+    );
+
+    filteredLogs.sort((a, b) => {
       if (b.turn !== a.turn) return b.turn - a.turn;
       return (b.timestamp || 0) - (a.timestamp || 0);
     });
 
-    records = this.filterRecordsByScopeAndNational(
-      records,
-      scope,
-      humanNationId,
-    );
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      records = records.filter((r) => {
-        const event = r.log.eventCode?.toLowerCase() || "";
-        const source = r.log.sourceNationId?.toLowerCase() || "";
-        const target = r.log.targetNationId?.toLowerCase() || "";
-        const msg = r.log.message?.toLowerCase() || "";
-        const paramMatches = Object.values(r.log.params || {}).some((v) =>
-          String(v).toLowerCase().includes(q),
-        );
-        return (
-          event.includes(q) ||
-          source.includes(q) ||
-          target.includes(q) ||
-          msg.includes(q) ||
-          paramMatches
-        );
-      });
-    }
-
-    const totalCount = records.length;
+    const totalCount = filteredLogs.length;
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
     const startIndex = (page - 1) * pageSize;
-    const pagedRecords = records.slice(startIndex, startIndex + pageSize);
+    const pagedLogs = filteredLogs.slice(startIndex, startIndex + pageSize);
 
     return {
-      logs: pagedRecords.map((r) => r.log),
+      logs: pagedLogs,
       totalCount,
       page,
       totalPages,
@@ -158,22 +111,24 @@ export class TurnLogRepository {
     humanNationId?: string,
     scope: TurnLogScope = "NATIONAL",
   ): Promise<TurnLogStatsSummary> {
-    const collection = this.getFilteredCollection(gameId, turn, scope);
-    let records = await collection.toArray();
+    const records = await db.turnLogs.where("gameId").equals(gameId).toArray();
 
-    records = this.filterRecordsByScopeAndNational(
-      records,
-      scope,
-      humanNationId,
-    );
+    const filtered = records
+      .map((r) => r.log)
+      .filter((log) => {
+        if (turn !== "ALL" && log.turn !== turn) {
+          return false;
+        }
+        return TurnLogFilterUtility.matchesScope(log, scope, humanNationId);
+      });
 
     let combatCount = 0;
     let diplomacyCount = 0;
     let espionageCount = 0;
     let criticalCount = 0;
 
-    for (let i = 0; i < records.length; i++) {
-      const log = records[i]!.log;
+    for (let i = 0; i < filtered.length; i++) {
+      const log = filtered[i]!;
       if (
         log.category === "GLOBAL_WAR" ||
         log.category === "MILITARY" ||

@@ -1,7 +1,7 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 
 export class TurnLogWindowUtility {
-  public static readonly MAX_RETAINED_TURNS = 4;
+  public static readonly MAX_RETAINED_TURNS = 100;
 
   public static pruneLogs(
     logs: TurnLogEntry[],

@@ -87,6 +87,22 @@ export class ReportCardStylerUtility {
       };
     }
 
+    if (log.eventCode === "BATTLE_TACTICAL_REPORT") {
+      const isPositive = log.level === "INFO";
+      return {
+        cardBg: isPositive
+          ? "bg-gradient-to-r from-emerald-950/25 via-card/95 to-emerald-950/15"
+          : "bg-gradient-to-r from-rose-950/25 via-card/95 to-rose-950/15",
+        border: isPositive
+          ? "border-emerald-500/40 hover:border-emerald-400 shadow-sm"
+          : "border-rose-500/40 hover:border-rose-400 shadow-sm",
+        icon: isPositive ? ShieldCheck : Swords,
+        iconBg: isPositive
+          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+          : "bg-rose-500/20 text-rose-400 border-rose-500/40",
+      };
+    }
+
     switch (log.eventCode) {
       case "DEFENSE_PACT_REFUSAL_COMPENSATION":
         return {
@@ -122,7 +138,6 @@ export class ReportCardStylerUtility {
         };
 
       case "WAR_DECLARED":
-      case "BATTLE_TACTICAL_REPORT":
       case "BATTLE_GLOBAL_NEWS":
         return {
           cardBg: "bg-rose-950/20",

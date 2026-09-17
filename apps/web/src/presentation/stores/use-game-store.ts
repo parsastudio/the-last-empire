@@ -54,6 +54,10 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     try {
       const updatedState = await GamePersistenceService.loadGameState(gameId);
       if (updatedState) {
+        if (updatedState.turnLogs && updatedState.turnLogs.length > 0) {
+          void TurnLogRepository.appendLogs(gameId, updatedState.turnLogs);
+        }
+
         set({
           gameState: updatedState,
           loading: false,
@@ -100,6 +104,9 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
         );
 
       await GamePersistenceService.saveGameStateImmediate(gameId, initialState);
+      if (initialState.turnLogs && initialState.turnLogs.length > 0) {
+        await TurnLogRepository.appendLogs(gameId, initialState.turnLogs);
+      }
 
       set({
         gameState: initialState,
@@ -125,14 +132,24 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       };
     }
 
+    const previousLogsCount = gameState.turnLogs.length;
     const result = ActionEngine.execute(gameState, action);
+
     if (result.success && result.newState) {
       set({
         gameState: result.newState,
       });
 
-      if (result.logs && result.logs.length > 0) {
-        void TurnLogRepository.appendLogs(activeGameId, result.logs);
+      const nextLogs = result.newState.turnLogs;
+      const newlyAppendedLogs =
+        result.logs && result.logs.length > 0
+          ? result.logs
+          : nextLogs.length > previousLogsCount
+            ? nextLogs.slice(previousLogsCount)
+            : [];
+
+      if (newlyAppendedLogs.length > 0) {
+        void TurnLogRepository.appendLogs(activeGameId, newlyAppendedLogs);
       }
 
       void GamePersistenceService.saveGameState(activeGameId, result.newState);

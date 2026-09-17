@@ -108,6 +108,7 @@ export class BattleLogFactory {
           "BATTLE_TACTICAL_REPORT",
           {
             outcome,
+            isDefender: isDefenderHuman,
             ratio: calcResult.valuationRatio,
             betrayalPenalty: betrayalPenaltyText
               ? Number(betrayalPenaltyText)
@@ -126,7 +127,12 @@ export class BattleLogFactory {
         defender.id,
         "BATTLE_GLOBAL_NEWS",
         {
-          outcome: calcResult.isAttackerVictory ? "VICTORY" : "DEFENDED",
+          outcome: calcResult.isAttackerVictory
+            ? isDefenderAnnexed
+              ? "CAPITULATION"
+              : "VICTORY"
+            : "DEFENDED",
+          ratio: calcResult.valuationRatio,
           reportJson: JSON.stringify(fullReportData),
         },
         "COMBAT",

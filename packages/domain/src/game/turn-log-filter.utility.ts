@@ -32,7 +32,34 @@ export class TurnLogFilterUtility {
     logs: TurnLogEntry[],
     scope: TurnLogScope,
     humanNationId?: string,
+    turn?: number | "ALL",
+    searchQuery?: string,
   ): TurnLogEntry[] {
-    return logs.filter((log) => this.matchesScope(log, scope, humanNationId));
+    return logs.filter((log) => {
+      if (turn !== undefined && turn !== "ALL" && log.turn !== turn) {
+        return false;
+      }
+      if (!this.matchesScope(log, scope, humanNationId)) {
+        return false;
+      }
+      if (searchQuery && searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        const event = log.eventCode?.toLowerCase() || "";
+        const source = log.sourceNationId?.toLowerCase() || "";
+        const target = log.targetNationId?.toLowerCase() || "";
+        const msg = log.message?.toLowerCase() || "";
+        const paramMatches = Object.values(log.params || {}).some((v) =>
+          String(v).toLowerCase().includes(q),
+        );
+        return (
+          event.includes(q) ||
+          source.includes(q) ||
+          target.includes(q) ||
+          msg.includes(q) ||
+          paramMatches
+        );
+      }
+      return true;
+    });
   }
 }

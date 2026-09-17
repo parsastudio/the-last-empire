@@ -46,9 +46,8 @@ export class GeopoliticalReachResolver {
       target.id,
       provincesMap,
     );
-    const hasNavalFleet = (source.navalFleet || 0) > 0;
 
-    return sourceSea && targetSea && hasNavalFleet;
+    return sourceSea && targetSea;
   }
 
   public static getReachTier(

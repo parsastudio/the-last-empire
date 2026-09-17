@@ -39,12 +39,15 @@ export function useWideReports({
 
   const refreshTurnsAndStats = useCallback(async () => {
     try {
-      const turns = await TurnLogRepository.getAvailableTurns(gameId);
-      if (turns.length > 0) {
-        setAvailableTurns(turns);
-      } else {
-        setAvailableTurns([currentTurn]);
+      const dbTurns = await TurnLogRepository.getAvailableTurns(gameId);
+      const combinedTurnsSet = new Set<number>([currentTurn, ...dbTurns]);
+      for (let i = 0; i < logs.length; i++) {
+        combinedTurnsSet.add(logs[i]!.turn);
       }
+      const sortedAvailable = Array.from(combinedTurnsSet).sort(
+        (a, b) => b - a,
+      );
+      setAvailableTurns(sortedAvailable);
 
       const freshStats = await TurnLogRepository.getStatsSummary(
         gameId,
@@ -54,7 +57,7 @@ export function useWideReports({
       );
       setStats(freshStats);
     } catch {}
-  }, [gameId, currentTurn, selectedTurn, humanNationId, selectedScope]);
+  }, [gameId, currentTurn, selectedTurn, humanNationId, selectedScope, logs]);
 
   const loadPagedLogs = useCallback(async () => {
     setIsLoading(true);
@@ -65,35 +68,35 @@ export function useWideReports({
         scope: selectedScope,
         searchQuery,
         page: 1,
-        pageSize: 50,
+        pageSize: 100,
         humanNationId,
       });
 
       if (pagedResult.logs.length > 0) {
         setDbLogs(pagedResult.logs);
-      } else if (logs.length > 0 && selectedTurn === currentTurn) {
-        setDbLogs(
-          TurnLogFilterUtility.filterLogs(logs, selectedScope, humanNationId),
-        );
       } else {
-        setDbLogs([]);
+        const memoryFiltered = TurnLogFilterUtility.filterLogs(
+          logs,
+          selectedScope,
+          humanNationId,
+          selectedTurn,
+          searchQuery,
+        );
+        setDbLogs(memoryFiltered);
       }
     } catch {
-      setDbLogs(
-        TurnLogFilterUtility.filterLogs(logs, selectedScope, humanNationId),
+      const memoryFiltered = TurnLogFilterUtility.filterLogs(
+        logs,
+        selectedScope,
+        humanNationId,
+        selectedTurn,
+        searchQuery,
       );
+      setDbLogs(memoryFiltered);
     } finally {
       setIsLoading(false);
     }
-  }, [
-    gameId,
-    selectedTurn,
-    selectedScope,
-    searchQuery,
-    logs,
-    currentTurn,
-    humanNationId,
-  ]);
+  }, [gameId, selectedTurn, selectedScope, searchQuery, logs, humanNationId]);
 
   useEffect(() => {
     void refreshTurnsAndStats();

@@ -10,14 +10,9 @@ import { TurnLogRepository } from "@/infrastructure/storage/repositories/turn-lo
 export class GameStorageAdapter {
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
     const now = Date.now();
-    const cleanState: GameState = {
-      ...state,
-      turnLogs: state.turnLogs.slice(-10),
-    };
-
     await db.gameStates.put({
       gameId,
-      state: cleanState,
+      state,
       timestamp: now,
     });
   }

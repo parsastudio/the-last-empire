@@ -68,7 +68,42 @@ export class TurnLogPresenterUtility {
       case "COALITION_FORMED":
         return tEvents("COALITION_FORMED", { source: sourceName });
 
-      case "BATTLE_TACTICAL_REPORT":
+      case "BATTLE_TACTICAL_REPORT": {
+        const outcome = String(params["outcome"] || "VICTORY");
+        const ratio = toDigits(String(params["ratio"] || "1"));
+        const isDefender = Boolean(params["isDefender"]);
+
+        if (outcome === "CAPITULATION") {
+          return isDefender
+            ? tEvents("BATTLE_CAPITULATION_DEFENDER", {
+                source: sourceName,
+                target: targetName,
+                ratio,
+              })
+            : tEvents("BATTLE_CAPITULATION", {
+                source: sourceName,
+                target: targetName,
+                ratio,
+              });
+        }
+        if (outcome === "DEFENDED") {
+          return tEvents("BATTLE_DEFENDED", {
+            source: sourceName,
+            target: targetName,
+          });
+        }
+        if (outcome === "DEFEAT") {
+          return tEvents("BATTLE_DEFEAT", {
+            source: sourceName,
+            target: targetName,
+          });
+        }
+        return tEvents("BATTLE_VICTORY", {
+          source: sourceName,
+          target: targetName,
+        });
+      }
+
       case "BATTLE_GLOBAL_NEWS": {
         const outcome = String(params["outcome"] || "VICTORY");
         const ratio = toDigits(String(params["ratio"] || "1"));
@@ -80,7 +115,7 @@ export class TurnLogPresenterUtility {
           });
         }
         if (outcome === "DEFENDED") {
-          return tEvents("BATTLE_DEFENDED", {
+          return tEvents("BATTLE_GLOBAL_DEFENDED", {
             source: sourceName,
             target: targetName,
           });
