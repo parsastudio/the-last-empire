@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   DollarSign,
+  Coins,
 } from "lucide-react";
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -164,7 +165,12 @@ export function ImfLoanCard({
       <AmountActionDialog
         isOpen={isLoanModalOpen}
         title={t("loanDialogTitle")}
-        subtitle={t("loanDialogSubtitle")}
+        subtitle={
+          <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 rounded-lg">
+            <Coins size={11} className="text-amber-400" />
+            <span>{t("loanDialogSubtitle")}</span>
+          </span>
+        }
         unitLabel={t("billionDollars")}
         maxAmount={availableLoanBillion}
         confirmLabel={t("requestLoan")}

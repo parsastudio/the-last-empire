@@ -48,7 +48,6 @@ export function EmergencyProtectorateModal({
   const { formatCurrency, toDigits } = useLocaleFormatter();
 
   const flagEmoji = getFlagEmoji(targetFlagCode || targetNationId);
-
   const formattedCost = formatCurrency(costPerTurn, true);
 
   const concessions = useMemo<DiplomaticPactConcession[]>(
@@ -142,8 +141,6 @@ export function EmergencyProtectorateModal({
       targetName={targetName}
       targetFlagEmoji={flagEmoji}
       roleLabel={t("protectorRole")}
-      costLabel={t("tributeLabel")}
-      costFormatted={formattedCost}
       concessionsTitle={t("concessionsTitle")}
       concessions={concessions}
       calloutIcon={Skull}

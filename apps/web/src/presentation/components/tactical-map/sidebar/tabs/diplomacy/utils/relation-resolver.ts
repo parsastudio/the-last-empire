@@ -85,20 +85,33 @@ export function resolveProfileRelation(
   let isEmergencyProtectorate = false;
 
   if (humanNation && liveNation && humanNation.id !== liveNation.id) {
-    const directRel =
-      humanNation.relations[liveNation.id] ||
-      humanNation.relations[CountryRegistry.resolveCanonicalId(liveNation.id)];
-    if (directRel) {
-      stance = directRel.stance;
-    }
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
+    const targetDirectRel =
+      liveNation.relations?.[canonicalHuman] ||
+      liveNation.relations?.[humanNation.id];
+
     const vector = GeopoliticalVectorCalculator.calculate(
       liveNation,
       humanNation,
       allNations,
       provincesMap,
     );
-    alignment = vector.alignment;
-    tension = vector.tension;
+
+    if (targetDirectRel) {
+      stance = targetDirectRel.stance || "NORMAL_DIPLOMACY";
+      alignment =
+        targetDirectRel.alignment !== undefined
+          ? targetDirectRel.alignment
+          : vector.alignment;
+      tension =
+        targetDirectRel.tension !== undefined
+          ? targetDirectRel.tension
+          : vector.tension;
+    } else {
+      alignment = vector.alignment;
+      tension = vector.tension;
+    }
+
     posture = vector.posture;
 
     const umbrella = NationRelationResolver.resolveBilateralUmbrellaState(

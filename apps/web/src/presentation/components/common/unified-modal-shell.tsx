@@ -9,7 +9,7 @@ import { TacticalSound } from "@/presentation/utils/tactical-sound";
 interface UnifiedModalShellProps {
   isOpen: boolean;
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   maxWidthClass?: string;
   zIndexClass?: string;
   onClose: () => void;
@@ -74,11 +74,14 @@ export function UnifiedModalShell({
                 {title}
               </h2>
             )}
-            {subtitle && (
-              <p className="text-[10px] sm:text-xs text-muted-foreground font-sans truncate">
-                {subtitle}
-              </p>
-            )}
+            {subtitle &&
+              (typeof subtitle === "string" ? (
+                <p className="text-[10px] sm:text-xs text-muted-foreground font-sans truncate">
+                  {subtitle}
+                </p>
+              ) : (
+                <div className="mt-0.5">{subtitle}</div>
+              ))}
           </div>
 
           <button

@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Binary } from "lucide-react";
 import {
   DiplomaticStance,
   Province,
@@ -29,7 +28,6 @@ interface AdvancedDiplomacyActionsProps {
   targetNation?: Nation | null;
   currentTurn?: number;
   turnActivity?: NationTurnActivity;
-  onOpenProxy?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
@@ -47,7 +45,6 @@ export function AdvancedDiplomacyActions({
   targetNation,
   currentTurn,
   turnActivity,
-  onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const t = useTranslations("diplomacy");
   const runner = useDiplomacyActionsRunner({
@@ -123,31 +120,6 @@ export function AdvancedDiplomacyActions({
               onDeclareWar={runner.handleDeclareWar}
             />
           </div>
-        </div>
-
-        <div className="pt-3 border-t border-border/60 space-y-2">
-          <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono block">
-            {t("actions.espionageTitle")}
-          </span>
-
-          <button
-            onClick={() => {
-              if (onOpenProxy) {
-                onOpenProxy();
-              }
-            }}
-            className="w-full p-3.5 rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-start transition-all cursor-pointer space-y-1 shadow-sm"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-primary">
-                {t("actions.espionageAction", { name: targetName })}
-              </span>
-              <Binary size={14} className="text-primary" />
-            </div>
-            <p className="text-[10px] text-muted-foreground leading-relaxed">
-              {t("actions.espionageDesc")}
-            </p>
-          </button>
         </div>
       </div>
 

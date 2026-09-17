@@ -19,7 +19,7 @@
   "recon": {
     "blindTitle": "Intelligence Fog: Adversary Defensive Positions Obscured",
     "osintSubtitle": "Estimated balance of power calculated strictly from public open-source metrics (OSINT)",
-    "scanButton": "Satellite Recon Scan & Uncover Hostile Defense Order ({cost})",
+    "scanButton": "Satellite Recon ({cost})",
     "balanceEstimate": "Initial Estimated Balance of Power:",
     "likelyWin": "Likely Victory",
     "likelyLoss": "Likely Defeat"

@@ -2,13 +2,12 @@
 
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Ship, Anchor, Coins, ShieldCheck, Zap, Lock } from "lucide-react";
+import { Ship, Anchor, Coins, Zap, Lock } from "lucide-react";
 import {
   ActionFactory,
   NAVAL_FLEET_CONFIG,
   ProcurementBatchCalculator,
 } from "@geopolitics/domain";
-import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
@@ -54,11 +53,6 @@ export function NavalFleetProcurementCard({
     Math.round(NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE * 100),
   );
 
-  const totalTransportCapacity = NavalDeploymentClamper.calculateMaxCapacity(
-    "NAVAL",
-    navalFleetCount,
-  );
-
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
 
@@ -76,15 +70,17 @@ export function NavalFleetProcurementCard({
   const activeFeedbacks = getFeedbacksFor("fleet");
 
   return (
-    <div className="relative p-4 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-card to-blue-950/25 space-y-3 font-sans text-start shadow-lg backdrop-blur-md">
-      <div className="flex items-center justify-between">
+    <div className="relative p-4 sm:p-5 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-card to-blue-950/25 space-y-3.5 font-sans text-start shadow-xl backdrop-blur-md ring-1 ring-white/5 overflow-hidden">
+      <div className="absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-border/60">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 shadow-inner">
             <Ship size={22} className="animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-xs font-black text-foreground">
+              <h4 className="text-xs sm:text-sm font-black text-foreground">
                 {t("navalFleetTitle")}
               </h4>
               <span className="text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded-lg">
@@ -101,7 +97,7 @@ export function NavalFleetProcurementCard({
           </div>
         </div>
 
-        <div className="relative shrink-0">
+        <div className="relative shrink-0 flex items-center">
           {activeFeedbacks.map((f) => (
             <span
               key={f.id}
@@ -112,8 +108,8 @@ export function NavalFleetProcurementCard({
           ))}
 
           {!hasSeaAccess ? (
-            <div className="py-2 px-3 bg-secondary/80 text-muted-foreground rounded-xl text-[10px] font-sans border border-border/60 flex items-center gap-1">
-              <Lock size={12} />
+            <div className="py-2.5 px-3.5 bg-secondary/80 text-muted-foreground rounded-2xl text-xs font-sans border border-border/60 flex items-center gap-1.5 shadow-inner">
+              <Lock size={13} />
               <span>{t("navalNoSeaAccess")}</span>
             </div>
           ) : (
@@ -121,10 +117,10 @@ export function NavalFleetProcurementCard({
               type="button"
               onClick={handleBuy}
               disabled={!canAfford || isSubmitting}
-              className="py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-white rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-cyan-600/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 border border-cyan-400/40"
+              className="py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-white rounded-2xl text-xs font-black font-mono transition-all cursor-pointer shadow-lg shadow-cyan-600/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 border border-cyan-400/40"
             >
-              <Zap size={13} />
-              <Coins size={12} />
+              <Zap size={14} />
+              <Coins size={13} />
               <span>
                 {t("navalBuyInstant", {
                   cost: formatCurrency(batchInfo.batchCost),
@@ -135,36 +131,24 @@ export function NavalFleetProcurementCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-mono">
-        <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[11px] font-mono">
+        <div className="bg-background/60 p-3 rounded-2xl border border-border/40 space-y-1">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
-            <Coins size={11} className="text-gdp" />
-            {t("navalRevenue", { pct: revenuePercentText })}
+            <Coins size={12} className="text-gdp" />
+            <span>{t("navalRevenue", { pct: revenuePercentText })}</span>
           </span>
-          <span className="font-extrabold text-gdp text-xs block">
+          <span className="font-black text-gdp text-xs block">
             +{formatCurrency(turnRevenue, true)} {t("perTurn")}
           </span>
         </div>
 
-        <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
+        <div className="bg-background/60 p-3 rounded-2xl border border-border/40 space-y-1">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
-            <Anchor size={11} className="text-cyan-400" />
-            {t("navalTransportCapacityPerFleet")}
+            <Anchor size={12} className="text-cyan-400" />
+            <span>{t("navalTransportCapacityPerFleet")}</span>
           </span>
-          <span className="font-extrabold text-cyan-300 text-xs block font-sans">
+          <span className="font-black text-cyan-300 text-xs block font-sans">
             {t("navalTransportRatio")}
-          </span>
-        </div>
-
-        <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
-          <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
-            <ShieldCheck size={11} className="text-primary" />
-            {t("navalTotalTransportCapacity")}
-          </span>
-          <span className="font-extrabold text-foreground text-xs block">
-            {t("navalTotalUnits", {
-              count: toDigits(totalTransportCapacity),
-            })}
           </span>
         </div>
       </div>

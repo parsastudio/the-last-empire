@@ -8,7 +8,7 @@ import { AmountActionForm } from "./amount-action-form";
 export interface AmountActionDialogProps {
   isOpen: boolean;
   title: string;
-  subtitle: string;
+  subtitle?: React.ReactNode;
   unitLabel: string;
   maxAmount: number;
   step?: number;
