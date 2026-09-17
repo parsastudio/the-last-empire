@@ -12,7 +12,6 @@ export interface NationDetail {
   gdp: string;
   population: string;
   treasury: string;
-  desc: string;
   defaultGovernment: string;
 }
 

@@ -8,7 +8,6 @@ export interface NationProjectStateContainer {
 
 export class NationalProjectEffectApplierUtility {
   public static readonly MAX_BOOSTS_PER_TURN = 2;
-  public static readonly TOTAL_STEPS = 30;
 
   public static getProjectConfig(
     projectId: string,
@@ -90,37 +89,5 @@ export class NationalProjectEffectApplierUtility {
     if (level === 2) return 1.2;
     if (level === 1) return 1.1;
     return 1.0;
-  }
-
-  public static getCombinedMultiplier(
-    completedIds: string[] = [],
-    multiplierKey: string,
-  ): number {
-    const container = { completedProjectIds: completedIds };
-    if (multiplierKey === "militaryPowerBonusMultiplier") {
-      return this.getMilitaryPowerMultiplier(container);
-    }
-    if (multiplierKey === "factoryYieldBonusMultiplier") {
-      return this.getFactoryYieldMultiplier(container);
-    }
-    return 1.0;
-  }
-
-  public static getCombinedDiscountMultiplier(
-    completedIds: string[] = [],
-    discountKey: string,
-  ): number {
-    const container = { completedProjectIds: completedIds };
-    if (discountKey === "procurementCostDiscountMultiplier") {
-      return this.getProcurementDiscountMultiplier(container);
-    }
-    if (discountKey === "researchCostDiscountMultiplier") {
-      return this.getResearchDiscountMultiplier(container);
-    }
-    return 1.0;
-  }
-
-  public static getCombinedBonus(): number {
-    return 0;
   }
 }

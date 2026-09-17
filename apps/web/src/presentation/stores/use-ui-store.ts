@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import {
   BattleFullReportData,
-  DilemmaEvent,
   ExportSalesBuyerItem,
   ExportSalesModalData,
 } from "@geopolitics/domain";
@@ -45,10 +44,6 @@ export type ActiveModalState =
   | {
       type: "EXPORT_SALES";
       data: ExportSalesModalData;
-    }
-  | {
-      type: "DILEMMA";
-      event: DilemmaEvent;
     }
   | {
       type: "VICTORY_DEBRIEF";

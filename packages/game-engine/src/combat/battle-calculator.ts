@@ -88,7 +88,7 @@ export class BattleCalculator {
       blendedDef.defArmor,
       deployedInfantry,
       blendedDef.defInfantry,
-      attDroneMults(attMults.droneMissile),
+      attMults.droneMissile,
       blendedDef.defMults.airDefense,
       attMults.airForce,
       blendedDef.defMults.airForce,
@@ -184,8 +184,4 @@ export class BattleCalculator {
       auxiliaryGuarantor: blendedDef.auxiliaryGuarantor,
     };
   }
-}
-
-function attDroneMults(val: number): number {
-  return val;
 }

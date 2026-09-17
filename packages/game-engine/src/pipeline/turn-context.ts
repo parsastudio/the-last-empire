@@ -107,11 +107,6 @@ export class TurnContext {
     );
   }
 
-  public isAlive(nationId: string): boolean {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    return this.aliveNationIds.has(canonicalId);
-  }
-
   public isAtWar(nation: Nation): boolean {
     return NationRelationResolver.isAtWar(nation, this.state.nations);
   }

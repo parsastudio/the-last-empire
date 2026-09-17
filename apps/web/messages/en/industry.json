@@ -68,8 +68,5 @@
     "submitting": "Conducting Industrial R&D...",
     "upgradeBtn": "Upgrade to Level {level}",
     "insufficientFunds": "Insufficient Treasury Reserves for R&D"
-  },
-  "capacityMeter": {
-    "tooltip": "Active Facilities: {active} of {max} Permanent Slots"
   }
 }

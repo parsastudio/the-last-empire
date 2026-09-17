@@ -22,9 +22,8 @@ export class BuildFactoryExecutor {
     const quantity = Math.max(1, action.quantity || 1);
 
     const projectDiscount =
-      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
-        nation.completedProjectIds,
-        "procurementCostDiscountMultiplier",
+      NationalProjectEffectApplierUtility.getProcurementDiscountMultiplier(
+        nation,
       );
 
     const baseCost = IndustryCalculator.calculateFactoryBuildCost(
@@ -47,15 +46,8 @@ export class BuildFactoryExecutor {
       throw new GameError("PROVINCE_NOT_FOUND");
     }
 
-    const slotExpansionRatio =
-      NationalProjectEffectApplierUtility.getCombinedBonus(
-        nation.completedProjectIds,
-        "factorySlotExpansionRatio",
-      );
-
     const getEffectiveMaxSlots = (provinceId: number): number => {
-      const baseMax = MapTopologyRegistry.getMaxSlots(provinceId, 1);
-      return Math.floor(baseMax * (1.0 + slotExpansionRatio));
+      return MapTopologyRegistry.getMaxSlots(provinceId, 1);
     };
 
     const distribution = new Map<number, number>();

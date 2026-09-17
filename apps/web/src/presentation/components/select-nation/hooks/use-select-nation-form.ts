@@ -13,7 +13,6 @@ import { useGameStore } from "@/presentation/stores/use-game-store";
 import {
   CountryRegistry,
   GameDifficulty,
-  MapTopologyRegistry,
   ECONOMY_CONFIG,
 } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
@@ -33,7 +32,6 @@ function createNationDetailItem(
   defaultGovernment: string,
   formatCountryName: (code: string) => string,
   tPowerTiers: (key: string) => string,
-  tDossier: (values: { name: string; rank: number }) => string,
   locale: AppLocale,
 ): NationDetail {
   const powerTierKey = NationPresentationMapper.getPowerTierKey(gdp);
@@ -62,14 +60,12 @@ function createNationDetailItem(
     gdp: summary.gdpText,
     population: summary.populationText,
     treasury: summary.treasuryText,
-    desc: tDossier({ name: summary.name, rank }),
     defaultGovernment,
   };
 }
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
-  tDossier: (values: { name: string; rank: number }) => string,
   tPowerTiers: (key: string) => string,
   formatCountryName: (code: string) => string,
   locale: AppLocale,
@@ -98,7 +94,6 @@ function mapManifestToNationDetails(
         gov,
         formatCountryName,
         tPowerTiers,
-        tDossier,
         locale,
       );
     });
@@ -136,7 +131,6 @@ function mapManifestToNationDetails(
       gov,
       formatCountryName,
       tPowerTiers,
-      tDossier,
       locale,
     );
   });
@@ -144,7 +138,6 @@ function mapManifestToNationDetails(
 
 export function useSelectNationForm() {
   const router = useRouter();
-  const tDossier = useTranslations("selectNation.dossier");
   const tPowerTiers = useTranslations("selectNation.powerTiers");
   const tErrors = useTranslations("common.errors");
   const { showToast } = useToast();
@@ -191,12 +184,11 @@ export function useSelectNationForm() {
     () =>
       mapManifestToNationDetails(
         manifest,
-        (values) => tDossier("template", values),
         (key) => tPowerTiers(key),
         formatCountryName,
         locale,
       ),
-    [manifest, tDossier, tPowerTiers, formatCountryName, locale],
+    [manifest, tPowerTiers, formatCountryName, locale],
   );
 
   const selectedNation = useMemo<NationDetail | null>(() => {

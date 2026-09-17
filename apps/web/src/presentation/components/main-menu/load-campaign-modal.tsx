@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSavedCampaigns } from "./hooks/use-saved-campaigns";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { SaveItemCard, SaveItemData } from "./components/save-item-card";
-
-export type { SaveItemData };
+import { SaveItemCard } from "./components/save-item-card";
 
 interface LoadCampaignModalProps {
   isOpen: boolean;

@@ -117,32 +117,34 @@ export function ProjectCard({
 
   return (
     <div
-      className={`rounded-3xl border ${visual.border} bg-card/95 p-5 md:p-6 flex flex-col justify-between space-y-4 shadow-xl backdrop-blur-2xl transition-all duration-300 relative overflow-hidden ring-1 ${visual.ring}`}
+      className={`rounded-3xl border ${visual.border} bg-card/95 p-4 sm:p-4.5 md:p-5 flex flex-col justify-between space-y-3.5 shadow-xl backdrop-blur-2xl transition-all duration-300 relative overflow-hidden ring-1 ${visual.ring}`}
     >
       <div
         className={`absolute top-0 start-0 end-0 h-1 bg-gradient-to-r from-transparent ${visual.glow} to-transparent`}
       />
 
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3">
             <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner shrink-0 ${visual.bg} ${visual.border} ${visual.color}`}
+              className={`w-10 h-10 rounded-2xl flex items-center justify-center border shadow-inner shrink-0 ${visual.bg} ${visual.border} ${visual.color}`}
             >
-              <Icon size={22} className="animate-pulse" />
+              <Icon size={20} className="animate-pulse" />
             </div>
             <div className="space-y-0.5">
-              <h4 className="text-sm md:text-base font-black text-foreground tracking-tight">
+              <h4 className="text-xs sm:text-sm font-black text-foreground tracking-tight">
                 {t(`${project.id}.name`)}
               </h4>
-              <span className={`text-[11px] font-bold ${visual.color} block`}>
+              <span
+                className={`text-[10px] sm:text-[11px] font-bold ${visual.color} block`}
+              >
                 {t(`${project.id}.tagline`)}
               </span>
             </div>
           </div>
 
           <span
-            className={`px-3 py-1 rounded-xl text-xs font-black font-mono border shrink-0 ${
+            className={`px-2.5 py-0.5 rounded-xl text-[10px] sm:text-xs font-black font-mono border shrink-0 ${
               currentLevel > 0
                 ? `${visual.bg} ${visual.border} ${visual.color} shadow-sm`
                 : "bg-secondary text-muted-foreground border-border/70"
@@ -154,22 +156,17 @@ export function ProjectCard({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed font-sans font-medium bg-background/50 border border-border/50 p-3 rounded-2xl">
-          {t(`${project.id}.description`)}
-        </p>
-
-        <div className="space-y-2 pt-1">
+        <div className="space-y-2 pt-0.5">
           <div className="flex items-center justify-between text-xs font-mono">
-            <span className="text-[11px] text-muted-foreground font-sans font-medium">
+            <span className="text-[10px] sm:text-[11px] text-muted-foreground font-sans font-medium">
               {nextMilestone
                 ? t("nextMilestone", {
-                    level: toDigits(currentLevel + 1),
                     step: toDigits(nextMilestone),
                     bonus: nextBonusText,
                   })
                 : t("maxLevelReached")}
             </span>
-            <span className="font-bold text-foreground">
+            <span className="font-bold text-foreground text-[11px] sm:text-xs">
               {t("stepCounter", {
                 current: toDigits(currentSteps),
                 total: toDigits(project.totalStepsRequired),
@@ -198,12 +195,7 @@ export function ProjectCard({
                 >
                   <div className="flex items-center justify-center gap-1 text-[10px] font-bold">
                     {isUnlocked && <Sparkles size={10} />}
-                    <span>
-                      {t("milestoneTag", {
-                        step: toDigits(m.step),
-                        level: toDigits(m.level),
-                      })}
-                    </span>
+                    <span>{t("milestoneTag", { step: toDigits(m.step) })}</span>
                   </div>
                   <span className="text-[9px] font-sans font-bold block truncate">
                     {m.bonus}
@@ -213,7 +205,7 @@ export function ProjectCard({
             })}
           </div>
 
-          <div className="w-full bg-secondary/80 h-2.5 rounded-full overflow-hidden border border-border/50 p-0.5">
+          <div className="w-full bg-secondary/80 h-2 rounded-full overflow-hidden border border-border/50 p-0.5">
             <div
               className={`h-full rounded-full transition-all duration-300 ${visual.progressColor} shadow-sm`}
               style={{
@@ -228,13 +220,13 @@ export function ProjectCard({
       </div>
 
       <div className="pt-2 border-t border-border/50 flex items-center justify-between gap-3">
-        <span className="text-[11px] font-mono text-muted-foreground">
+        <span className="text-[10px] sm:text-[11px] font-mono text-muted-foreground">
           {formatCurrency(project.costPerStep, true)} / {t("stepCost")}
         </span>
 
         {isCompleted ? (
-          <div className="py-2.5 px-4 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
-            <CheckCircle2 size={14} />
+          <div className="py-2 px-3.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-2xl text-[11px] sm:text-xs font-black flex items-center gap-1.5 shadow-sm">
+            <CheckCircle2 size={13} />
             <span>{t("maxedOut")}</span>
           </div>
         ) : (
@@ -242,14 +234,14 @@ export function ProjectCard({
             type="button"
             onClick={() => onBoost(project)}
             disabled={isButtonDisabled}
-            className={`py-2.5 px-4 text-white rounded-2xl text-xs font-black transition-all cursor-pointer shadow-md flex items-center gap-1.5 border hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none ${
+            className={`py-2 px-3.5 text-white rounded-2xl text-[11px] sm:text-xs font-black transition-all cursor-pointer shadow-md flex items-center gap-1.5 border hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none ${
               visual.bg
             } ${visual.border} bg-opacity-80 hover:bg-opacity-100`}
           >
             {!hasAvailableQuota ? (
-              <Lock size={13} />
+              <Lock size={12} />
             ) : (
-              <Plus size={14} strokeWidth={3} />
+              <Plus size={13} strokeWidth={3} />
             )}
             <span>{t("injectBudget")}</span>
           </button>

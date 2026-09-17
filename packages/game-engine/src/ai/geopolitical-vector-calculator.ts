@@ -22,7 +22,6 @@ export interface GeopoliticalVector {
   proximityTier: ProximityTier;
   isNeighbor: boolean;
   isLandNeighbor: boolean;
-  isNavalReachable: boolean;
   powerRatio: number;
   lostProvincesCount: number;
   saturationScore: number;
@@ -101,10 +100,6 @@ export class GeopoliticalVectorCalculator {
     );
 
     const isNeighbor = proximityTier === "DIRECT_NEIGHBOR";
-    const isNavalReachable =
-      proximityTier === "DIRECT_NEIGHBOR" ||
-      proximityTier === "REGIONAL_MARITIME" ||
-      proximityTier === "DISTANT_OCEAN";
 
     let borderFriction = 0;
     if (proximityTier === "DIRECT_NEIGHBOR") {
@@ -252,7 +247,6 @@ export class GeopoliticalVectorCalculator {
       proximityTier,
       isNeighbor,
       isLandNeighbor,
-      isNavalReachable,
       powerRatio,
       lostProvincesCount,
       saturationScore,

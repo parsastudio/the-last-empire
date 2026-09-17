@@ -3,6 +3,7 @@ import {
   RelationProfile,
   DiplomaticProposalType,
   DIPLOMACY_CONFIG,
+  ECONOMY_CONFIG,
 } from "@geopolitics/domain";
 
 export interface BetrayalEvaluation {
@@ -42,7 +43,7 @@ export class DiplomaticBetrayalCalculator {
 
 export class TreatyEvaluator {
   public static calculateForeignAidCost(targetGdp: number): number {
-    return Math.floor(targetGdp * 0.005);
+    return Math.floor(targetGdp * ECONOMY_CONFIG.FOREIGN_AID_RATIO);
   }
 
   public applyTreatyStance(

@@ -10,9 +10,9 @@
   "maxedOut": "تکمیل نهایی (سطح ۳ فعال)",
   "levelBadge": "سطح {level}",
   "inactiveLevel": "غیرفعال (سطح ۰)",
-  "nextMilestone": "هدف بعدی: سطح {level} در گام {step} ({bonus})",
+  "nextMilestone": "هدف بعدی: گام {step} ({bonus})",
   "maxLevelReached": "رسیدن به اوج اقتدار و پایان مسیر",
-  "milestoneTag": "گام {step} • سطح {level}",
+  "milestoneTag": "گام {step}",
   "automation_production_lines": {
     "name": "اتوماسیون و بازده کارخانجات",
     "tagline": "جهش راندمان مالی و خروجی صنایع تا +۳۵٪",
