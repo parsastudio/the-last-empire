@@ -4,6 +4,7 @@ import {
   MilitaryInventoryHelper,
   MilitaryPowerCalculator,
   NationalProjectEffectApplierUtility,
+  ECONOMY_CONFIG,
 } from "@geopolitics/domain";
 
 export interface NationCombatUnitMultipliers {
@@ -18,7 +19,11 @@ export class CombatModifierResolver {
   public static calculateDeploymentCosts(forceCost: number): {
     moneyCost: number;
   } {
-    return { moneyCost: Math.floor(forceCost * 0.05) };
+    return {
+      moneyCost: Math.floor(
+        forceCost * ECONOMY_CONFIG.WAR_DEPLOYMENT_COST_RATIO,
+      ),
+    };
   }
 
   public static getUnitMultiplier(nation: Nation, unitType: UnitType): number {

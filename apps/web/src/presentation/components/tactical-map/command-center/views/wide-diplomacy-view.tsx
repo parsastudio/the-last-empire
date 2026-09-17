@@ -8,7 +8,6 @@ import { DiplomacyAlliesResolver } from "@/presentation/components/tactical-map/
 import { Search, Globe, Shield } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry, NationTurnActivity } from "@geopolitics/domain";
@@ -21,11 +20,6 @@ interface WideDiplomacyViewProps {
   provincesMap?: Record<string, Province>;
   turnActivity?: NationTurnActivity;
   currentTurn?: number;
-  onNavigateTab?: (
-    tab: SidebarTabType,
-    subTab?: string,
-    targetCode?: string,
-  ) => void;
 }
 
 export function WideDiplomacyView({

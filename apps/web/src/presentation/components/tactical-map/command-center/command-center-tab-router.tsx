@@ -30,7 +30,6 @@ export function CommandCenterTabRouter({
   selectedTargetCode,
   nation,
   gameState,
-  onNavigateTab,
 }: CommandCenterTabRouterProps) {
   const currentNationActivity = gameState?.turnActivity?.[nation.id];
 
@@ -84,7 +83,6 @@ export function CommandCenterTabRouter({
           provincesMap={gameState?.provinces}
           turnActivity={currentNationActivity}
           currentTurn={gameState?.currentTurn}
-          onNavigateTab={onNavigateTab}
         />
       );
 

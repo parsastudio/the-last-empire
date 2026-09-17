@@ -45,7 +45,6 @@ export function WebGLTacticalWorkspace({
 }: WebGLTacticalWorkspaceProps) {
   const t = useTranslations("common");
   const tHud = useTranslations("map.hud");
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
 
@@ -189,10 +188,7 @@ export function WebGLTacticalWorkspace({
   const isNotFound = !loading && (error !== null || !effectiveGameState);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-screen h-screen bg-background overflow-hidden relative"
-    >
+    <div className="w-screen h-screen bg-background overflow-hidden relative">
       <WebGLMapCanvas
         provincesMap={effectiveGameState?.provinces}
         nationsMap={effectiveGameState?.nations}

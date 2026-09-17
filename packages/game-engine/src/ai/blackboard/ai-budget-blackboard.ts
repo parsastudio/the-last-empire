@@ -28,11 +28,9 @@ export interface BlackboardAllocatedWallets {
 
 export class AiBudgetBlackboard {
   private wallets: BlackboardAllocatedWallets;
-  private nationId: string;
 
-  constructor(wallets: BlackboardAllocatedWallets, nationId: string) {
+  constructor(wallets: BlackboardAllocatedWallets) {
     this.wallets = { ...wallets };
-    this.nationId = nationId;
   }
 
   public static createForNation(
@@ -47,7 +45,7 @@ export class AiBudgetBlackboard {
     );
     const wallets = this.arbitrateBudgets(nation, context, posture, needScores);
 
-    return new AiBudgetBlackboard(wallets, nation.id);
+    return new AiBudgetBlackboard(wallets);
   }
 
   private static arbitrateBudgets(

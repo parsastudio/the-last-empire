@@ -68,8 +68,5 @@
     "submitting": "در حال اجرای تحقیقات صنعتی...",
     "upgradeBtn": "ارتقا به سطح {level}",
     "insufficientFunds": "موجودی خزانه ناکافی جهت R&D"
-  },
-  "capacityMeter": {
-    "tooltip": "کارخانجات فعال: {active} از {max} اسلات دائم"
   }
 }

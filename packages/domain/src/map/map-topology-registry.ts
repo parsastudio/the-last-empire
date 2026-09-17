@@ -100,8 +100,4 @@ export class MapTopologyRegistry {
   ): { x: number; y: number } {
     return this.topologyMap.get(provinceId)?.centerCoordinates ?? fallback;
   }
-
-  public static isReady(): boolean {
-    return this.isLoaded && this.topologyMap.size > 0;
-  }
 }

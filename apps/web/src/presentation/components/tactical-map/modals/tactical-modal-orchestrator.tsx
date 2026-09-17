@@ -113,16 +113,6 @@ export function TacticalModalOrchestrator({
         />
       );
 
-    case "DILEMMA":
-      return (
-        <DilemmaModal
-          isOpen={true}
-          dilemma={activeModal.event}
-          humanNationId={humanNation?.id || ""}
-          onClose={closeModal}
-        />
-      );
-
     default:
       return null;
   }

@@ -7,7 +7,6 @@ import {
   AI_DOCTRINE_PRESETS,
   ALL_MILITARY_UNIT_TYPES,
 } from "@geopolitics/domain";
-import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import { AIWartimeLoanEvaluator } from "@/engine/ai/procurement/ai-wartime-loan-evaluator";
 import { AIArmsImportPlanner } from "@/engine/ai/procurement/ai-arms-import-planner";
 import { AIDomesticRecruitmentPlanner } from "@/engine/ai/procurement/ai-domestic-recruitment-planner";
@@ -17,8 +16,6 @@ import {
   AiStrategicWallets,
 } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 import { TurnContext } from "@/engine/pipeline/turn-context";
-
-export type { AIPosture };
 
 export interface RecruitmentPlanResult {
   actions: GameAction[];

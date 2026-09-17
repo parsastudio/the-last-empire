@@ -10,9 +10,9 @@
   "maxedOut": "Fully Completed (Level 3 Active)",
   "levelBadge": "Level {level}",
   "inactiveLevel": "Inactive (Level 0)",
-  "nextMilestone": "Next Milestone: Level {level} at Step {step} ({bonus})",
+  "nextMilestone": "Next Goal: Step {step} ({bonus})",
   "maxLevelReached": "Peak Sovereign Hegemony Achieved",
-  "milestoneTag": "Step {step} • Level {level}",
+  "milestoneTag": "Step {step}",
   "automation_production_lines": {
     "name": "Industrial Automation & Factory Yield",
     "tagline": "Surge nationwide factory revenue yields up to +35%",
