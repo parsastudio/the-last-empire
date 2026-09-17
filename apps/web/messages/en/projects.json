@@ -1,110 +1,48 @@
 {
-  "headerTitle": "Strategic National Projects & Research",
-  "headerSubtitle": "Step-by-step capital deployment into national technologies ($5B per step)",
-  "treasury": "Treasury",
+  "headerTitle": "Strategic National Projects & Pillars",
+  "headerSubtitle": "Step-by-step capital deployment into 4 core national pillars ($5B per step)",
+  "treasury": "National Treasury",
   "stepCost": "Step",
   "stepCounter": "Step {current} of {total}",
   "quotaRemaining": "Turn Quota: {remaining} of {max}",
   "quotaFull": "Turn Quota Depleted",
-  "allTiers": "All Projects",
-  "shortTerm": "Short-Term",
-  "midTerm": "Mid-Term",
-  "longTerm": "Mega Projects",
-  "activeAndDeployed": "Active & Deployed",
-  "completed": "Completed",
-  "injectBudget": "Deploy Funds",
-  "breakthroughBadge": "Scientific Breakthrough ⚡",
-  "breakthroughTitle": "Breakthrough Achievement: Early Completion!",
-  "breakthroughDesc": "Project '{name}' was unexpectedly completed ahead of schedule without requiring further steps.",
-  "breakthroughAction": "Claim Achievement 🎉",
+  "injectBudget": "Deploy Funds ($5B)",
+  "maxedOut": "Fully Completed (Level 3 Active)",
+  "levelBadge": "Level {level}",
+  "inactiveLevel": "Inactive (Level 0)",
+  "nextMilestone": "Next Milestone: Level {level} at Step {step} ({bonus})",
+  "maxLevelReached": "Peak Sovereign Hegemony Achieved",
+  "milestoneTag": "Step {step} • Level {level}",
   "automation_production_lines": {
-    "name": "Factory Line Automation",
-    "tagline": "Surge industrial output with automated AI engineering",
-    "description": "Equipping industrial complexes and assembly facilities with automated robotic arms and sensory networks, permanently raising national factory yields by 10%."
+    "name": "Industrial Automation & Factory Yield",
+    "tagline": "Surge nationwide factory revenue yields up to +35%",
+    "description": "Equipping assembly lines with robotics and automated AI engineering, permanently raising factory outputs by 10%, 20%, and 35% at Steps 10, 20, and 30.",
+    "milestone1": "+10% Factory Output",
+    "milestone2": "+20% Factory Output",
+    "milestone3": "+35% Factory Output (Max)"
   },
-  "rapid_deployment_doctrine": {
-    "name": "Rapid Reaction & Mobility Doctrine",
-    "tagline": "Enhance battlefield firepower and formation agility",
-    "description": "Modernizing centralized command structures and joint simulation drills to augment frontline combat lethality by 10% across infantry and armor divisions."
+  "scientific_research_optimization": {
+    "name": "Scientific R&D Cost Optimization",
+    "tagline": "Discount defense and industrial research costs up to 35%",
+    "description": "Unified research campuses streamlining scientific steps, reducing both military and industrial R&D upgrade costs by 15%, 25%, and 35% at Steps 10, 20, and 30.",
+    "milestone1": "15% R&D Cost Discount",
+    "milestone2": "25% R&D Cost Discount",
+    "milestone3": "35% R&D Cost Discount (Max)"
   },
-  "free_transit_gateways": {
-    "name": "Free-Trade Gateways & Harbor Expansion",
-    "tagline": "Expand customs revenue and international maritime transit",
-    "description": "Optimizing cargo clearance protocols, targeted tariff exemptions, and deep-water berths, boosting cross-border commercial revenues by 15%."
+  "logistics_procurement_modernization": {
+    "name": "Force Procurement & Supply Lines",
+    "tagline": "Direct discount on all military unit recruitment up to 30%",
+    "description": "Standardized military arsenals and modular manufacturing, lowering recruitment costs for infantry, armor, air defense, jets, and missiles by 10%, 20%, and 30% at Steps 10, 20, and 30.",
+    "milestone1": "10% Recruitment Discount",
+    "milestone2": "20% Recruitment Discount",
+    "milestone3": "30% Recruitment Discount (Max)"
   },
-  "passive_defense_fortifications": {
-    "name": "Subterranean Bunkers & Hardened Redoubts",
-    "tagline": "Mitigate defensive casualties across sovereign territory",
-    "description": "Constructing reinforced concrete complexes, subterranean redoubts, and logistical tunnel networks, mitigating domestic defensive casualties by 15%."
-  },
-  "diplomatic_soft_power_network": {
-    "name": "Diplomatic Soft Power & Embassy Outreach",
-    "tagline": "Elevate international prestige and sovereign standing",
-    "description": "Establishing overseas commercial delegations, bilateral institutes, and multilateral missions, permanently conferring +10 international reputation points."
-  },
-  "smart_logistics_hub": {
-    "name": "Automated Logistics & Digital Depot Hub",
-    "tagline": "Curtail operational upkeep and military payroll friction",
-    "description": "Deploying robotic munitions warehousing and fleet telematics, reducing ongoing armed forces upkeep and maintenance expenditures by 10%."
-  },
-  "integrated_laser_radar_grid": {
-    "name": "Integrated Aerospace Defense Grid",
-    "tagline": "Persistent airspace monitoring and early interception",
-    "description": "Positioning phased-array radars and rapid-reaction batteries to automatically neutralize 20% of incoming enemy cruise missiles and drones."
-  },
-  "continental_energy_corridor": {
-    "name": "Continental Energy & Fiber Corridor",
-    "tagline": "Strategic infrastructure security and domestic resilience",
-    "description": "Constructing a national power ring and hardened fiber network, reinforcing social cohesion and granting +8 permanent political stability."
-  },
-  "electronic_warfare_ai_hub": {
-    "name": "Electronic Warfare & Satellite Surveillance",
-    "tagline": "Tactical signals intelligence and adversary disruption",
-    "description": "Deploying signal intelligence stations and orbital reconnaissance arrays, bolstering state reputation by +8 and aiding interception by +5%."
-  },
-  "nano_alloy_metallurgy": {
-    "name": "Nano-Alloy Metallurgy & Composites",
-    "tagline": "Discount industrial expansion and heavy arms fabrication",
-    "description": "Formulating ultra-dense synthetic alloys, lowering the expenditure of factory construction and heavy hardware fabrication by 15%."
-  },
-  "national_industrial_zones": {
-    "name": "Special Industrial Enclaves",
-    "tagline": "Augment maximum permanent factory slot caps nationwide",
-    "description": "Preparing designated manufacturing zones and high-voltage power conduits, expanding maximum factory slots across every province by 20%."
-  },
-  "strategic_currency_clearing": {
-    "name": "Bilateral Currency Clearing Accord",
-    "tagline": "Maximize export margins and foreign commercial settlements",
-    "description": "Implementing sovereign currency settlement channels with trade partners, expanding gross export trade revenues by 25%."
-  },
-  "quantum_fusion_grid": {
-    "name": "Quantum Fusion Power Architecture",
-    "tagline": "Abundant power catalyst for industrial capacity",
-    "description": "Harnessing steady-state fusion reactors, elevating nationwide factory productivity by 20% and expanding slot limits by 30%."
-  },
-  "petro_currency_hegemony": {
-    "name": "Petro-Sovereignty & Currency Hegemony",
-    "tagline": "Dominate international energy trade clearing flows",
-    "description": "Mandating sovereign currency settlement for regional energy commerce, surging trade gains by 35% and collecting perpetual global tribute."
-  },
-  "strategic_deterrence_triad": {
-    "name": "Strategic Nuclear Deterrence Triad",
-    "tagline": "Ultimate deterrence posture against rival superpowers",
-    "description": "Constructing hardened ballistic silos and stealth submarines, deterring foreign war declarations by 30% and securing +10 prestige."
-  },
-  "combined_arms_supremacy": {
-    "name": "Airborne C4ISR Combined Arms Supremacy",
-    "tagline": "Unified tactical command synergy across all combat arms",
-    "description": "Networking airborne radars, armored formations, and infantry via real-time data links, increasing frontline combat effectiveness by 20%."
-  },
-  "multilateral_treaty_architecture": {
-    "name": "Global Hegemony Council Architecture",
-    "tagline": "Lead multilateral diplomacy with sovereign immunity",
-    "description": "Inaugurating a permanent international security assembly under sovereign leadership, conferring +20 reputation and +10 permanent stability."
-  },
-  "advanced_robotics_defense_arsenal": {
-    "name": "Fully Autonomous Defense Manufacturing",
-    "tagline": "Radically diminish procurement costs and armed forces upkeep",
-    "description": "Deploying lights-out robotic arsenals, diminishing unit procurement expenditures by 20% and routine army payroll maintenance by 20%."
+  "combat_command_supremacy": {
+    "name": "Battlefield Command & Firepower",
+    "tagline": "Surge armed forces battlefield combat lethality up to +30%",
+    "description": "C4ISR satellite tactical integration boosting lethal combat efficiency across all army branches by 10%, 20%, and 30% at Steps 10, 20, and 30.",
+    "milestone1": "+10% Combat Lethality",
+    "milestone2": "+20% Combat Lethality",
+    "milestone3": "+30% Combat Lethality (Max)"
   }
 }

@@ -33,10 +33,7 @@ export class CombatModifierResolver {
     nation: Nation,
   ): NationCombatUnitMultipliers {
     const projectPowerMultiplier =
-      NationalProjectEffectApplierUtility.getCombinedMultiplier(
-        nation.completedProjectIds,
-        "militaryPowerBonusMultiplier",
-      );
+      NationalProjectEffectApplierUtility.getMilitaryPowerMultiplier(nation);
 
     return {
       infantry:

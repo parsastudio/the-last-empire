@@ -20,9 +20,8 @@ export class DomesticRecruitmentManager {
     }
 
     const projectDiscount =
-      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
-        nation.completedProjectIds,
-        "procurementCostDiscountMultiplier",
+      NationalProjectEffectApplierUtility.getProcurementDiscountMultiplier(
+        nation,
       );
 
     const baseUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(

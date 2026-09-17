@@ -211,10 +211,12 @@ export class IndustryCalculator {
   public static calculateResearchStepCost(
     industrialLevel: number,
     governmentType?: string,
+    projectDiscountMultiplier = 1.0,
   ): number {
     return FactoryYieldCalculatorUtility.calculateResearchStepCost(
       industrialLevel,
       governmentType,
+      projectDiscountMultiplier,
     );
   }
 

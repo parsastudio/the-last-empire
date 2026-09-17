@@ -1,6 +1,10 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationGettersUtility } from "@geopolitics/domain";
+import {
+  GameError,
+  NationGettersUtility,
+  NationalProjectEffectApplierUtility,
+} from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { DomesticRecruitmentManager } from "@/engine/military/domestic-recruitment-manager";
@@ -80,9 +84,14 @@ export class MilitaryActionExecutor {
       }
 
       case "INVEST_RESEARCH": {
+        const projectDiscount =
+          NationalProjectEffectApplierUtility.getResearchDiscountMultiplier(
+            nation,
+          );
         const cost = ResearchManager.getMilitaryTechCost(
           nation.military.techLevel,
           nation.government?.type,
+          projectDiscount,
         );
         if (nation.treasury < cost) {
           throw new GameError("INSUFFICIENT_FUNDS");

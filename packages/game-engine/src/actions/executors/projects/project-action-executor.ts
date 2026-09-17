@@ -17,11 +17,11 @@ export class ProjectActionExecutor {
     buyerKey: string,
   ): ExecutionResult<{
     projectId: string;
-    projectName: string;
     currentStep: number;
     totalSteps: number;
+    currentLevel: number;
+    isMilestoneReached: boolean;
     isCompleted: boolean;
-    isEarlyBreakthrough: boolean;
   }> {
     const config = NationalProjectEffectApplierUtility.getProjectConfig(
       action.projectId,
@@ -30,8 +30,8 @@ export class ProjectActionExecutor {
       throw new GameError("PROJECT_NOT_FOUND");
     }
 
-    const completedIds = nation.completedProjectIds || [];
-    if (completedIds.includes(config.id)) {
+    const currentSteps = nation.projectProgressSteps?.[config.id] || 0;
+    if (currentSteps >= config.totalStepsRequired) {
       throw new GameError("PROJECT_ALREADY_COMPLETED");
     }
 
@@ -52,52 +52,28 @@ export class ProjectActionExecutor {
       throw new GameError("INSUFFICIENT_FUNDS");
     }
 
-    const currentSteps = nation.projectProgressSteps?.[config.id] || 0;
     const nextSteps = currentSteps + 1;
-
-    const breakthroughChance = 1 / config.totalStepsRequired;
-    const roll = Math.random();
-    const isSilentBreakthrough = roll <= breakthroughChance;
-
-    let isCompleted = nextSteps >= config.totalStepsRequired;
-    let finalSteps = nextSteps;
-
-    if (isSilentBreakthrough && !isCompleted) {
-      isCompleted = true;
-      finalSteps = config.totalStepsRequired;
-    }
+    const oldLevel =
+      NationalProjectEffectApplierUtility.getProjectLevel(currentSteps);
+    const nextLevel =
+      NationalProjectEffectApplierUtility.getProjectLevel(nextSteps);
+    const isMilestoneReached = nextLevel > oldLevel;
+    const isCompleted = nextSteps >= config.totalStepsRequired;
 
     const nextTreasury = Math.max(0, nation.treasury - config.costPerStep);
     const updatedBoostedList = [...boostedThisTurn, config.id];
     const updatedStepsMap = {
       ...(nation.projectProgressSteps || {}),
-      [config.id]: finalSteps,
+      [config.id]: nextSteps,
     };
 
+    const completedIds = nation.completedProjectIds || [];
     const updatedCompletedList = isCompleted
       ? Array.from(new Set([...completedIds, config.id]))
       : completedIds;
 
-    let nextStability = nation.government.stability;
-    let nextReputation = nation.globalReputation;
-
-    if (isCompleted) {
-      if (config.effect.permanentStabilityBonus) {
-        nextStability = Math.min(
-          100,
-          nextStability + config.effect.permanentStabilityBonus,
-        );
-      }
-      if (config.effect.globalReputationBonus) {
-        nextReputation = Math.min(
-          100,
-          nextReputation + config.effect.globalReputationBonus,
-        );
-      }
-    }
-
     const newLogs = [];
-    if (isCompleted) {
+    if (isMilestoneReached) {
       newLogs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,
@@ -107,10 +83,10 @@ export class ProjectActionExecutor {
           "GENERIC_EVENT",
           {
             projectId: config.id,
-            isEarlyBreakthrough: isSilentBreakthrough,
-            eventCode: isSilentBreakthrough
-              ? "EARLY_BREAKTHROUGH"
-              : "PROJECT_COMPLETED",
+            level: nextLevel,
+            eventCode: isCompleted
+              ? "PROJECT_COMPLETED"
+              : "PROJECT_MILESTONE_REACHED",
           },
         ),
       );
@@ -119,13 +95,8 @@ export class ProjectActionExecutor {
     const updatedNation: Nation = {
       ...nation,
       treasury: nextTreasury,
-      globalReputation: nextReputation,
       projectProgressSteps: updatedStepsMap,
       completedProjectIds: updatedCompletedList,
-      government: {
-        ...nation.government,
-        stability: nextStability,
-      },
     };
 
     const updatedTurnActivity = {
@@ -150,11 +121,11 @@ export class ProjectActionExecutor {
       newState,
       resultData: {
         projectId: config.id,
-        projectName: config.id,
-        currentStep: finalSteps,
+        currentStep: nextSteps,
         totalSteps: config.totalStepsRequired,
+        currentLevel: nextLevel,
+        isMilestoneReached,
         isCompleted,
-        isEarlyBreakthrough: isSilentBreakthrough && isCompleted,
       },
     };
   }

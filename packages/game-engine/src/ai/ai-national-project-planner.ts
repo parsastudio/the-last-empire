@@ -34,7 +34,6 @@ export class AINationalProjectPlanner {
     const boostedProjectIds =
       context.state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
 
-    const completedIds = nation.completedProjectIds || [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;
     let quotaRemaining = Math.max(0, maxBoosts - boostedProjectIds.length);
 
@@ -43,9 +42,12 @@ export class AINationalProjectPlanner {
     }
 
     const progressSteps = nation.projectProgressSteps || {};
-    const candidateProjects = NATIONAL_PROJECTS_CATALOG.filter(
-      (p) => !completedIds.includes(p.id) && !boostedProjectIds.includes(p.id),
-    );
+    const candidateProjects = NATIONAL_PROJECTS_CATALOG.filter((p) => {
+      const current = progressSteps[p.id] || 0;
+      return (
+        current < p.totalStepsRequired && !boostedProjectIds.includes(p.id)
+      );
+    });
 
     if (candidateProjects.length === 0) {
       return { actions, spentMoney: 0 };
@@ -53,45 +55,46 @@ export class AINationalProjectPlanner {
 
     const scoredProjects = candidateProjects.map((project) => {
       const currentStep = progressSteps[project.id] || 0;
-      let score = 0;
+      const currentLevel =
+        NationalProjectEffectApplierUtility.getProjectLevel(currentStep);
+      let score = 20;
 
-      if (currentStep > 0) {
-        score += (currentStep / project.totalStepsRequired) * 120;
+      const nextMilestone =
+        NationalProjectEffectApplierUtility.getNextMilestoneStep(currentStep);
+      if (nextMilestone) {
+        const remainingToMilestone = nextMilestone - currentStep;
+        score += Math.max(0, (10 - remainingToMilestone) * 8);
       }
 
-      if (project.tier === "SHORT_TERM") {
-        score += 35;
-      } else if (project.tier === "MID_TERM") {
-        score += 20;
+      if (posture === "WAR") {
+        if (project.category === "MILITARY") score += 50;
+        if (project.category === "LOGISTICS") score += 40;
       } else {
-        score += 10;
+        if (project.category === "INDUSTRY") score += 45;
+        if (project.category === "RESEARCH") score += 35;
       }
 
       switch (nation.doctrine) {
         case "MILITARIST_HAWK":
-          if (project.category === "MILITARY") score += 50;
-          break;
-        case "MERCANTILE_ECONOMIC":
-          if (project.category === "ECONOMIC") score += 50;
+          if (
+            project.category === "MILITARY" ||
+            project.category === "LOGISTICS"
+          )
+            score += 35;
           break;
         case "DOMESTIC_INDUSTRIALIST":
-          if (project.category === "INDUSTRY_TECH") score += 50;
+          if (
+            project.category === "INDUSTRY" ||
+            project.category === "RESEARCH"
+          )
+            score += 35;
+          break;
+        case "MERCANTILE_ECONOMIC":
+          if (project.category === "INDUSTRY") score += 30;
           break;
         case "GLOBAL_HEGEMON":
-          if (project.category === "GEOPOLITICAL") score += 40;
-          if (project.tier === "LONG_TERM") score += 30;
+          score += (currentLevel + 1) * 15;
           break;
-      }
-
-      if (posture === "WAR" && project.category === "MILITARY") {
-        score += 45;
-      }
-
-      if (
-        nation.government.stability < 40 &&
-        project.effect.permanentStabilityBonus
-      ) {
-        score += 60;
       }
 
       return { project, score };

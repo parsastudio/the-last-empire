@@ -14,10 +14,7 @@ import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver
 import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
 import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
 import { GuarantorMultiplierBlender } from "@/engine/combat/optimizer/helpers/guarantor-multiplier-blender";
-import {
-  NationalProjectEffectApplierUtility,
-  MilitaryPricingCalculator,
-} from "@geopolitics/domain";
+import { MilitaryPricingCalculator } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -82,12 +79,6 @@ export class BattleCalculator {
       guarantorNation,
     );
 
-    const autoInterceptionBonus =
-      NationalProjectEffectApplierUtility.getCombinedBonus(
-        defender.completedProjectIds,
-        "autoMissileInterceptionRate",
-      );
-
     const phasesResult = BattlePhaseOrchestrator.executePhases(
       deployedDrones,
       blendedDef.defAirDefense,
@@ -97,7 +88,7 @@ export class BattleCalculator {
       blendedDef.defArmor,
       deployedInfantry,
       blendedDef.defInfantry,
-      attMults.droneMissile,
+      attDroneMults(attMults.droneMissile),
       blendedDef.defMults.airDefense,
       attMults.airForce,
       blendedDef.defMults.airForce,
@@ -105,7 +96,7 @@ export class BattleCalculator {
       blendedDef.defMults.armor,
       attMults.infantry,
       blendedDef.defMults.infantry,
-      autoInterceptionBonus,
+      0,
     );
 
     const attackerDeployedPower = Math.max(
@@ -142,12 +133,6 @@ export class BattleCalculator {
       (attackerDeployedPower / defenderTotalPower).toFixed(2),
     );
 
-    const defCasualtyDiscount =
-      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
-        defender.completedProjectIds,
-        "defenseCasualtyReductionMultiplier",
-      );
-
     const casualty = BattleCasualtyResolver.resolve({
       deployedInfantry,
       deployedArmor,
@@ -165,7 +150,7 @@ export class BattleCalculator {
       rawDefAirDefenseLost:
         phasesResult.missilePhaseOutput.rawDefAirDefenseLost,
       rawDefAirLoss: phasesResult.airPhaseOutput.rawDefAirLoss,
-      defCasualtyDiscount,
+      defCasualtyDiscount: 1.0,
     });
 
     const treasuryLooted = BattleLootEvaluator.calculateLoot(
@@ -199,4 +184,8 @@ export class BattleCalculator {
       auxiliaryGuarantor: blendedDef.auxiliaryGuarantor,
     };
   }
+}
+
+function attDroneMults(val: number): number {
+  return val;
 }

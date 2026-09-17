@@ -1,43 +1,31 @@
 import { z } from "zod";
 
 export const ProjectCategorySchema = z.enum([
+  "INDUSTRY",
+  "RESEARCH",
+  "LOGISTICS",
   "MILITARY",
-  "ECONOMIC",
-  "GEOPOLITICAL",
-  "INDUSTRY_TECH",
 ]);
 
-export const ProjectScopeTierSchema = z.enum([
-  "SHORT_TERM",
-  "MID_TERM",
-  "LONG_TERM",
-]);
-
-export const NationalProjectEffectSchema = z.object({
+export const ProjectMilestoneEffectSchema = z.object({
+  level: z.number().int().min(1).max(3),
+  stepThreshold: z.number().int().positive(),
   factoryYieldBonusMultiplier: z.number().optional(),
-  militaryPowerBonusMultiplier: z.number().optional(),
-  globalTradeIncomeBonusMultiplier: z.number().optional(),
-  defenseCasualtyReductionMultiplier: z.number().optional(),
-  autoMissileInterceptionRate: z.number().optional(),
-  permanentStabilityBonus: z.number().optional(),
+  researchCostDiscountMultiplier: z.number().optional(),
   procurementCostDiscountMultiplier: z.number().optional(),
-  globalReputationBonus: z.number().optional(),
-  maintenanceCostDiscountMultiplier: z.number().optional(),
-  petroTributeShare: z.number().optional(),
-  factorySlotExpansionRatio: z.number().optional(),
-  deterrenceWarThresholdMultiplier: z.number().optional(),
+  militaryPowerBonusMultiplier: z.number().optional(),
 });
 
 export const NationalProjectConfigSchema = z.object({
   id: z.string(),
   category: ProjectCategorySchema,
-  tier: ProjectScopeTierSchema,
-  totalStepsRequired: z.number().int().min(10),
+  totalStepsRequired: z.number().int().default(30),
   costPerStep: z.number().positive(),
-  effect: NationalProjectEffectSchema,
+  milestones: z.array(ProjectMilestoneEffectSchema),
 });
 
 export type ProjectCategory = z.infer<typeof ProjectCategorySchema>;
-export type ProjectScopeTier = z.infer<typeof ProjectScopeTierSchema>;
-export type NationalProjectEffect = z.infer<typeof NationalProjectEffectSchema>;
+export type ProjectMilestoneEffect = z.infer<
+  typeof ProjectMilestoneEffectSchema
+>;
 export type NationalProjectConfig = z.infer<typeof NationalProjectConfigSchema>;

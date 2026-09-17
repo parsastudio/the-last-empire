@@ -17,6 +17,7 @@ interface IndustryTechUpgradeCardProps {
   treasury?: number;
   industrialLevel?: number;
   governmentType?: string;
+  projectDiscountMultiplier?: number;
 }
 
 export function IndustryTechUpgradeCard({
@@ -24,6 +25,7 @@ export function IndustryTechUpgradeCard({
   treasury = 0,
   industrialLevel = 1.0,
   governmentType,
+  projectDiscountMultiplier = 1.0,
 }: IndustryTechUpgradeCardProps) {
   const t = useTranslations("industry.techUpgrade");
   const { formatCurrency, formatPercent, formatLevel } = useLocaleFormatter();
@@ -33,6 +35,7 @@ export function IndustryTechUpgradeCard({
   const stepResearchCost = IndustryCalculator.calculateResearchStepCost(
     industrialLevel,
     governmentType,
+    projectDiscountMultiplier,
   );
   const canAffordTech = treasury >= stepResearchCost;
 

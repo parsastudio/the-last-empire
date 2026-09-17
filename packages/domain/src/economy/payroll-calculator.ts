@@ -3,7 +3,6 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
-import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
 
 export interface BreakdownMilitaryPayroll {
   infantry: number;
@@ -26,16 +25,8 @@ export class MilitaryPayrollCalculator {
       nation.government?.type,
     );
 
-    const projectDiscount =
-      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
-        nation.completedProjectIds,
-        "maintenanceCostDiscountMultiplier",
-      );
-
     const effectivePayrollRate =
-      this.PAYROLL_RATE *
-      govModifiers.maintenanceCostMultiplier *
-      projectDiscount;
+      this.PAYROLL_RATE * govModifiers.maintenanceCostMultiplier;
 
     const rawInfantry = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
@@ -74,12 +65,7 @@ export class MilitaryPayrollCalculator {
     const gdp = getNationGdp(nation, provincesMap);
     const maxAllowedPayroll =
       gdp > 0
-        ? Math.floor(
-            gdp *
-              0.06 *
-              govModifiers.maintenanceCostMultiplier *
-              projectDiscount,
-          )
+        ? Math.floor(gdp * 0.06 * govModifiers.maintenanceCostMultiplier)
         : rawTotal;
 
     if (rawTotal > maxAllowedPayroll && rawTotal > 0) {

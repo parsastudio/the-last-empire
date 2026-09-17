@@ -4,8 +4,8 @@ import { EspionageExecutionResult } from "@/domain/espionage/espionage.schema";
 import { DiplomaticProposalFeedbackData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/components/treaty-response-feedback-content";
 
 interface ProjectActionResult {
+  isMilestoneReached?: boolean;
   isCompleted?: boolean;
-  isEarlyBreakthrough?: boolean;
 }
 
 export class ActionSoundResolverUtility {
@@ -63,7 +63,7 @@ export class ActionSoundResolverUtility {
 
       case "BOOST_NATIONAL_PROJECT": {
         const projectData = resultData as ProjectActionResult | undefined;
-        if (projectData?.isEarlyBreakthrough || projectData?.isCompleted) {
+        if (projectData?.isMilestoneReached || projectData?.isCompleted) {
           TacticalSound.playTechUpgrade();
         } else {
           TacticalSound.playCoinSound();

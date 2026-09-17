@@ -1,5 +1,9 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError, GovernmentTraitsUtility } from "@geopolitics/domain";
+import {
+  GameError,
+  GovernmentTraitsUtility,
+  NationalProjectEffectApplierUtility,
+} from "@geopolitics/domain";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class ResearchManager {
@@ -8,8 +12,9 @@ export class ResearchManager {
   public static readonly RESEARCH_STEP = 0.1;
 
   public static getMilitaryTechCost(
-    techLevel: number = 1.0,
+    techLevel = 1.0,
     governmentType?: string,
+    projectDiscountMultiplier = 1.0,
   ): number {
     const currentTech = Math.max(1.0, techLevel);
     const k = Math.floor(currentTech);
@@ -22,14 +27,20 @@ export class ResearchManager {
           .militaryResearchCostMultiplier
       : 1.0;
 
-    return Math.floor((fullTierCost / 10) * modifier);
+    return Math.floor(
+      (fullTierCost / 10) * modifier * projectDiscountMultiplier,
+    );
   }
 
   public investInMilitaryTech(nation: Nation): Nation {
     const currentTech = nation.military.techLevel || 1.0;
+    const projectDiscount =
+      NationalProjectEffectApplierUtility.getResearchDiscountMultiplier(nation);
+
     const cost = ResearchManager.getMilitaryTechCost(
       currentTech,
       nation.government?.type,
+      projectDiscount,
     );
 
     if (nation.treasury < cost) {
