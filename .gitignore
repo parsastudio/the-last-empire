@@ -53,3 +53,6 @@ apps/web/public/maps/**/temp/**
 debug
 
 deploy.sh
+
+# FastAgent artifacts
+.fastagent/

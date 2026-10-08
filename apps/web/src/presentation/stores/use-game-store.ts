@@ -6,13 +6,10 @@ import {
   FinalMapManifest,
   GameDifficulty,
 } from "@geopolitics/domain";
-import {
-  ActionEngine,
-  TurnProgressionOrchestrator,
-} from "@geopolitics/game-engine";
 import { CampaignInitializationService } from "@/presentation/stores/services/campaign-initialization-service";
 import { GamePersistenceService } from "@/presentation/stores/services/game-persistence-service";
 import { TurnLogRepository } from "@/infrastructure/storage/repositories/turn-log.repository";
+import { SimulationWorkerClient } from "@/infrastructure/workers/simulation-worker.client";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -36,7 +33,7 @@ interface GameStoreState {
   enableSandboxMode: () => Promise<void>;
 }
 
-const orchestrator = new TurnProgressionOrchestrator();
+const workerClient = SimulationWorkerClient.getInstance();
 
 export const useGameStore = create<GameStoreState>((set, get) => ({
   gameState: null,
@@ -132,39 +129,51 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       };
     }
 
-    const previousLogsCount = gameState.turnLogs.length;
-    const result = ActionEngine.execute(gameState, action);
+    try {
+      const previousLogsCount = gameState.turnLogs.length;
+      const result = await workerClient.executeAction(gameState, action);
 
-    if (result.success && result.newState) {
-      set({
-        gameState: result.newState,
-      });
+      if (result.newState) {
+        set({
+          gameState: result.newState,
+        });
 
-      const nextLogs = result.newState.turnLogs;
-      const newlyAppendedLogs =
-        result.logs && result.logs.length > 0
-          ? result.logs
-          : nextLogs.length > previousLogsCount
-            ? nextLogs.slice(previousLogsCount)
-            : [];
+        const nextLogs = result.newState.turnLogs;
+        const newlyAppendedLogs =
+          result.logs && result.logs.length > 0
+            ? result.logs
+            : nextLogs.length > previousLogsCount
+              ? nextLogs.slice(previousLogsCount)
+              : [];
 
-      if (newlyAppendedLogs.length > 0) {
-        void TurnLogRepository.appendLogs(activeGameId, newlyAppendedLogs);
+        if (newlyAppendedLogs.length > 0) {
+          void TurnLogRepository.appendLogs(activeGameId, newlyAppendedLogs);
+        }
+
+        void GamePersistenceService.saveGameState(
+          activeGameId,
+          result.newState,
+        );
+
+        return {
+          success: true,
+          message: onSuccessMessage || result.message,
+          resultData: result.resultData,
+        };
       }
 
-      void GamePersistenceService.saveGameState(activeGameId, result.newState);
-
       return {
-        success: true,
-        message: onSuccessMessage || result.message,
-        resultData: result.resultData,
+        success: false,
+        message: result.message || "Action cannot be executed.",
+      };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Action cannot be executed.";
+      return {
+        success: false,
+        message,
       };
     }
-
-    return {
-      success: false,
-      message: result.message || "Action cannot be executed.",
-    };
   },
 
   advanceNextTurn: async () => {
@@ -173,13 +182,12 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       return null;
     }
     try {
-      const prng = new SeededRandom(
-        gameState.seed || Math.floor(Math.random() * 1000000),
-      );
+      const seed =
+        gameState.seed || Math.floor(Math.random() * 1000000);
 
-      const { newState, newTurnLogs } = orchestrator.advanceTurnWithLogs(
+      const { newState, newTurnLogs } = await workerClient.advanceTurn(
         gameState,
-        prng,
+        seed,
       );
 
       set({
@@ -193,7 +201,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       void GamePersistenceService.saveGameState(activeGameId, newState);
       return newState;
     } catch (err) {
-      console.error("Failed to advance turn:", err);
+      console.error("Failed to advance turn via worker:", err);
       return null;
     }
   },
