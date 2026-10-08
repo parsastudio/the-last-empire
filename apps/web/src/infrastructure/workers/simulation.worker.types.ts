@@ -5,6 +5,24 @@ import {
   FinalMapManifest,
 } from "@geopolitics/domain";
 
+export type SimulationWorkerRequestPayload =
+  | {
+      type: "INIT";
+      manifest: FinalMapManifest;
+    }
+  | {
+      type: "ADVANCE_TURN";
+      state: GameState;
+      seed?: number;
+      manifest?: FinalMapManifest | null;
+    }
+  | {
+      type: "EXECUTE_ACTION";
+      state: GameState;
+      action: GameAction;
+      manifest?: FinalMapManifest | null;
+    };
+
 export type SimulationWorkerRequest =
   | {
       id: string;

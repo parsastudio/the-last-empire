@@ -12,6 +12,7 @@ import {
 } from "@geopolitics/game-engine";
 import {
   SimulationWorkerRequest,
+  SimulationWorkerRequestPayload,
   SimulationWorkerResponse,
 } from "@/infrastructure/workers/simulation.worker.types";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
@@ -93,10 +94,10 @@ export class SimulationWorkerClient {
   }
 
   private sendRequest<TResponse>(
-    requestData: Omit<SimulationWorkerRequest, "id">,
+    requestData: SimulationWorkerRequestPayload,
   ): Promise<TResponse> {
     const id = `req_${Date.now()}_${++this.requestCounter}`;
-    const payload: SimulationWorkerRequest = {
+    const payload = {
       ...requestData,
       id,
     } as SimulationWorkerRequest;
