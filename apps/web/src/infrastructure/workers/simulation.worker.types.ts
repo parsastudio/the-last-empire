@@ -1,20 +1,37 @@
-import { GameAction, GameState, TurnLogEntry } from "@geopolitics/domain";
+import {
+  GameAction,
+  GameState,
+  TurnLogEntry,
+  FinalMapManifest,
+} from "@geopolitics/domain";
 
 export type SimulationWorkerRequest =
+  | {
+      id: string;
+      type: "INIT";
+      manifest: FinalMapManifest;
+    }
   | {
       id: string;
       type: "ADVANCE_TURN";
       state: GameState;
       seed?: number;
+      manifest?: FinalMapManifest | null;
     }
   | {
       id: string;
       type: "EXECUTE_ACTION";
       state: GameState;
       action: GameAction;
+      manifest?: FinalMapManifest | null;
     };
 
 export type SimulationWorkerResponse =
+  | {
+      id: string;
+      success: true;
+      type: "INIT";
+    }
   | {
       id: string;
       success: true;

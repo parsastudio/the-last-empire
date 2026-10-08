@@ -4,19 +4,63 @@ import {
   TurnProgressionOrchestrator,
   ActionEngine,
 } from "@geopolitics/game-engine";
-import { SeededRandom } from "@geopolitics/domain";
+import {
+  SeededRandom,
+  MapTopologyRegistry,
+  CountryRegistry,
+  FinalMapManifest,
+} from "@geopolitics/domain";
 import {
   SimulationWorkerRequest,
   SimulationWorkerResponse,
 } from "@/infrastructure/workers/simulation.worker.types";
 
 const orchestrator = new TurnProgressionOrchestrator();
+let isManifestLoaded = false;
 
-self.addEventListener("message", (event: MessageEvent<SimulationWorkerRequest>) => {
+async function ensureWorkerManifestLoaded(
+  manifest?: FinalMapManifest | null,
+): Promise<void> {
+  if (manifest && (!isManifestLoaded || !MapTopologyRegistry.getTopology(5))) {
+    MapTopologyRegistry.initializeFromManifest(manifest);
+    CountryRegistry.initializeFromManifest(manifest);
+    isManifestLoaded = true;
+    return;
+  }
+
+  if (!isManifestLoaded || !MapTopologyRegistry.getTopology(5)) {
+    try {
+      const res = await fetch("/maps/map1/final/manifest.json");
+      if (res.ok) {
+        const data = (await res.json()) as FinalMapManifest;
+        MapTopologyRegistry.initializeFromManifest(data);
+        CountryRegistry.initializeFromManifest(data);
+        isManifestLoaded = true;
+      }
+    } catch (err) {
+      console.warn("SimulationWorker fallback manifest fetch failed:", err);
+    }
+  }
+}
+
+self.addEventListener("message", async (event: MessageEvent<SimulationWorkerRequest>) => {
   const request = event.data;
   if (!request || !request.id) return;
 
   try {
+    if (request.type === "INIT") {
+      await ensureWorkerManifestLoaded(request.manifest);
+      const response: SimulationWorkerResponse = {
+        id: request.id,
+        success: true,
+        type: "INIT",
+      };
+      self.postMessage(response);
+      return;
+    }
+
+    await ensureWorkerManifestLoaded(request.manifest);
+
     if (request.type === "ADVANCE_TURN") {
       const prng = new SeededRandom(
         request.seed ??

@@ -3,6 +3,8 @@ import {
   GameAction,
   TurnLogEntry,
   SeededRandom,
+  MapTopologyRegistry,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import {
   TurnProgressionOrchestrator,
@@ -12,6 +14,7 @@ import {
   SimulationWorkerRequest,
   SimulationWorkerResponse,
 } from "@/infrastructure/workers/simulation.worker.types";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 interface PendingRequest {
   resolve: (value: unknown) => void;
@@ -69,6 +72,17 @@ export class SimulationWorkerClient {
       this.worker.addEventListener("error", (errorEvent) => {
         console.error("SimulationWorker runtime error:", errorEvent);
       });
+
+      void ClientFinalStateLoader.ensureManifestLoaded("map1").then(
+        (manifest) => {
+          if (manifest && this.worker) {
+            void this.sendRequest({
+              type: "INIT",
+              manifest,
+            }).catch(() => {});
+          }
+        },
+      );
     } catch (err) {
       console.warn(
         "SimulationWorker could not be initialized, falling back to main-thread processing:",
@@ -104,6 +118,19 @@ export class SimulationWorkerClient {
     request: SimulationWorkerRequest,
   ): Promise<TResponse> {
     try {
+      if (request.manifest) {
+        MapTopologyRegistry.initializeFromManifest(request.manifest);
+        CountryRegistry.initializeFromManifest(request.manifest);
+      }
+
+      if (request.type === "INIT") {
+        return Promise.resolve({
+          id: request.id,
+          success: true,
+          type: "INIT",
+        } as unknown as TResponse);
+      }
+
       if (request.type === "ADVANCE_TURN") {
         if (!this.fallbackOrchestrator) {
           this.fallbackOrchestrator = new TurnProgressionOrchestrator();
@@ -153,6 +180,8 @@ export class SimulationWorkerClient {
     state: GameState,
     seed?: number,
   ): Promise<{ newState: GameState; newTurnLogs: TurnLogEntry[] }> {
+    const manifest = await ClientFinalStateLoader.ensureManifestLoaded("map1");
+
     const response = await this.sendRequest<{
       id: string;
       success: true;
@@ -163,6 +192,7 @@ export class SimulationWorkerClient {
       type: "ADVANCE_TURN",
       state,
       seed,
+      manifest,
     });
 
     return {
@@ -180,6 +210,8 @@ export class SimulationWorkerClient {
     resultData?: unknown;
     logs?: TurnLogEntry[];
   }> {
+    const manifest = await ClientFinalStateLoader.ensureManifestLoaded("map1");
+
     const response = await this.sendRequest<{
       id: string;
       success: true;
@@ -192,6 +224,7 @@ export class SimulationWorkerClient {
       type: "EXECUTE_ACTION",
       state,
       action,
+      manifest,
     });
 
     return {
