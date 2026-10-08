@@ -30,13 +30,38 @@ export class TurnProgressionOrchestrator {
     const nextTurn = state.currentTurn + 1;
     const initialLogsCount = state.turnLogs.length;
 
+    const workingProvinces: typeof state.provinces = {};
+    for (const key in state.provinces) {
+      const p = state.provinces[key]!;
+      workingProvinces[key] = {
+        ...p,
+        factoryTiers: p.factoryTiers ? p.factoryTiers.map((t) => ({ ...t })) : [],
+      };
+    }
+
+    const workingNations: typeof state.nations = {};
+    for (const key in state.nations) {
+      const n = state.nations[key]!;
+      workingNations[key] = {
+        ...n,
+        government: { ...n.government },
+        military: {
+          ...n.military,
+          branchTech: n.military.branchTech ? { ...n.military.branchTech } : undefined,
+        },
+        factoryTiers: n.factoryTiers ? n.factoryTiers.map((t) => ({ ...t })) : [],
+        relations: { ...n.relations },
+        activeModifiers: n.activeModifiers ? n.activeModifiers.map((m) => ({ ...m })) : [],
+      };
+    }
+
     let workingState: GameState = {
       ...state,
       currentTurn: nextTurn,
-      provinces: { ...state.provinces },
-      nations: { ...state.nations },
+      provinces: workingProvinces,
+      nations: workingNations,
       turnLogs: [...state.turnLogs],
-      pendingProposals: [...state.pendingProposals],
+      pendingProposals: state.pendingProposals.map((p) => ({ ...p })),
       turnActivity: {},
     };
 

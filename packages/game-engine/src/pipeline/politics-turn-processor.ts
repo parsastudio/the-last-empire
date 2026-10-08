@@ -9,24 +9,23 @@ export class PoliticsTurnProcessor {
     isAtWar: boolean,
     turnContext: TurnContext,
   ): Nation {
-    const updated = ModifierManager.updateActiveModifiers(nation);
+    if (nation.activeModifiers && nation.activeModifiers.length > 0) {
+      ModifierManager.updateActiveModifiersInPlace(nation);
+    }
 
     const newStability = StabilityCalculator.calculateTurnStability(
-      updated,
+      nation,
       isAtWar,
       turnContext.state.nations,
     );
 
-    return {
-      ...updated,
-      government: {
-        ...updated.government,
-        stability: newStability,
-        turnsInPower: updated.government.turnsInPower + 1,
-      },
-      globalReputation: !isAtWar
-        ? Math.min(100, updated.globalReputation + 1)
-        : updated.globalReputation,
-    };
+    nation.government.stability = newStability;
+    nation.government.turnsInPower += 1;
+
+    if (!isAtWar) {
+      nation.globalReputation = Math.min(100, nation.globalReputation + 1);
+    }
+
+    return nation;
   }
 }

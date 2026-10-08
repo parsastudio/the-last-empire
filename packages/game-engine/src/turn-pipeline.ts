@@ -12,17 +12,15 @@ export class TurnPipeline {
     const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
 
-    const updatedNations: Record<string, Nation> = {};
-    const updatedProvincesMap: Record<string, ProvinceDynamicState> = {
-      ...currentState.provinces,
-    };
+    const provincesMap = currentState.provinces;
+    const nationsMap = currentState.nations;
     const economyLogs: TurnLogEntry[] = [];
 
-    const nationKeys = Object.keys(currentState.nations);
+    const nationKeys = Object.keys(nationsMap);
 
     for (let i = 0; i < nationKeys.length; i++) {
       const id = nationKeys[i]!;
-      const nation = currentState.nations[id];
+      const nation = nationsMap[id];
       if (!nation) continue;
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
@@ -30,7 +28,6 @@ export class TurnPipeline {
       const hasTerritory = ownedProvinces.length > 0;
 
       if (!nation.isAlive || !hasTerritory) {
-        updatedNations[canonicalId] = nation;
         continue;
       }
 
@@ -49,23 +46,22 @@ export class TurnPipeline {
 
       for (let p = 0; p < updatedProvinces.length; p++) {
         const up = updatedProvinces[p]!;
-        updatedProvincesMap[up.provinceId.toString()] = up;
+        provincesMap[up.provinceId.toString()] = up;
       }
 
-      const polNation = PoliticsTurnProcessor.process(
+      PoliticsTurnProcessor.process(
         ecoNation,
         isAtWar,
         turnContext,
       );
 
-      updatedNations[canonicalId] = polNation;
+      nationsMap[canonicalId] = ecoNation;
     }
 
-    return {
-      ...currentState,
-      provinces: updatedProvincesMap,
-      nations: updatedNations,
-      turnLogs: [...currentState.turnLogs, ...economyLogs],
-    };
+    if (economyLogs.length > 0) {
+      currentState.turnLogs.push(...economyLogs);
+    }
+
+    return currentState;
   }
 }

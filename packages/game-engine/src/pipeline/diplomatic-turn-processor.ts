@@ -40,15 +40,7 @@ export class DiplomaticTurnProcessor {
     const canonicalSource = CountryRegistry.resolveCanonicalId(nation.id);
     let isAtWar = false;
     const relKeys = Object.keys(nation.relations);
-    const newRels: Record<string, RelationProfile> = {};
-
-    for (let i = 0; i < relKeys.length; i++) {
-      const key = relKeys[i]!;
-      const r = nation.relations[key];
-      if (r) {
-        newRels[key] = { ...r };
-      }
-    }
+    const newRels: Record<string, RelationProfile> = nation.relations;
 
     const myProvs = turnContext.getOwnedProvinces(canonicalSource);
 
@@ -126,12 +118,9 @@ export class DiplomaticTurnProcessor {
         }
       }
 
-      newRels[canonicalTarget] = {
-        ...relation,
-        targetNationId: canonicalTarget,
-        alignment: Math.max(-100, Math.min(100, nextAlignment)),
-        tension: currentTension,
-      };
+      relation.targetNationId = canonicalTarget;
+      relation.alignment = Math.max(-100, Math.min(100, nextAlignment));
+      relation.tension = currentTension;
     }
 
     let nextWarFocus = nation.warFocusTargetId ?? null;
