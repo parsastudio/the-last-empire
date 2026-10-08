@@ -79,3 +79,4 @@ export * from "./reports/combat-report.schema";
 export * from "./reports/export-sales.schema";
 export * from "./shared/domain-utilities";
 export * from "./shared/utils/flag-emoji.utility";
+export * from "./shared/utils/response-curve.utility";

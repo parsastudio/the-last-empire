@@ -1,4 +1,8 @@
-import { Nation, NationRelationResolver } from "@geopolitics/domain";
+import {
+  Nation,
+  NationRelationResolver,
+  ResponseCurveUtility,
+} from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class WarUtilityEvaluator {
@@ -9,11 +13,16 @@ export class WarUtilityEvaluator {
     targetGdp?: number,
     allNations?: Record<string, Nation>,
   ): number {
-    if (vector.tension < 35) {
+    if (source.military.infantry < 2 || source.government.stability < 25) {
       return -100;
     }
 
-    if (source.military.infantry < 2 || source.government.stability < 25) {
+    if (vector.proximityTier === "NONE") {
+      return -100;
+    }
+
+    const tensionCurveFactor = ResponseCurveUtility.sigmoid(vector.tension, 45, 0.1);
+    if (tensionCurveFactor < 0.25) {
       return -100;
     }
 
@@ -29,17 +38,13 @@ export class WarUtilityEvaluator {
       return -100;
     }
 
-    let rawPowerAdvantage = 0;
-    if (vector.powerRatio > 1.0) {
-      rawPowerAdvantage = -Math.round((vector.powerRatio - 1.0) * 60);
-    } else {
-      rawPowerAdvantage = Math.round((1.0 - vector.powerRatio) * 50);
-    }
+    const continuousAdvantage = ResponseCurveUtility.powerRatioAdvantage(vector.powerRatio);
+    let rawPowerAdvantage = Math.round((continuousAdvantage - 0.5) * 100);
 
     if (
       rawPowerAdvantage <= 0 &&
       vector.lostProvincesCount === 0 &&
-      vector.saturationScore < 60
+      vector.saturationScore < 55
     ) {
       return -100;
     }
@@ -85,12 +90,12 @@ export class WarUtilityEvaluator {
         distancePenalty = 0;
         break;
       case "REGIONAL_MARITIME":
-        proximityMultiplier = 0.7;
-        distancePenalty = -15;
+        proximityMultiplier = 0.72;
+        distancePenalty = -14;
         break;
       case "DISTANT_OCEAN":
-        proximityMultiplier = 0.3;
-        distancePenalty = -40;
+        proximityMultiplier = 0.28;
+        distancePenalty = -38;
         break;
       default:
         return -100;
@@ -102,12 +107,15 @@ export class WarUtilityEvaluator {
         : rawPowerAdvantage;
 
     let expansionistDrive = 0;
-    if (vector.saturationScore >= 50 && rawPowerAdvantage > 0) {
-      const driveFactor = (vector.saturationScore - 40) / 60;
-      expansionistDrive = Math.round(driveFactor * 25);
+    if (rawPowerAdvantage > 0) {
+      const saturationFactor = ResponseCurveUtility.diminishingReturns(
+        Math.max(0, vector.saturationScore - 30),
+        35,
+      );
+      expansionistDrive = Math.round(saturationFactor * 30);
     }
 
-    const tensionScore = Math.round(vector.tension * 0.5);
+    const tensionScore = Math.round(tensionCurveFactor * 55);
     const alignmentDampener = Math.round(vector.alignment * 0.5);
     const stabilityScore = Math.round(
       ((source.government.stability - 50) / 50) * 15,

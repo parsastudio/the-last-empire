@@ -4,6 +4,7 @@ import {
   CountryRegistry,
   GeopoliticalReachResolver,
   NationRelationResolver,
+  ResponseCurveUtility,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -62,7 +63,8 @@ export class AIPostureEvaluator {
       }
     }
 
-    if (maxTension >= 55) return "THREAT";
+    const threatProbability = ResponseCurveUtility.sigmoid(maxTension, 52, 0.12);
+    if (threatProbability >= 0.58) return "THREAT";
     return "PEACE";
   }
 }
