@@ -74,6 +74,7 @@ export * from "./combat/state-appliers/battle-attacker-state-applier";
 export * from "./combat/state-appliers/battle-defender-state-applier";
 
 export * from "./diagnostics/turn-state-logger";
+export * from "./diagnostics/stress-benchmark-runner";
 
 export * from "./diplomacy/diplomacy-engine";
 export * from "./diplomacy/diplomatic-acceptance-evaluator";
