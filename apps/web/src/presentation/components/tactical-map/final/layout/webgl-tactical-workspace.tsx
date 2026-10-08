@@ -16,6 +16,7 @@ import {
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
 import { CountryRegistry } from "@/domain/data/countries";
+import { BattleFullReportData } from "@geopolitics/domain";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { NationPresenter } from "@/presentation/presenters/nation.presenter";
@@ -126,7 +127,7 @@ export function WebGLTacticalWorkspace({
   );
 
   const handleSelectBattleReport = useCallback(
-    (reportData: any) => {
+    (reportData: BattleFullReportData) => {
       openModal({
         type: "BATTLE_DEBRIEF",
         reportData,
