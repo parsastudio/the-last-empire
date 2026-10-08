@@ -17,7 +17,7 @@ export class WarUtilityEvaluator {
       return -100;
     }
 
-    if (vector.proximityTier === "NONE") {
+    if ((vector.proximityTier as string) === "NONE") {
       return -100;
     }
 
@@ -84,7 +84,7 @@ export class WarUtilityEvaluator {
     let proximityMultiplier = 1.0;
     let distancePenalty = 0;
 
-    switch (vector.proximityTier) {
+    switch (vector.proximityTier as string) {
       case "DIRECT_NEIGHBOR":
         proximityMultiplier = 1.0;
         distancePenalty = 0;
@@ -97,6 +97,7 @@ export class WarUtilityEvaluator {
         proximityMultiplier = 0.28;
         distancePenalty = -38;
         break;
+      case "NONE":
       default:
         return -100;
     }

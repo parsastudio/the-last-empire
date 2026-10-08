@@ -1,3 +1,8 @@
+import {
+  DEFAULT_MISSILE_PHASE_CONFIG,
+  MissilePhaseConfig,
+} from "@/domain/military/missile-phase.config";
+
 export interface MissilePhaseInput {
   deployedDrones: number;
   defAirDefense: number;
@@ -13,56 +18,87 @@ export interface MissilePhaseOutput {
   interceptedMissiles: number;
 }
 
+interface AirCombatResult {
+  intercepted: number;
+  penetrated: number;
+}
+
+interface SuppressionResult {
+  rawDefAirDefenseLost: number;
+  defAirDefenseRemainingRaw: number;
+  rawSurplusMissiles: number;
+}
+
 export class MissileInterceptionPhase {
-  public static calculate(input: MissilePhaseInput): MissilePhaseOutput {
+  public static calculate(
+    input: MissilePhaseInput,
+    config: MissilePhaseConfig = DEFAULT_MISSILE_PHASE_CONFIG,
+  ): MissilePhaseOutput {
     if (input.deployedDrones <= 0) {
-      return {
-        rawDefAirDefenseLost: 0,
-        defAirDefenseRemainingRaw: input.defAirDefense,
-        destroyedFactories: 0,
-        interceptedMissiles: 0,
-      };
+      return this.createZeroAttackOutput(input.defAirDefense);
     }
 
+    if (input.defAirDefense <= 0) {
+      return this.resolveZeroDefenseScenario(input, config);
+    }
+
+    const airCombat = this.resolveAirCombat(input, config);
+    const suppression = this.resolveSuppression(
+      airCombat.penetrated,
+      input,
+      config,
+    );
+    const destroyedFactories = this.calculateDestroyedFactories(
+      suppression.rawSurplusMissiles,
+      input.deployedDrones,
+      config,
+    );
+
+    return {
+      rawDefAirDefenseLost: suppression.rawDefAirDefenseLost,
+      defAirDefenseRemainingRaw: suppression.defAirDefenseRemainingRaw,
+      destroyedFactories,
+      interceptedMissiles: airCombat.intercepted,
+    };
+  }
+
+  private static resolveAirCombat(
+    input: MissilePhaseInput,
+    config: MissilePhaseConfig,
+  ): AirCombatResult {
     const attMissilesEff = input.deployedDrones * input.attDroneMult;
     const defAirDefenseEff = input.defAirDefense * input.defAdMult;
     const autoInterceptionBonus = input.autoInterceptionBonus || 0;
 
-    if (input.defAirDefense <= 0) {
-      const autoIntercepted = Math.min(
-        input.deployedDrones,
-        Math.round(input.deployedDrones * autoInterceptionBonus),
-      );
-      const penetrating = Math.max(0, input.deployedDrones - autoIntercepted);
-      const destroyedFactories = Math.min(
-        Math.floor(input.deployedDrones / 12),
-        Math.floor(
-          (penetrating * input.attDroneMult) / (12 * input.attDroneMult),
-        ),
-      );
-      return {
-        rawDefAirDefenseLost: 0,
-        defAirDefenseRemainingRaw: 0,
-        destroyedFactories,
-        interceptedMissiles: autoIntercepted,
-      };
-    }
-
     const calculatedBaseRate =
-      defAirDefenseEff / (defAirDefenseEff + 0.5 * attMissilesEff);
+      defAirDefenseEff /
+      (defAirDefenseEff + config.attackEffectivenessWeight * attMissilesEff);
+
     const interceptionRate = Math.max(
-      0.1,
-      Math.min(0.95, calculatedBaseRate + autoInterceptionBonus),
+      config.minInterceptionRate,
+      Math.min(
+        config.maxInterceptionRate,
+        calculatedBaseRate + autoInterceptionBonus,
+      ),
     );
 
-    const rawIntercepted = Math.min(
+    const intercepted = Math.min(
       input.deployedDrones,
       Math.round(input.deployedDrones * interceptionRate),
     );
-    const rawPenetrated = Math.max(0, input.deployedDrones - rawIntercepted);
-    const penetratingPower = rawPenetrated * input.attDroneMult;
+    const penetrated = Math.max(0, input.deployedDrones - intercepted);
 
-    const adSuppressionCostPerUnit = 2 * input.defAdMult;
+    return { intercepted, penetrated };
+  }
+
+  private static resolveSuppression(
+    penetratedDrones: number,
+    input: MissilePhaseInput,
+    config: MissilePhaseConfig,
+  ): SuppressionResult {
+    const penetratingPower = penetratedDrones * input.attDroneMult;
+    const adSuppressionCostPerUnit =
+      config.adSuppressionCostBaseFactor * input.defAdMult;
     const powerNeededToClearAllAD =
       input.defAirDefense * adSuppressionCostPerUnit;
 
@@ -85,21 +121,64 @@ export class MissileInterceptionPhase {
       input.defAirDefense - rawDefAirDefenseLost,
     );
 
-    const rawSurplusMissiles = Math.max(
-      0,
-      Math.floor(surplusPenetratingPower / Math.max(0.1, input.attDroneMult)),
+    const droneMultiplierDivisor = Math.max(
+      config.minDroneMultiplierFloor,
+      input.attDroneMult,
     );
 
-    const destroyedFactories = Math.min(
-      Math.floor(input.deployedDrones / 12),
-      Math.floor(rawSurplusMissiles / 12),
+    const rawSurplusMissiles = Math.max(
+      0,
+      Math.floor(surplusPenetratingPower / droneMultiplierDivisor),
     );
 
     return {
       rawDefAirDefenseLost,
       defAirDefenseRemainingRaw,
+      rawSurplusMissiles,
+    };
+  }
+
+  private static calculateDestroyedFactories(
+    surplusMissiles: number,
+    deployedDrones: number,
+    config: MissilePhaseConfig,
+  ): number {
+    return Math.min(
+      Math.floor(deployedDrones / config.dronesPerFactory),
+      Math.floor(surplusMissiles / config.dronesPerFactory),
+    );
+  }
+
+  private static resolveZeroDefenseScenario(
+    input: MissilePhaseInput,
+    config: MissilePhaseConfig,
+  ): MissilePhaseOutput {
+    const autoBonus = input.autoInterceptionBonus || 0;
+    const intercepted = Math.min(
+      input.deployedDrones,
+      Math.round(input.deployedDrones * autoBonus),
+    );
+    const penetrating = Math.max(0, input.deployedDrones - intercepted);
+    const destroyedFactories = Math.floor(
+      penetrating / config.dronesPerFactory,
+    );
+
+    return {
+      rawDefAirDefenseLost: 0,
+      defAirDefenseRemainingRaw: 0,
       destroyedFactories,
-      interceptedMissiles: rawIntercepted,
+      interceptedMissiles: intercepted,
+    };
+  }
+
+  private static createZeroAttackOutput(
+    defAirDefense: number,
+  ): MissilePhaseOutput {
+    return {
+      rawDefAirDefenseLost: 0,
+      defAirDefenseRemainingRaw: defAirDefense,
+      destroyedFactories: 0,
+      interceptedMissiles: 0,
     };
   }
 }

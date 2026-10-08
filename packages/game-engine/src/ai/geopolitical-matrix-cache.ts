@@ -141,7 +141,7 @@ export class GeopoliticalMatrixCache {
     for (const other of Object.values(allNations)) {
       if (!other.isAlive || other.id === nation.id) continue;
       const vector = vectors.get(CountryRegistry.resolveCanonicalId(other.id));
-      if (vector && vector.proximityTier !== "NONE") {
+      if (vector && (vector.proximityTier as string) !== "NONE") {
         targets.push(other);
       }
     }
