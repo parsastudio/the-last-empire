@@ -11,6 +11,8 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { DiplomaticStampsOverlay } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/diplomatic-stamps-overlay";
+import { ConflictMarkersOverlay } from "@/presentation/components/tactical-map/overlays/conflict-markers/conflict-markers-overlay";
+import { TurnLogEntry, BattleFullReportData } from "@geopolitics/domain";
 
 interface WebGLMapCanvasProps {
   provincesMap?: Record<string, ProvinceDynamicState>;
@@ -19,8 +21,11 @@ interface WebGLMapCanvasProps {
   activeLayer?: "political" | "gdp";
   positionRef?: React.RefObject<CameraPosition>;
   scaleRef?: React.RefObject<number>;
+  turnLogs?: TurnLogEntry[];
+  currentTurn?: number;
   onSelectCountryContext?: (iso3: string) => void;
   onSelectCountryAttackContext?: (iso3: string, provinceId?: number) => void;
+  onSelectBattleReport?: (reportData: BattleFullReportData) => void;
 }
 
 export function WebGLMapCanvas({
@@ -30,8 +35,11 @@ export function WebGLMapCanvas({
   activeLayer = "political",
   positionRef: externalPositionRef,
   scaleRef: externalScaleRef,
+  turnLogs = [],
+  currentTurn = 1,
   onSelectCountryContext,
   onSelectCountryAttackContext,
+  onSelectBattleReport,
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -176,6 +184,15 @@ export function WebGLMapCanvas({
         nationsMap={nationsMap}
         provincesMap={provincesMap}
         humanNationId={humanNationId}
+      />
+      <ConflictMarkersOverlay
+        dimensions={dimensions}
+        positionRef={positionRef}
+        scaleRef={scaleRef}
+        turnLogs={turnLogs}
+        currentTurn={currentTurn}
+        humanNationId={humanNationId}
+        onSelectBattleReport={onSelectBattleReport}
       />
       <WebGLHoverHud hudRef={hudRef} hoverData={hoverData} />
       <WebGLContextMenuWrapper

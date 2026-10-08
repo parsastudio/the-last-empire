@@ -125,6 +125,16 @@ export function WebGLTacticalWorkspace({
     [openModal],
   );
 
+  const handleSelectBattleReport = useCallback(
+    (reportData: any) => {
+      openModal({
+        type: "BATTLE_DEBRIEF",
+        reportData,
+      });
+    },
+    [openModal],
+  );
+
   const handleNextTurnAndRefresh = useCallback(async () => {
     if (isProcessingTurn) return;
     try {
@@ -196,8 +206,11 @@ export function WebGLTacticalWorkspace({
         activeLayer={activeLayer}
         positionRef={positionRef}
         scaleRef={scaleRef}
+        turnLogs={effectiveGameState?.turnLogs}
+        currentTurn={effectiveGameState?.currentTurn}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
+        onSelectBattleReport={handleSelectBattleReport}
       />
 
       <TopHudBar metrics={metrics} />
